@@ -6,6 +6,7 @@ export class Product extends Model {
   public name!: string;
   public description!: string;
   public price!: number;
+  public brand_id!: number;
 }
 
 Product.init(
@@ -27,6 +28,14 @@ Product.init(
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0.0,
       allowNull: false,
+    },
+    brand_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Brands',
+        key: 'id',
+      },
     },
   },
   {

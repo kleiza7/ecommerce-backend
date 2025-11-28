@@ -4,11 +4,20 @@ import { ProductsController } from './controllers/Products.controller';
 import { ProductsRouter } from './routers/Products.router';
 import { sequelize } from './config/database';
 import cors from 'cors';
+import { BrandsRouter } from './routers/Brands.router';
+import { BrandsController } from './controllers/Brands.controller';
+import { associateModels } from './models/index';
+import { AuthController } from './controllers/Auth.controller';
+import { AuthRouter } from './routers/Auth.router';
 
 dotenv.config();
 
 class Server {
-  constructor(private productsRouter: ProductsRouter) {
+  constructor(
+    private productsRouter: ProductsRouter,
+    private brandsRouter: BrandsRouter,
+    private authRouter: AuthRouter,
+  ) {
     this.startServer();
   }
 
@@ -21,22 +30,30 @@ class Server {
     app.use(cors());
 
     app.use('/products', this.productsRouter.getRouter());
+    app.use('/brands', this.brandsRouter.getRouter());
+    app.use('/auth', this.authRouter.getRouter());
 
     sequelize
-      .sync()
+      .authenticate()
+      .then(() => {
+        associateModels();
+        return sequelize.sync({ alter: true });
+      })
       .then(() =>
         app.listen(port, () => {
           console.log(`Server is Fire at http://localhost:${port}`);
         }),
       )
-      .catch((_) => console.log('Can not connected db'));
+      .catch((err) => console.log('Can not connect db', err));
   }
 }
 
-const router = express.Router();
-
 const productsController = new ProductsController();
+const brandsController = new BrandsController();
+const authController = new AuthController();
 
-const productsRouter = new ProductsRouter(router, productsController);
+const productsRouter = new ProductsRouter(express.Router(), productsController);
+const brandsRouter = new BrandsRouter(express.Router(), brandsController);
+const authRouter = new AuthRouter(express.Router(), authController);
 
-new Server(productsRouter);
+new Server(productsRouter, brandsRouter, authRouter);

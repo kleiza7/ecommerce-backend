@@ -2,15 +2,19 @@ import { Router } from 'express';
 import { ProductsController } from '../controllers/Products.controller';
 
 export class ProductsRouter {
-  constructor(private router: Router, private productsController: ProductsController) {}
+  constructor(private router: Router, private controller: ProductsController) {
+    this.setupRoutes();
+  }
 
-  getRouter() {
-    this.router.get('/get-all', this.productsController.getAllProducts);
+  private setupRoutes() {
+    this.router.get('/get-all', this.controller.getAllProducts);
+    // TODO: bu endpointi daha sonradan dinamik bir şekilde filtre ürünleri listeleyeceğim bir endpoint olarak yazacağım
+    this.router.get('/get-by-brand-id/:brandId', this.controller.getProductsByBrandId);
+    this.router.get('/get-by-id/:id', this.controller.getProductById);
+    this.router.post('/create', this.controller.createProduct);
+  }
 
-    this.router.get('/get-by-id/:id', this.productsController.getProductById);
-
-    this.router.post('/create', this.productsController.createProduct);
-
+  public getRouter() {
     return this.router;
   }
 }

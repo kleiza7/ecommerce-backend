@@ -14,6 +14,24 @@ export class ProductsController {
     }
   }
 
+  async getProductsByBrandId(req: Request, res: Response) {
+    try {
+      const { brandId } = req.params;
+
+      const products = await Product.findAll({
+        where: { brand_id: brandId },
+        attributes: ['id', 'name', 'description', 'price'],
+      });
+      if (products.length === 0) {
+        res.status(404).json({ message: 'No products found for this brand.' });
+        return;
+      }
+      res.status(200).json(products);
+    } catch (error) {
+      res.status(404).json({ message: 'An error occurred when fetch products by brand.' });
+    }
+  }
+
   async getProductById(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -33,9 +51,9 @@ export class ProductsController {
 
   async createProduct(req: Request, res: Response) {
     try {
-      const { name, description, price } = req.body;
+      const { name, description, price, brandId } = req.body;
 
-      const product = await Product.create({ name, description, price });
+      const product = await Product.create({ name, description, price, brand_id: brandId });
 
       res.status(201).json(product);
     } catch (error) {
