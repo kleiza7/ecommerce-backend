@@ -55,13 +55,14 @@ export class ProductsController {
 
   createProduct = async (req: Request, res: Response) => {
     try {
-      const { name, description, price, brandId } = req.body;
+      const { name, description, price, brandId, categoryId } = req.body;
 
       const product = await this.productsService.createProduct({
         name,
         description,
         price,
         brandId,
+        categoryId,
       });
 
       res.status(201).json(product);

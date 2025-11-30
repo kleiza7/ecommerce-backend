@@ -23,12 +23,14 @@ export class ProductsService {
     description: string;
     price: number;
     brandId: number;
+    categoryId: number;
   }) {
     return await Product.create({
       name: data.name,
       description: data.description,
       price: data.price,
       brand_id: data.brandId,
+      category_id: data.categoryId,
     });
   }
 }
