@@ -1,67 +1,60 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { User } from '../models/User.model';
-import { USER_ROLE } from '../enums/UserRole.enum';
+import { Request, Response } from "express";
+import { USER_ROLE } from "../enums/UserRole.enum";
+import { AuthService } from "../services/Auth.service";
 
 export class AuthController {
-  private registerWithRole = async (req: Request, res: Response, role: USER_ROLE) => {
+  constructor(private authService: AuthService) {}
+
+  private registerWithRole = async (
+    req: Request,
+    res: Response,
+    role: USER_ROLE
+  ) => {
     try {
       const { name, email, password } = req.body;
 
-      const existing = await User.findOne({ where: { email } });
-      if (existing) {
-        res.status(400).json({ message: 'Email already exists' });
+      const result = await this.authService.register(
+        name,
+        email,
+        password,
+        role
+      );
+
+      if (result === null) {
+        res.status(400).json({ message: "Email already exists" });
         return;
       }
 
-      const hashed = await bcrypt.hash(password, 10);
-
-      await User.create({ name, email, password: hashed, role });
-
-      res.status(201).json({ message: 'Registered successfully' });
-      return;
+      res.status(201).json({ message: "Registered successfully" });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: 'Server error' });
-      return;
+      res.status(500).json({ error: "Server error" });
     }
   };
 
-  registerUser = async (req: Request, res: Response) => {
+  registerUser = (req: Request, res: Response) => {
     return this.registerWithRole(req, res, USER_ROLE.USER);
   };
 
-  registerSeller = async (req: Request, res: Response) => {
+  registerSeller = (req: Request, res: Response) => {
     return this.registerWithRole(req, res, USER_ROLE.SELLER);
   };
 
-  async login(req: Request, res: Response) {
+  login = async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
 
-      const user = await User.findOne({ where: { email } });
-      if (!user) {
-        res.status(400).json({ message: 'Invalid credentials' });
+      const token = await this.authService.login(email, password);
+
+      if (!token) {
+        res.status(400).json({ message: "Invalid credentials" });
         return;
       }
-
-      const match = await bcrypt.compare(password, user.password);
-      if (!match) {
-        res.status(400).json({ message: 'Invalid credentials' });
-        return;
-      }
-
-      const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET as string, {
-        expiresIn: '1d',
-      });
 
       res.json({ token });
-      return;
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: 'Server error' });
-      return;
+      res.status(500).json({ error: "Server error" });
     }
-  }
+  };
 }

@@ -1,63 +1,72 @@
-import { Request, Response } from 'express';
-import { Product } from '../models/Product.model';
+import { Request, Response } from "express";
+import { ProductsService } from "../services/Products.service";
 
 export class ProductsController {
-  async getAllProducts(_: Request, res: Response) {
-    try {
-      const products = await Product.findAll({
-        attributes: ['id', 'name', 'description', 'price'],
-      });
+  constructor(private productsService: ProductsService) {}
 
+  getAllProducts = async (_: Request, res: Response) => {
+    try {
+      const products = await this.productsService.getAllProducts();
       res.status(200).json(products);
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred when fetch products.' });
+      res
+        .status(404)
+        .json({ message: "An error occurred when fetch products." });
     }
-  }
+  };
 
-  async getProductsByBrandId(req: Request, res: Response) {
+  getProductsByBrandId = async (req: Request, res: Response) => {
     try {
       const { brandId } = req.params;
 
-      const products = await Product.findAll({
-        where: { brand_id: brandId },
-        attributes: ['id', 'name', 'description', 'price'],
-      });
+      const products = await this.productsService.getProductsByBrandId(brandId);
+
       if (products.length === 0) {
-        res.status(404).json({ message: 'No products found for this brand.' });
+        res.status(404).json({ message: "No products found for this brand." });
         return;
       }
+
       res.status(200).json(products);
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred when fetch products by brand.' });
+      res
+        .status(404)
+        .json({ message: "An error occurred when fetch products by brand." });
     }
-  }
+  };
 
-  async getProductById(req: Request, res: Response) {
+  getProductById = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
 
-      const product = await Product.findByPk(id);
+      const product = await this.productsService.getProductById(id);
 
       if (!product) {
-        res.status(404).json({ message: 'Product not found.' });
+        res.status(404).json({ message: "Product not found." });
         return;
       }
 
       res.status(200).json(product);
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred when fetch product.' });
+      res
+        .status(404)
+        .json({ message: "An error occurred when fetch product." });
     }
-  }
+  };
 
-  async createProduct(req: Request, res: Response) {
+  createProduct = async (req: Request, res: Response) => {
     try {
       const { name, description, price, brandId } = req.body;
 
-      const product = await Product.create({ name, description, price, brand_id: brandId });
+      const product = await this.productsService.createProduct({
+        name,
+        description,
+        price,
+        brandId,
+      });
 
       res.status(201).json(product);
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred.' });
+      res.status(404).json({ message: "An error occurred." });
     }
-  }
+  };
 }
