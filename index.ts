@@ -1,14 +1,17 @@
-import dotenv from 'dotenv';
-import express, { Application } from 'express';
-import { ProductsController } from './controllers/Products.controller';
-import { ProductsRouter } from './routers/Products.router';
-import { sequelize } from './config/database';
-import cors from 'cors';
-import { BrandsRouter } from './routers/Brands.router';
-import { BrandsController } from './controllers/Brands.controller';
-import { associateModels } from './models/index';
-import { AuthController } from './controllers/Auth.controller';
-import { AuthRouter } from './routers/Auth.router';
+import cors from "cors";
+import dotenv from "dotenv";
+import express, { Application } from "express";
+import { sequelize } from "./config/database";
+import { AuthController } from "./controllers/Auth.controller";
+import { BrandsController } from "./controllers/Brands.controller";
+import { ProductsController } from "./controllers/Products.controller";
+import { associateModels } from "./models/index";
+import { AuthRouter } from "./routers/Auth.router";
+import { BrandsRouter } from "./routers/Brands.router";
+import { ProductsRouter } from "./routers/Products.router";
+import { AuthService } from "./services/Auth.service";
+import { BrandsService } from "./services/Brands.service";
+import { ProductsService } from "./services/Products.service";
 
 dotenv.config();
 
@@ -16,7 +19,7 @@ class Server {
   constructor(
     private productsRouter: ProductsRouter,
     private brandsRouter: BrandsRouter,
-    private authRouter: AuthRouter,
+    private authRouter: AuthRouter
   ) {
     this.startServer();
   }
@@ -29,9 +32,9 @@ class Server {
     app.use(express.json());
     app.use(cors());
 
-    app.use('/products', this.productsRouter.getRouter());
-    app.use('/brands', this.brandsRouter.getRouter());
-    app.use('/auth', this.authRouter.getRouter());
+    app.use("/products", this.productsRouter.getRouter());
+    app.use("/brands", this.brandsRouter.getRouter());
+    app.use("/auth", this.authRouter.getRouter());
 
     sequelize
       .authenticate()
@@ -42,15 +45,19 @@ class Server {
       .then(() =>
         app.listen(port, () => {
           console.log(`Server is Fire at http://localhost:${port}`);
-        }),
+        })
       )
-      .catch((err) => console.log('Can not connect db', err));
+      .catch((err) => console.log("Can not connect db", err));
   }
 }
 
-const productsController = new ProductsController();
-const brandsController = new BrandsController();
-const authController = new AuthController();
+const productsService = new ProductsService();
+const brandsService = new BrandsService();
+const authService = new AuthService();
+
+const productsController = new ProductsController(productsService);
+const brandsController = new BrandsController(brandsService);
+const authController = new AuthController(authService);
 
 const productsRouter = new ProductsRouter(express.Router(), productsController);
 const brandsRouter = new BrandsRouter(express.Router(), brandsController);
