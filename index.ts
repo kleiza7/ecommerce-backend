@@ -45,7 +45,7 @@ class Server {
       .authenticate()
       .then(() => {
         associateModels();
-        return sequelize.sync({ alter: true });
+        return sequelize.sync();
       })
       .then(() =>
         app.listen(port, () => {

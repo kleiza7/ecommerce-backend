@@ -51,6 +51,8 @@ Category.init(
         model: "Categories",
         key: "id",
       },
+      onDelete: "SET NULL", // 🔥 SQLite + self-FK için zorunlu
+      onUpdate: "CASCADE",
     },
 
     description: {

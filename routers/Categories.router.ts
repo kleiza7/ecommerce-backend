@@ -12,7 +12,7 @@ export class CategoriesRouter {
   private setupRoutes() {
     this.router.get("/get-all", this.controller.getAllCategories);
     this.router.get("/get-by-id/:id", this.controller.getCategoryById);
-    this.router.get("/children/:id", this.controller.getChildren);
+    this.router.get("/get-children/:id", this.controller.getChildren);
     this.router.post("/create", this.controller.createCategory);
     this.router.put("/update/:id", this.controller.updateCategory);
     this.router.delete("/delete/:id", this.controller.deleteCategory);
