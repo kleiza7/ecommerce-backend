@@ -1,5 +1,8 @@
 import { Router } from "express";
 import { CategoriesController } from "../controllers/Categories.controller";
+import { USER_ROLE } from "../enums/UserRole.enum";
+import { checkRole } from "../middlewares/CheckRole";
+import { verifyToken } from "../middlewares/VerifyToken";
 
 export class CategoriesRouter {
   constructor(
@@ -13,9 +16,24 @@ export class CategoriesRouter {
     this.router.get("/get-all", this.controller.getAllCategories);
     this.router.get("/get-by-id/:id", this.controller.getCategoryById);
     this.router.get("/get-children/:id", this.controller.getChildren);
-    this.router.post("/create", this.controller.createCategory);
-    this.router.put("/update/:id", this.controller.updateCategory);
-    this.router.delete("/delete/:id", this.controller.deleteCategory);
+    this.router.post(
+      "/create",
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      this.controller.createCategory
+    );
+    this.router.put(
+      "/update/:id",
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      this.controller.updateCategory
+    );
+    this.router.delete(
+      "/delete/:id",
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      this.controller.deleteCategory
+    );
   }
 
   public getRouter() {
