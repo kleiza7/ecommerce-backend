@@ -1,8 +1,9 @@
-import { Request } from 'express';
+import { Request } from "express";
+import { USER_ROLE } from "../enums/UserRole.enum";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: number;
-    role: string;
+    role: USER_ROLE;
   };
 }

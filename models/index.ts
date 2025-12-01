@@ -1,6 +1,9 @@
 import { Brand } from "./Brand.model";
+import { Cart } from "./Cart.model";
+import { CartItem } from "./CartItem.model";
 import { Category } from "./Category.model";
 import { Product } from "./Product.model";
+import { User } from "./User.model";
 
 export const associateModels = () => {
   Brand.hasMany(Product, {
@@ -17,20 +20,20 @@ export const associateModels = () => {
 
   Category.hasMany(Product, {
     foreignKey: "category_id",
-    onDelete: "SET NULL", // 🔥 Daha doğru davranış
+    onDelete: "SET NULL",
     onUpdate: "CASCADE",
   });
 
   Product.belongsTo(Category, {
     foreignKey: "category_id",
-    onDelete: "SET NULL", // Ürünü silmek gereksiz olur
+    onDelete: "SET NULL",
     onUpdate: "CASCADE",
   });
 
   Category.hasMany(Category, {
     as: "children",
     foreignKey: "parent_id",
-    onDelete: "SET NULL", // 🔥 En doğru davranış
+    onDelete: "SET NULL",
     onUpdate: "CASCADE",
   });
 
@@ -38,6 +41,42 @@ export const associateModels = () => {
     as: "parent",
     foreignKey: "parent_id",
     onDelete: "SET NULL",
+    onUpdate: "CASCADE",
+  });
+
+  User.hasOne(Cart, {
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  Cart.belongsTo(User, {
+    foreignKey: "user_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  Cart.hasMany(CartItem, {
+    foreignKey: "cart_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  CartItem.belongsTo(Cart, {
+    foreignKey: "cart_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  Product.hasMany(CartItem, {
+    foreignKey: "product_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  CartItem.belongsTo(Product, {
+    foreignKey: "product_id",
+    onDelete: "CASCADE",
     onUpdate: "CASCADE",
   });
 };
