@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { CartController } from "../controllers/Cart.controller";
-import { verifyToken } from "../middlewares/VerifyToken";
+import { VerifyToken } from "../middlewares/VerifyToken";
 
 export class CartRouter {
   constructor(private router: Router, private controller: CartController) {
@@ -8,23 +8,23 @@ export class CartRouter {
   }
 
   private setupRoutes() {
-    this.router.get("/", verifyToken, this.controller.getCart);
+    this.router.get("/", VerifyToken, this.controller.getCart);
 
-    this.router.post("/add", verifyToken, this.controller.addItem);
+    this.router.post("/add", VerifyToken, this.controller.addItem);
 
     this.router.put(
       "/update/:itemId",
-      verifyToken,
+      VerifyToken,
       this.controller.updateQuantity
     );
 
     this.router.delete(
       "/remove/:itemId",
-      verifyToken,
+      VerifyToken,
       this.controller.removeItem
     );
 
-    this.router.delete("/clear", verifyToken, this.controller.clearCart);
+    this.router.delete("/clear", VerifyToken, this.controller.clearCart);
   }
 
   public getRouter() {
