@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { BrandsController } from "../controllers/Brands.controller";
 import { USER_ROLE } from "../enums/UserRole.enum";
-import { checkRole } from "../middlewares/CheckRole";
-import { verifyToken } from "../middlewares/VerifyToken";
+import { CheckRole } from "../middlewares/CheckRole";
+import { VerifyToken } from "../middlewares/VerifyToken";
 
 export class BrandsRouter {
   constructor(private router: Router, private controller: BrandsController) {
@@ -14,8 +14,8 @@ export class BrandsRouter {
     this.router.get("/get-by-id/:id", this.controller.getBrandById);
     this.router.post(
       "/create",
-      verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      VerifyToken,
+      CheckRole(USER_ROLE.SELLER),
       this.controller.createBrand
     );
   }
