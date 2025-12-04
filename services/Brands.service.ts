@@ -1,15 +1,43 @@
 import { Brand } from "../models/Brand.model";
+import { generateSlug } from "../utils/Slug.util";
 
 export class BrandsService {
   async getAllBrands() {
-    return await Brand.findAll();
+    return Brand.findAll();
   }
 
-  async getBrandById(id: string) {
-    return await Brand.findByPk(id);
+  async getBrandById(id: number) {
+    return Brand.findByPk(id);
   }
 
   async createBrand(name: string) {
-    return await Brand.create({ name });
+    const slug = generateSlug(name);
+
+    const brand = await Brand.create({
+      name,
+      slug,
+    });
+
+    return brand;
+  }
+
+  async updateBrand(id: number, data: Partial<Brand>) {
+    const brand = await Brand.findByPk(id);
+    if (!brand) return null;
+
+    if (data.name) {
+      data.slug = generateSlug(data.name);
+    }
+
+    await brand.update(data);
+    return brand;
+  }
+
+  async deleteBrand(id: number) {
+    const brand = await Brand.findByPk(id);
+    if (!brand) return false;
+
+    await brand.destroy();
+    return true;
   }
 }

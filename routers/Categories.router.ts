@@ -16,18 +16,21 @@ export class CategoriesRouter {
     this.router.get("/get-all", this.controller.getAllCategories);
     this.router.get("/get-by-id/:id", this.controller.getCategoryById);
     this.router.get("/get-children/:id", this.controller.getChildren);
+
     this.router.post(
       "/create",
       VerifyToken,
       CheckRole(USER_ROLE.SELLER),
       this.controller.createCategory
     );
+
     this.router.put(
       "/update/:id",
       VerifyToken,
       CheckRole(USER_ROLE.SELLER),
       this.controller.updateCategory
     );
+
     this.router.delete(
       "/delete/:id",
       VerifyToken,
