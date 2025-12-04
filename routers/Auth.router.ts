@@ -1,5 +1,7 @@
-import { Router } from 'express';
-import { AuthController } from '../controllers/Auth.controller';
+import { Router } from "express";
+import { AuthController } from "../controllers/Auth.controller";
+import { validate } from "../middlewares/validate.middleware";
+import { loginSchema, registerSchema } from "../schemas/auth.schema";
 
 export class AuthRouter {
   constructor(private router: Router, private controller: AuthController) {
@@ -7,9 +9,19 @@ export class AuthRouter {
   }
 
   private setupRoutes() {
-    this.router.post('/register-user', this.controller.registerUser);
-    this.router.post('/register-seller', this.controller.registerSeller);
-    this.router.post('/login', this.controller.login);
+    this.router.post(
+      "/register-user",
+      validate(registerSchema),
+      this.controller.registerUser
+    );
+
+    this.router.post(
+      "/register-seller",
+      validate(registerSchema),
+      this.controller.registerSeller
+    );
+
+    this.router.post("/login", validate(loginSchema), this.controller.login);
   }
 
   public getRouter() {

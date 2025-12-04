@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { USER_ROLE } from "../enums/UserRole.enum";
 import { AuthenticatedRequest } from "../interfaces/AuthenticatedRequest.interface";
 
-export const VerifyToken = (
+export const verifyToken = (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction

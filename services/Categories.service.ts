@@ -25,23 +25,19 @@ export class CategoriesService {
   ) {
     const slug = generateSlug(name);
 
-    // Parent kontrolü (HAM CRUD)
+    // Parent kontrolü
     if (parent_id) {
       const parent = await Category.findByPk(parent_id);
-      if (!parent) {
-        return null; // Controller bunu yakalayıp 400 dönecek
-      }
+      if (!parent) return null;
     }
 
-    const category = await Category.create({
+    return Category.create({
       name,
       slug,
       parent_id,
       description,
       display_order,
     });
-
-    return category;
   }
 
   async updateCategory(id: number, data: Partial<Category>) {
@@ -50,16 +46,12 @@ export class CategoriesService {
 
     // parent değiştirilmişse
     if (data.parent_id !== undefined && data.parent_id !== null) {
-      // kendi kendine parent olamaz
-      if (data.parent_id === id) {
-        return null;
-      }
-
+      if (data.parent_id === id) return null; // kendi kendine parent olamaz
       const parent = await Category.findByPk(data.parent_id);
       if (!parent) return null;
     }
 
-    // isim güncelleniyorsa slug'ı da güncelle
+    // isim güncelleniyorsa slug değişsin
     if (data.name) {
       data.slug = generateSlug(data.name);
     }
@@ -74,9 +66,7 @@ export class CategoriesService {
 
     // Alt kategori varsa silme
     const child = await Category.findOne({ where: { parent_id: id } });
-    if (child) {
-      return false;
-    }
+    if (child) return false;
 
     await category.destroy();
     return true;

@@ -21,14 +21,13 @@ export class AuthController {
       );
 
       if (result === null) {
-        res.status(400).json({ message: "Email already exists" });
-        return;
+        return res.status(400).json({ message: "Email already exists" });
       }
 
-      res.status(201).json({ message: "Registered successfully" });
+      return res.status(201).json({ message: "Registered successfully" });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Server error" });
+      return res.status(500).json({ error: "Server error" });
     }
   };
 
@@ -47,14 +46,13 @@ export class AuthController {
       const token = await this.authService.login(email, password);
 
       if (!token) {
-        res.status(400).json({ message: "Invalid credentials" });
-        return;
+        return res.status(400).json({ message: "Invalid credentials" });
       }
 
-      res.json({ token });
+      return res.json({ token });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Server error" });
+      return res.status(500).json({ error: "Server error" });
     }
   };
 }

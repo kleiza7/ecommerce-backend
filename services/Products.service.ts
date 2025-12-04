@@ -40,15 +40,13 @@ export class ProductsService {
     const category = await Category.findByPk(data.categoryId);
     if (!category) return null;
 
-    const product = await Product.create({
+    return Product.create({
       name: data.name,
       description: data.description,
       price: data.price,
       brand_id: data.brandId,
       category_id: data.categoryId,
     });
-
-    return product;
   }
 
   async updateProduct(id: number, data: Partial<Product>) {

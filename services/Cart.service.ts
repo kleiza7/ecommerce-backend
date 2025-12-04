@@ -26,9 +26,7 @@ export class CartService {
     const cart = await this.getOrCreateCart(userId);
 
     const product = await Product.findByPk(productId);
-    if (!product) {
-      throw new Error("Product not found");
-    }
+    if (!product) throw new Error("Product not found");
 
     let item = await CartItem.findOne({
       where: { cart_id: cart.id, product_id: productId },
@@ -40,14 +38,12 @@ export class CartService {
       return item;
     }
 
-    item = await CartItem.create({
+    return await CartItem.create({
       cart_id: cart.id,
       product_id: productId,
       quantity,
       price_snapshot: product.price,
     });
-
-    return item;
   }
 
   async updateQuantity(userId: number, itemId: number, quantity: number) {
@@ -57,9 +53,7 @@ export class CartService {
       where: { id: itemId, cart_id: cart.id },
     });
 
-    if (!item) {
-      throw new Error("Cart item not found");
-    }
+    if (!item) throw new Error("Cart item not found");
 
     if (quantity <= 0) {
       await item.destroy();
@@ -68,7 +62,6 @@ export class CartService {
 
     item.quantity = quantity;
     await item.save();
-
     return item;
   }
 
@@ -79,9 +72,7 @@ export class CartService {
       where: { id: itemId, cart_id: cart.id },
     });
 
-    if (!deleted) {
-      throw new Error("Cart item not found");
-    }
+    if (!deleted) throw new Error("Cart item not found");
 
     return true;
   }

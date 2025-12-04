@@ -13,12 +13,10 @@ export class BrandsService {
   async createBrand(name: string) {
     const slug = generateSlug(name);
 
-    const brand = await Brand.create({
+    return Brand.create({
       name,
       slug,
     });
-
-    return brand;
   }
 
   async updateBrand(id: number, data: Partial<Brand>) {
