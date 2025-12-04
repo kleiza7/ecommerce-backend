@@ -1,13 +1,21 @@
+import { AppError } from "../errors/AppError";
 import { Category } from "../models/Category.model";
 import { generateSlug } from "../utils/Slug.util";
 
 export class CategoriesService {
   async getAllCategories() {
-    return Category.findAll({ order: [["display_order", "ASC"]] });
+    return Category.findAll({
+      order: [["display_order", "ASC"]],
+    });
   }
 
   async getCategoryById(id: number) {
-    return Category.findByPk(id);
+    const category = await Category.findByPk(id);
+    if (!category) {
+      throw new AppError("Category not found", 404);
+    }
+
+    return category;
   }
 
   async getChildren(id: number) {
@@ -25,10 +33,12 @@ export class CategoriesService {
   ) {
     const slug = generateSlug(name);
 
-    // Parent kontrolü
+    // parent valid mi?
     if (parent_id) {
       const parent = await Category.findByPk(parent_id);
-      if (!parent) return null;
+      if (!parent) {
+        throw new AppError("Parent category not found", 400);
+      }
     }
 
     return Category.create({
@@ -42,16 +52,23 @@ export class CategoriesService {
 
   async updateCategory(id: number, data: Partial<Category>) {
     const category = await Category.findByPk(id);
-    if (!category) return null;
-
-    // parent değiştirilmişse
-    if (data.parent_id !== undefined && data.parent_id !== null) {
-      if (data.parent_id === id) return null; // kendi kendine parent olamaz
-      const parent = await Category.findByPk(data.parent_id);
-      if (!parent) return null;
+    if (!category) {
+      throw new AppError("Category not found", 404);
     }
 
-    // isim güncelleniyorsa slug değişsin
+    // parent değişiyor mu?
+    if (data.parent_id !== undefined && data.parent_id !== null) {
+      if (data.parent_id === id) {
+        throw new AppError("A category cannot be its own parent", 400);
+      }
+
+      const parent = await Category.findByPk(data.parent_id);
+      if (!parent) {
+        throw new AppError("Parent category not found", 400);
+      }
+    }
+
+    // name güncellenmişse slug da güncellenir
     if (data.name) {
       data.slug = generateSlug(data.name);
     }
@@ -62,11 +79,17 @@ export class CategoriesService {
 
   async deleteCategory(id: number) {
     const category = await Category.findByPk(id);
-    if (!category) return false;
+    if (!category) {
+      throw new AppError("Category not found", 404);
+    }
 
-    // Alt kategori varsa silme
-    const child = await Category.findOne({ where: { parent_id: id } });
-    if (child) return false;
+    const child = await Category.findOne({
+      where: { parent_id: id },
+    });
+
+    if (child) {
+      throw new AppError("Category has children and cannot be deleted", 400);
+    }
 
     await category.destroy();
     return true;

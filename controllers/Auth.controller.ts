@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { USER_ROLE } from "../enums/UserRole.enum";
 import { AuthService } from "../services/Auth.service";
 
@@ -8,51 +8,38 @@ export class AuthController {
   private registerWithRole = async (
     req: Request,
     res: Response,
+    next: NextFunction,
     role: USER_ROLE
   ) => {
     try {
       const { name, email, password } = req.body;
-
       const result = await this.authService.register(
         name,
         email,
         password,
         role
       );
-
-      if (result === null) {
-        return res.status(400).json({ message: "Email already exists" });
-      }
-
-      return res.status(201).json({ message: "Registered successfully" });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Server error" });
+      return res.status(201).json(result);
+    } catch (error) {
+      next(error);
     }
   };
 
-  registerUser = (req: Request, res: Response) => {
-    return this.registerWithRole(req, res, USER_ROLE.USER);
+  registerUser = (req: Request, res: Response, next: NextFunction) => {
+    return this.registerWithRole(req, res, next, USER_ROLE.USER);
   };
 
-  registerSeller = (req: Request, res: Response) => {
-    return this.registerWithRole(req, res, USER_ROLE.SELLER);
+  registerSeller = (req: Request, res: Response, next: NextFunction) => {
+    return this.registerWithRole(req, res, next, USER_ROLE.SELLER);
   };
 
-  login = async (req: Request, res: Response) => {
+  login = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body;
-
-      const token = await this.authService.login(email, password);
-
-      if (!token) {
-        return res.status(400).json({ message: "Invalid credentials" });
-      }
-
-      return res.json({ token });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Server error" });
+      const result = await this.authService.login(email, password);
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
     }
   };
 }

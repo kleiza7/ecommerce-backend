@@ -1,3 +1,4 @@
+import { AppError } from "../errors/AppError";
 import { Brand } from "../models/Brand.model";
 import { generateSlug } from "../utils/Slug.util";
 
@@ -7,7 +8,13 @@ export class BrandsService {
   }
 
   async getBrandById(id: number) {
-    return Brand.findByPk(id);
+    const brand = await Brand.findByPk(id);
+
+    if (!brand) {
+      throw new AppError("Brand not found", 404);
+    }
+
+    return brand;
   }
 
   async createBrand(name: string) {
@@ -21,7 +28,10 @@ export class BrandsService {
 
   async updateBrand(id: number, data: Partial<Brand>) {
     const brand = await Brand.findByPk(id);
-    if (!brand) return null;
+
+    if (!brand) {
+      throw new AppError("Brand not found", 404);
+    }
 
     if (data.name) {
       data.slug = generateSlug(data.name);
@@ -33,7 +43,10 @@ export class BrandsService {
 
   async deleteBrand(id: number) {
     const brand = await Brand.findByPk(id);
-    if (!brand) return false;
+
+    if (!brand) {
+      throw new AppError("Brand not found", 404);
+    }
 
     await brand.destroy();
     return true;
