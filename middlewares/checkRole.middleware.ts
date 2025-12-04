@@ -12,10 +12,7 @@ export const checkRole = (...allowedRoles: USER_ROLE[]) => {
     const userRole = req.user.role;
 
     if (!allowedRoles.includes(userRole)) {
-      throw new AppError(
-        "Forbidden: You are not allowed to access this resource",
-        403
-      );
+      throw new AppError("Forbidden: Insufficient permissions", 403);
     }
 
     next();
