@@ -1,3 +1,4 @@
+import { AppError } from "../errors/AppError";
 import { Brand } from "../models/Brand.model";
 import { Category } from "../models/Category.model";
 import { Product } from "../models/Product.model";
@@ -17,14 +18,25 @@ export class ProductsService {
   }
 
   async getProductsByBrandId(brandId: number) {
-    return Product.findAll({
+    const products = await Product.findAll({
       where: { brand_id: brandId },
       attributes: ["id", "name", "description", "price"],
     });
+
+    if (products.length === 0) {
+      throw new AppError("No products found for this brand", 404);
+    }
+
+    return products;
   }
 
   async getProductById(id: number) {
-    return Product.findByPk(id);
+    const product = await Product.findByPk(id);
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
+
+    return product;
   }
 
   async createProduct(data: {
@@ -35,10 +47,14 @@ export class ProductsService {
     categoryId: number;
   }) {
     const brand = await Brand.findByPk(data.brandId);
-    if (!brand) return null;
+    if (!brand) {
+      throw new AppError("Invalid brandId", 400);
+    }
 
     const category = await Category.findByPk(data.categoryId);
-    if (!category) return null;
+    if (!category) {
+      throw new AppError("Invalid categoryId", 400);
+    }
 
     return Product.create({
       name: data.name,
@@ -51,16 +67,22 @@ export class ProductsService {
 
   async updateProduct(id: number, data: Partial<Product>) {
     const product = await Product.findByPk(id);
-    if (!product) return null;
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
 
     if (data.brand_id) {
       const brand = await Brand.findByPk(data.brand_id);
-      if (!brand) return null;
+      if (!brand) {
+        throw new AppError("Invalid brand_id", 400);
+      }
     }
 
     if (data.category_id) {
       const category = await Category.findByPk(data.category_id);
-      if (!category) return null;
+      if (!category) {
+        throw new AppError("Invalid category_id", 400);
+      }
     }
 
     await product.update(data);
@@ -69,7 +91,9 @@ export class ProductsService {
 
   async deleteProduct(id: number) {
     const product = await Product.findByPk(id);
-    if (!product) return false;
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
 
     await product.destroy();
     return true;

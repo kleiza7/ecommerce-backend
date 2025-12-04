@@ -1,3 +1,4 @@
+import { AppError } from "../errors/AppError";
 import { Cart } from "../models/Cart.model";
 import { CartItem } from "../models/CartItem.model";
 import { Product } from "../models/Product.model";
@@ -26,7 +27,9 @@ export class CartService {
     const cart = await this.getOrCreateCart(userId);
 
     const product = await Product.findByPk(productId);
-    if (!product) throw new Error("Product not found");
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
 
     let item = await CartItem.findOne({
       where: { cart_id: cart.id, product_id: productId },
@@ -38,7 +41,7 @@ export class CartService {
       return item;
     }
 
-    return await CartItem.create({
+    return CartItem.create({
       cart_id: cart.id,
       product_id: productId,
       quantity,
@@ -53,7 +56,9 @@ export class CartService {
       where: { id: itemId, cart_id: cart.id },
     });
 
-    if (!item) throw new Error("Cart item not found");
+    if (!item) {
+      throw new AppError("Cart item not found", 404);
+    }
 
     if (quantity <= 0) {
       await item.destroy();
@@ -72,7 +77,9 @@ export class CartService {
       where: { id: itemId, cart_id: cart.id },
     });
 
-    if (!deleted) throw new Error("Cart item not found");
+    if (!deleted) {
+      throw new AppError("Cart item not found", 404);
+    }
 
     return true;
   }

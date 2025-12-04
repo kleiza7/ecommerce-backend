@@ -1,21 +1,21 @@
 import { NextFunction, Response } from "express";
 import { USER_ROLE } from "../enums/UserRole.enum";
+import { AppError } from "../errors/AppError";
 import { AuthenticatedRequest } from "../interfaces/AuthenticatedRequest.interface";
 
 export const checkRole = (...allowedRoles: USER_ROLE[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return (req: AuthenticatedRequest, _: Response, next: NextFunction) => {
     if (!req.user) {
-      return res.status(401).json({
-        message: "Unauthorized: Token missing or invalid",
-      });
+      throw new AppError("Unauthorized: Token missing or invalid", 401);
     }
 
     const userRole = req.user.role;
 
     if (!allowedRoles.includes(userRole)) {
-      return res.status(403).json({
-        message: "Forbidden: You are not allowed to access this resource",
-      });
+      throw new AppError(
+        "Forbidden: You are not allowed to access this resource",
+        403
+      );
     }
 
     next();

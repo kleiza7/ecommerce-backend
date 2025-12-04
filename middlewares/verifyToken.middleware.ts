@@ -1,18 +1,18 @@
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
 import { USER_ROLE } from "../enums/UserRole.enum";
+import { AppError } from "../errors/AppError";
 import { AuthenticatedRequest } from "../interfaces/AuthenticatedRequest.interface";
 
 export const verifyToken = (
   req: AuthenticatedRequest,
-  res: Response,
+  _: Response,
   next: NextFunction
 ): void => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res.status(401).json({ message: "Unauthorized: Token missing" });
-    return;
+    throw new AppError("Unauthorized: Token missing", 401);
   }
 
   const token = authHeader.split(" ")[1];
@@ -23,9 +23,9 @@ export const verifyToken = (
       role: string;
     };
 
+    // Role token içinde geçersizse
     if (!Object.values(USER_ROLE).includes(decoded.role as USER_ROLE)) {
-      res.status(401).json({ message: "Unauthorized: Invalid role in token" });
-      return;
+      throw new AppError("Unauthorized: Invalid role in token", 401);
     }
 
     req.user = {
@@ -35,6 +35,6 @@ export const verifyToken = (
 
     next();
   } catch (err) {
-    res.status(401).json({ message: "Unauthorized: Invalid or expired token" });
+    throw new AppError("Unauthorized: Invalid or expired token", 401);
   }
 };

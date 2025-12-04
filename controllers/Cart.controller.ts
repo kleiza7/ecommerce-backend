@@ -1,40 +1,45 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import { AuthenticatedRequest } from "../interfaces/AuthenticatedRequest.interface";
 import { CartService } from "../services/Cart.service";
 
 export class CartController {
   constructor(private cartService: CartService) {}
 
-  getCart = async (req: AuthenticatedRequest, res: Response) => {
+  getCart = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const userId = req.user!.id;
       const cart = await this.cartService.getCart(userId);
       return res.status(200).json(cart);
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "Failed to fetch cart" });
+      next(error);
     }
   };
 
-  addItem = async (req: AuthenticatedRequest, res: Response) => {
+  addItem = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const userId = req.user!.id;
       const { product_id, quantity } = req.body;
 
-      const result = await this.cartService.addItem(
-        userId,
-        product_id,
-        quantity
-      );
-
-      return res.status(201).json(result);
+      const item = await this.cartService.addItem(userId, product_id, quantity);
+      return res.status(201).json(item);
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "Failed to add item to cart" });
+      next(error);
     }
   };
 
-  updateQuantity = async (req: AuthenticatedRequest, res: Response) => {
+  updateQuantity = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const userId = req.user!.id;
       const itemId = Number(req.params.itemId);
@@ -45,38 +50,39 @@ export class CartController {
         itemId,
         quantity
       );
-
       return res.status(200).json(updated);
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "Failed to update quantity" });
+      next(error);
     }
   };
 
-  removeItem = async (req: AuthenticatedRequest, res: Response) => {
+  removeItem = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const userId = req.user!.id;
       const itemId = Number(req.params.itemId);
 
       await this.cartService.removeItem(userId, itemId);
-
       return res.status(200).json({ message: "Item removed from cart" });
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "Failed to remove item" });
+      next(error);
     }
   };
 
-  clearCart = async (req: AuthenticatedRequest, res: Response) => {
+  clearCart = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const userId = req.user!.id;
-
       await this.cartService.clearCart(userId);
-
       return res.status(200).json({ message: "Cart cleared" });
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "Failed to clear cart" });
+      next(error);
     }
   };
 }
