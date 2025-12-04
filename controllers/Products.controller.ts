@@ -4,24 +4,18 @@ import { ProductsService } from "../services/Products.service";
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
-  getAllProducts = async (_: Request, res: Response, next: NextFunction) => {
+  getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const products = await this.productsService.getAllProducts();
-      return res.status(200).json(products);
-    } catch (error) {
-      next(error);
-    }
-  };
+      const { page = 1, limit = 10, brandId, categoryId } = req.body;
 
-  getProductsByBrandId = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const brandId = Number(req.params.brandId);
-      const products = await this.productsService.getProductsByBrandId(brandId);
-      return res.status(200).json(products);
+      const result = await this.productsService.getProducts({
+        page,
+        limit,
+        brandId,
+        categoryId,
+      });
+
+      return res.status(200).json(result);
     } catch (error) {
       next(error);
     }

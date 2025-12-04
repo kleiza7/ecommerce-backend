@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+export const productListSchema = z.object({
+  body: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    brandId: z.coerce.number().optional(),
+    categoryId: z.coerce.number().optional(),
+  }),
+});
+
 export const createProductSchema = z.object({
   body: z.object({
     name: z.string().min(1),
