@@ -11,17 +11,33 @@ export class ProductsRouter {
 
   private setupRoutes() {
     this.router.get("/get-all", this.controller.getAllProducts);
-    // TODO: bu endpointi daha sonradan dinamik bir şekilde filtre ürünleri listeleyeceğim bir endpoint olarak yazacağım
+
     this.router.get(
       "/get-by-brand-id/:brandId",
       this.controller.getProductsByBrandId
     );
+
     this.router.get("/get-by-id/:id", this.controller.getProductById);
+
     this.router.post(
       "/create",
       VerifyToken,
       CheckRole(USER_ROLE.SELLER),
       this.controller.createProduct
+    );
+
+    this.router.put(
+      "/update/:id",
+      VerifyToken,
+      CheckRole(USER_ROLE.SELLER),
+      this.controller.updateProduct
+    );
+
+    this.router.delete(
+      "/delete/:id",
+      VerifyToken,
+      CheckRole(USER_ROLE.SELLER),
+      this.controller.deleteProduct
     );
   }
 

@@ -47,11 +47,8 @@ Category.init(
     parent_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
-        model: "Categories",
-        key: "id",
-      },
-      onDelete: "SET NULL", // 🔥 SQLite + self-FK için zorunlu
+      references: { model: "Categories", key: "id" },
+      onDelete: "SET NULL",
       onUpdate: "CASCADE",
     },
 

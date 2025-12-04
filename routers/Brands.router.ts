@@ -12,11 +12,26 @@ export class BrandsRouter {
   private setupRoutes() {
     this.router.get("/get-all", this.controller.getAllBrands);
     this.router.get("/get-by-id/:id", this.controller.getBrandById);
+
     this.router.post(
       "/create",
       VerifyToken,
       CheckRole(USER_ROLE.SELLER),
       this.controller.createBrand
+    );
+
+    this.router.put(
+      "/update/:id",
+      VerifyToken,
+      CheckRole(USER_ROLE.SELLER),
+      this.controller.updateBrand
+    );
+
+    this.router.delete(
+      "/delete/:id",
+      VerifyToken,
+      CheckRole(USER_ROLE.SELLER),
+      this.controller.deleteBrand
     );
   }
 

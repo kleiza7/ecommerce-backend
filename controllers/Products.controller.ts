@@ -7,55 +7,57 @@ export class ProductsController {
   getAllProducts = async (_: Request, res: Response) => {
     try {
       const products = await this.productsService.getAllProducts();
-      res.status(200).json(products);
+      return res.status(200).json(products);
     } catch (error) {
-      res
-        .status(404)
-        .json({ message: "An error occurred when fetch products." });
+      console.error(error);
+      return res.status(500).json({ message: "Failed to fetch products" });
     }
   };
 
   getProductsByBrandId = async (req: Request, res: Response) => {
     try {
-      const { brandId } = req.params;
+      const brandId = Number(req.params.brandId);
 
       const products = await this.productsService.getProductsByBrandId(brandId);
 
-      if (products.length === 0) {
-        res.status(404).json({ message: "No products found for this brand." });
-        return;
+      if (!products || products.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No products found for this brand" });
       }
 
-      res.status(200).json(products);
+      return res.status(200).json(products);
     } catch (error) {
-      res
-        .status(404)
-        .json({ message: "An error occurred when fetch products by brand." });
+      console.error(error);
+      return res
+        .status(500)
+        .json({ message: "Failed to fetch products by brand" });
     }
   };
 
   getProductById = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-
+      const id = Number(req.params.id);
       const product = await this.productsService.getProductById(id);
 
       if (!product) {
-        res.status(404).json({ message: "Product not found." });
-        return;
+        return res.status(404).json({ message: "Product not found" });
       }
 
-      res.status(200).json(product);
+      return res.status(200).json(product);
     } catch (error) {
-      res
-        .status(404)
-        .json({ message: "An error occurred when fetch product." });
+      console.error(error);
+      return res.status(500).json({ message: "Failed to fetch product" });
     }
   };
 
   createProduct = async (req: Request, res: Response) => {
     try {
       const { name, description, price, brandId, categoryId } = req.body;
+
+      if (!name || !description || !price || !brandId || !categoryId) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
 
       const product = await this.productsService.createProduct({
         name,
@@ -65,9 +67,50 @@ export class ProductsController {
         categoryId,
       });
 
-      res.status(201).json(product);
+      if (!product) {
+        return res.status(400).json({ message: "Invalid brand or category" });
+      }
+
+      return res.status(201).json(product);
     } catch (error) {
-      res.status(404).json({ message: "An error occurred." });
+      console.error(error);
+      return res.status(500).json({ message: "Failed to create product" });
+    }
+  };
+
+  updateProduct = async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+
+      const updated = await this.productsService.updateProduct(id, req.body);
+
+      if (!updated) {
+        return res
+          .status(400)
+          .json({ message: "Invalid product, brand, or category" });
+      }
+
+      return res.status(200).json(updated);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Failed to update product" });
+    }
+  };
+
+  deleteProduct = async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+
+      const deleted = await this.productsService.deleteProduct(id);
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      return res.status(200).json({ message: "Product deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Failed to delete product" });
     }
   };
 }

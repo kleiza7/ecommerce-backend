@@ -4,10 +4,11 @@ import { sequelize } from "../config/database";
 export interface BrandAttributes {
   id: number;
   name: string;
+  slug: string;
 }
 
 export interface BrandCreationAttributes
-  extends Optional<BrandAttributes, "id"> {}
+  extends Optional<BrandAttributes, "id" | "slug"> {}
 
 export class Brand
   extends Model<BrandAttributes, BrandCreationAttributes>
@@ -15,6 +16,7 @@ export class Brand
 {
   public id!: number;
   public name!: string;
+  public slug!: string;
 }
 
 Brand.init(
@@ -28,6 +30,12 @@ Brand.init(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
   },
   {

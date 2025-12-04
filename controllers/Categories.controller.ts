@@ -59,6 +59,10 @@ export class CategoriesController {
         display_order
       );
 
+      if (!category) {
+        return res.status(400).json({ message: "Invalid parent_id" });
+      }
+
       return res.status(201).json(category);
     } catch (error) {
       console.error(error);
@@ -76,7 +80,9 @@ export class CategoriesController {
       );
 
       if (!updated) {
-        return res.status(404).json({ message: "Category not found" });
+        return res
+          .status(400)
+          .json({ message: "Invalid update operation (id or parent invalid)" });
       }
 
       return res.status(200).json(updated);
@@ -93,7 +99,9 @@ export class CategoriesController {
       const deleted = await this.categoriesService.deleteCategory(Number(id));
 
       if (!deleted) {
-        return res.status(404).json({ message: "Category not found" });
+        return res.status(400).json({
+          message: "Category not found or cannot be deleted (has children)",
+        });
       }
 
       return res.status(200).json({ message: "Category deleted successfully" });
