@@ -8,7 +8,6 @@ export class CartController {
   getCart = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user!.id;
-
       const cart = await this.cartService.getCart(userId);
       return res.status(200).json(cart);
     } catch (error) {

@@ -16,8 +16,8 @@ export class CategoriesController {
 
   getCategoryById = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const category = await this.categoriesService.getCategoryById(Number(id));
+      const id = Number(req.params.id);
+      const category = await this.categoriesService.getCategoryById(id);
 
       if (!category) {
         return res.status(404).json({ message: "Category not found" });
@@ -32,9 +32,8 @@ export class CategoriesController {
 
   getChildren = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
-      const children = await this.categoriesService.getChildren(Number(id));
-
+      const id = Number(req.params.id);
+      const children = await this.categoriesService.getChildren(id);
       return res.status(200).json(children);
     } catch (error) {
       console.error(error);
@@ -45,12 +44,6 @@ export class CategoriesController {
   createCategory = async (req: Request, res: Response) => {
     try {
       const { name, parent_id, description, display_order } = req.body;
-
-      if (!name || display_order === undefined) {
-        return res
-          .status(400)
-          .json({ message: "name and display_order are required" });
-      }
 
       const category = await this.categoriesService.createCategory(
         name,
@@ -72,12 +65,9 @@ export class CategoriesController {
 
   updateCategory = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
+      const id = Number(req.params.id);
 
-      const updated = await this.categoriesService.updateCategory(
-        Number(id),
-        req.body
-      );
+      const updated = await this.categoriesService.updateCategory(id, req.body);
 
       if (!updated) {
         return res
@@ -94,13 +84,14 @@ export class CategoriesController {
 
   deleteCategory = async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
+      const id = Number(req.params.id);
 
-      const deleted = await this.categoriesService.deleteCategory(Number(id));
+      const deleted = await this.categoriesService.deleteCategory(id);
 
       if (!deleted) {
         return res.status(400).json({
-          message: "Category not found or cannot be deleted (has children)",
+          message:
+            "Category not found or cannot be deleted because it has children",
         });
       }
 

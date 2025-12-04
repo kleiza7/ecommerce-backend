@@ -17,7 +17,6 @@ export class ProductsController {
   getProductsByBrandId = async (req: Request, res: Response) => {
     try {
       const brandId = Number(req.params.brandId);
-
       const products = await this.productsService.getProductsByBrandId(brandId);
 
       if (!products || products.length === 0) {
@@ -53,22 +52,12 @@ export class ProductsController {
 
   createProduct = async (req: Request, res: Response) => {
     try {
-      const { name, description, price, brandId, categoryId } = req.body;
-
-      if (!name || !description || !price || !brandId || !categoryId) {
-        return res.status(400).json({ message: "All fields are required" });
-      }
-
-      const product = await this.productsService.createProduct({
-        name,
-        description,
-        price,
-        brandId,
-        categoryId,
-      });
+      const product = await this.productsService.createProduct(req.body);
 
       if (!product) {
-        return res.status(400).json({ message: "Invalid brand or category" });
+        return res.status(400).json({
+          message: "Invalid brandId or categoryId",
+        });
       }
 
       return res.status(201).json(product);

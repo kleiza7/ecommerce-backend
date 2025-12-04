@@ -34,10 +34,6 @@ export class BrandsController {
     try {
       const { name } = req.body;
 
-      if (!name) {
-        return res.status(400).json({ message: "name is required" });
-      }
-
       const brand = await this.brandsService.createBrand(name);
       return res.status(201).json(brand);
     } catch (error) {

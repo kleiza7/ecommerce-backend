@@ -1,8 +1,14 @@
 import { Router } from "express";
 import { CategoriesController } from "../controllers/Categories.controller";
 import { USER_ROLE } from "../enums/UserRole.enum";
-import { CheckRole } from "../middlewares/CheckRole";
-import { VerifyToken } from "../middlewares/VerifyToken";
+import { checkRole } from "../middlewares/checkRole.middleware";
+import { validate } from "../middlewares/validate.middleware";
+import { verifyToken } from "../middlewares/verifyToken.middleware";
+import {
+  categoryIdParamSchema,
+  createCategorySchema,
+  updateCategorySchema,
+} from "../schemas/category.schema";
 
 export class CategoriesRouter {
   constructor(
@@ -14,27 +20,40 @@ export class CategoriesRouter {
 
   private setupRoutes() {
     this.router.get("/get-all", this.controller.getAllCategories);
-    this.router.get("/get-by-id/:id", this.controller.getCategoryById);
-    this.router.get("/get-children/:id", this.controller.getChildren);
+
+    this.router.get(
+      "/get-by-id/:id",
+      validate(categoryIdParamSchema),
+      this.controller.getCategoryById
+    );
+
+    this.router.get(
+      "/get-children/:id",
+      validate(categoryIdParamSchema),
+      this.controller.getChildren
+    );
 
     this.router.post(
       "/create",
-      VerifyToken,
-      CheckRole(USER_ROLE.SELLER),
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      validate(createCategorySchema),
       this.controller.createCategory
     );
 
     this.router.put(
       "/update/:id",
-      VerifyToken,
-      CheckRole(USER_ROLE.SELLER),
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      validate(updateCategorySchema),
       this.controller.updateCategory
     );
 
     this.router.delete(
       "/delete/:id",
-      VerifyToken,
-      CheckRole(USER_ROLE.SELLER),
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      validate(categoryIdParamSchema),
       this.controller.deleteCategory
     );
   }

@@ -1,6 +1,12 @@
 import { Router } from "express";
 import { CartController } from "../controllers/Cart.controller";
-import { VerifyToken } from "../middlewares/VerifyToken";
+import { validate } from "../middlewares/validate.middleware";
+import { verifyToken } from "../middlewares/verifyToken.middleware";
+import {
+  addToCartSchema,
+  removeItemSchema,
+  updateCartQuantitySchema,
+} from "../schemas/cart.schema";
 
 export class CartRouter {
   constructor(private router: Router, private controller: CartController) {
@@ -8,23 +14,35 @@ export class CartRouter {
   }
 
   private setupRoutes() {
-    this.router.get("/", VerifyToken, this.controller.getCart);
+    // GET CART
+    this.router.get("/", verifyToken, this.controller.getCart);
 
-    this.router.post("/add", VerifyToken, this.controller.addItem);
+    // ADD ITEM
+    this.router.post(
+      "/add",
+      verifyToken,
+      validate(addToCartSchema),
+      this.controller.addItem
+    );
 
+    // UPDATE QUANTITY
     this.router.put(
       "/update/:itemId",
-      VerifyToken,
+      verifyToken,
+      validate(updateCartQuantitySchema),
       this.controller.updateQuantity
     );
 
+    // REMOVE ITEM
     this.router.delete(
       "/remove/:itemId",
-      VerifyToken,
+      verifyToken,
+      validate(removeItemSchema),
       this.controller.removeItem
     );
 
-    this.router.delete("/clear", VerifyToken, this.controller.clearCart);
+    // CLEAR CART
+    this.router.delete("/clear", verifyToken, this.controller.clearCart);
   }
 
   public getRouter() {
