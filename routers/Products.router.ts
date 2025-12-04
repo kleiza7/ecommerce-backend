@@ -7,6 +7,7 @@ import { verifyToken } from "../middlewares/verifyToken.middleware";
 import {
   createProductSchema,
   productIdParamSchema,
+  productListSchema,
   updateProductSchema,
 } from "../schemas/product.schema";
 
@@ -16,12 +17,10 @@ export class ProductsRouter {
   }
 
   private setupRoutes() {
-    // PUBLIC
-    this.router.get("/get-all", this.controller.getAllProducts);
-
-    this.router.get(
-      "/get-by-brand-id/:brandId",
-      this.controller.getProductsByBrandId
+    this.router.post(
+      "/list",
+      validate(productListSchema),
+      this.controller.getProducts
     );
 
     this.router.get(
@@ -30,7 +29,6 @@ export class ProductsRouter {
       this.controller.getProductById
     );
 
-    // SELLER ONLY
     this.router.post(
       "/create",
       verifyToken,

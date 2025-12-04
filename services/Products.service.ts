@@ -4,8 +4,31 @@ import { Category } from "../models/Category.model";
 import { Product } from "../models/Product.model";
 
 export class ProductsService {
-  async getAllProducts() {
-    return Product.findAll({
+  async getProducts(params: {
+    page: number;
+    limit: number;
+    brandId?: number;
+    categoryId?: number;
+  }) {
+    const { page, limit, brandId, categoryId } = params;
+
+    const where: any = {};
+
+    if (brandId) {
+      where.brand_id = brandId;
+    }
+
+    if (categoryId) {
+      where.category_id = categoryId;
+    }
+
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await Product.findAndCountAll({
+      where,
+      offset,
+      limit,
+      order: [["id", "DESC"]],
       attributes: [
         "id",
         "name",
@@ -15,19 +38,16 @@ export class ProductsService {
         "category_id",
       ],
     });
-  }
 
-  async getProductsByBrandId(brandId: number) {
-    const products = await Product.findAll({
-      where: { brand_id: brandId },
-      attributes: ["id", "name", "description", "price"],
-    });
-
-    if (products.length === 0) {
-      throw new AppError("No products found for this brand", 404);
-    }
-
-    return products;
+    return {
+      items: rows,
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
+    };
   }
 
   async getProductById(id: number) {
