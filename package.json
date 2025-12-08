@@ -7,20 +7,29 @@
     "dev": "ts-node-dev --respawn --transpile-only ./index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "check:ts": "tsc --noEmit"
+    "check:ts": "tsc --noEmit",
+    "seed": "ts-node ./seed/index.ts",
+    "reset:db": "rm ecommerce.sqlite && rm -rf prisma/migrations && npx prisma generate && npx prisma migrate dev --name init && npm run seed",
+    "studio": "npx prisma studio",
+    "prisma:migrate": "npx prisma migrate dev",
+    "prisma:generate": "npx prisma generate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.1.0",
+    "@prisma/client": "^7.1.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.1.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "sequelize": "^6.37.7",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -28,6 +37,9 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.10",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "prisma": "^7.1.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
   }

@@ -1,18 +1,20 @@
 import { Router } from "express";
-import { BrandsController } from "../controllers/Brands.controller";
+import { CategoriesController } from "../controllers/Categories.controller";
 import { USER_ROLE } from "../enums/UserRole.enum";
 import { checkRole } from "../middlewares/checkRole.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { verifyToken } from "../middlewares/verifyToken.middleware";
-
 import {
-  brandIdParamSchema,
-  createBrandSchema,
-  updateBrandSchema,
-} from "../schemas/Brands.schema";
+  categoryIdParamSchema,
+  createCategorySchema,
+  updateCategorySchema,
+} from "../schemas/Categories.schema";
 
-export class BrandsRouter {
-  constructor(private router: Router, private controller: BrandsController) {
+export class CategoriesRouter {
+  constructor(
+    private router: Router,
+    private controller: CategoriesController
+  ) {
     this.setupRoutes();
   }
 
@@ -20,12 +22,18 @@ export class BrandsRouter {
     //
     // PUBLIC ROUTES
     //
-    this.router.get("/get-all", this.controller.getAllBrands);
+    this.router.get("/get-all", this.controller.getAllCategories);
 
     this.router.get(
       "/get-by-id/:id",
-      validate(brandIdParamSchema),
-      this.controller.getBrandById
+      validate(categoryIdParamSchema),
+      this.controller.getCategoryById
+    );
+
+    this.router.get(
+      "/get-children/:id",
+      validate(categoryIdParamSchema),
+      this.controller.getChildren
     );
 
     //
@@ -35,24 +43,24 @@ export class BrandsRouter {
       "/create",
       verifyToken,
       checkRole(USER_ROLE.SELLER),
-      validate(createBrandSchema),
-      this.controller.createBrand
+      validate(createCategorySchema),
+      this.controller.createCategory
     );
 
     this.router.put(
       "/update/:id",
       verifyToken,
       checkRole(USER_ROLE.SELLER),
-      validate(updateBrandSchema),
-      this.controller.updateBrand
+      validate(updateCategorySchema),
+      this.controller.updateCategory
     );
 
     this.router.delete(
       "/delete/:id",
       verifyToken,
       checkRole(USER_ROLE.SELLER),
-      validate(brandIdParamSchema),
-      this.controller.deleteBrand
+      validate(categoryIdParamSchema),
+      this.controller.deleteCategory
     );
   }
 

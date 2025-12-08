@@ -1,5 +1,16 @@
-import { Router } from 'express';
-import { ProductsController } from '../controllers/Products.controller';
+import { Router } from "express";
+import { ProductsController } from "../controllers/Products.controller";
+import { USER_ROLE } from "../enums/UserRole.enum";
+import { checkRole } from "../middlewares/checkRole.middleware";
+import { validate } from "../middlewares/validate.middleware";
+import { verifyToken } from "../middlewares/verifyToken.middleware";
+
+import {
+  createProductSchema,
+  productIdParamSchema,
+  productListSchema,
+  updateProductSchema,
+} from "../schemas/Products.schema";
 
 export class ProductsRouter {
   constructor(private router: Router, private controller: ProductsController) {
@@ -7,11 +18,46 @@ export class ProductsRouter {
   }
 
   private setupRoutes() {
-    this.router.get('/get-all', this.controller.getAllProducts);
-    // TODO: bu endpointi daha sonradan dinamik bir şekilde filtre ürünleri listeleyeceğim bir endpoint olarak yazacağım
-    this.router.get('/get-by-brand-id/:brandId', this.controller.getProductsByBrandId);
-    this.router.get('/get-by-id/:id', this.controller.getProductById);
-    this.router.post('/create', this.controller.createProduct);
+    // LIST (pagination + filters)
+    this.router.post(
+      "/list",
+      validate(productListSchema),
+      this.controller.getProducts
+    );
+
+    // GET BY ID
+    this.router.get(
+      "/get-by-id/:id",
+      validate(productIdParamSchema),
+      this.controller.getProductById
+    );
+
+    // CREATE (SELLER ONLY)
+    this.router.post(
+      "/create",
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      validate(createProductSchema),
+      this.controller.createProduct
+    );
+
+    // UPDATE (SELLER ONLY)
+    this.router.put(
+      "/update/:id",
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      validate(updateProductSchema),
+      this.controller.updateProduct
+    );
+
+    // DELETE (SELLER ONLY)
+    this.router.delete(
+      "/delete/:id",
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      validate(productIdParamSchema),
+      this.controller.deleteProduct
+    );
   }
 
   public getRouter() {

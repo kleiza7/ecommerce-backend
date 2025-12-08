@@ -1,63 +1,88 @@
-import { Request, Response } from 'express';
-import { Product } from '../models/Product.model';
+import { NextFunction, Request, Response } from "express";
+import { ProductsService } from "../services/Products.service";
 
 export class ProductsController {
-  async getAllProducts(_: Request, res: Response) {
+  constructor(private productsService: ProductsService) {}
+
+  getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const products = await Product.findAll({
-        attributes: ['id', 'name', 'description', 'price'],
+      const page = Number(req.body.page ?? 1);
+      const limit = Number(req.body.limit ?? 10);
+
+      const brandId = req.body.brandId ? Number(req.body.brandId) : undefined;
+      const categoryId = req.body.categoryId
+        ? Number(req.body.categoryId)
+        : undefined;
+
+      const result = await this.productsService.getProducts({
+        page,
+        limit,
+        brandId,
+        categoryId,
       });
 
-      res.status(200).json(products);
+      return res.status(200).json(result);
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred when fetch products.' });
+      next(error);
     }
-  }
+  };
 
-  async getProductsByBrandId(req: Request, res: Response) {
+  getProductById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { brandId } = req.params;
+      const id = Number(req.params.id);
+      const product = await this.productsService.getProductById(id);
+      return res.status(200).json(product);
+    } catch (error) {
+      next(error);
+    }
+  };
 
-      const products = await Product.findAll({
-        where: { brand_id: brandId },
-        attributes: ['id', 'name', 'description', 'price'],
+  createProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name, description, price, brandId, categoryId } = req.body;
+
+      const product = await this.productsService.createProduct({
+        name,
+        description,
+        price: Number(price),
+        brandId: Number(brandId),
+        categoryId: Number(categoryId),
       });
-      if (products.length === 0) {
-        res.status(404).json({ message: 'No products found for this brand.' });
-        return;
-      }
-      res.status(200).json(products);
-    } catch (error) {
-      res.status(404).json({ message: 'An error occurred when fetch products by brand.' });
-    }
-  }
 
-  async getProductById(req: Request, res: Response) {
+      return res.status(201).json(product);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
+      const id = Number(req.params.id);
 
-      const product = await Product.findByPk(id);
+      const { name, description, price, brandId, categoryId } = req.body;
 
-      if (!product) {
-        res.status(404).json({ message: 'Product not found.' });
-        return;
-      }
+      const updated = await this.productsService.updateProduct(id, {
+        name,
+        description,
+        price: price !== undefined ? Number(price) : undefined,
+        brandId: brandId !== undefined ? Number(brandId) : undefined,
+        categoryId: categoryId !== undefined ? Number(categoryId) : undefined,
+      });
 
-      res.status(200).json(product);
+      return res.status(200).json(updated);
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred when fetch product.' });
+      next(error);
     }
-  }
+  };
 
-  async createProduct(req: Request, res: Response) {
+  deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, description, price, brandId } = req.body;
+      const id = Number(req.params.id);
+      await this.productsService.deleteProduct(id);
 
-      const product = await Product.create({ name, description, price, brand_id: brandId });
-
-      res.status(201).json(product);
+      return res.status(200).json({ message: "Product deleted successfully" });
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred.' });
+      next(error);
     }
-  }
+  };
 }

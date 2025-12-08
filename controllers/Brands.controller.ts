@@ -1,43 +1,58 @@
-import { Request, Response } from 'express';
-import { Brand } from '../models/Brand.model';
+import { NextFunction, Request, Response } from "express";
+import { BrandsService } from "../services/Brands.service";
 
 export class BrandsController {
-  async getAllBrands(_: Request, res: Response) {
+  constructor(private brandsService: BrandsService) {}
+
+  getAllBrands = async (_: Request, res: Response, next: NextFunction) => {
     try {
-      const brands = await Brand.findAll();
-
-      res.status(200).json(brands);
+      const brands = await this.brandsService.getAllBrands();
+      return res.status(200).json(brands);
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred when fetch brands.' });
+      next(error);
     }
-  }
+  };
 
-  async getBrandById(req: Request, res: Response) {
+  getBrandById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
-
-      const brand = await Brand.findByPk(id);
-
-      if (!brand) {
-        res.status(404).json({ message: 'Brand not found.' });
-        return;
-      }
-
-      res.status(200).json(brand);
+      const id = Number(req.params.id);
+      const brand = await this.brandsService.getBrandById(id);
+      return res.status(200).json(brand);
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred when fetch brand.' });
+      next(error);
     }
-  }
+  };
 
-  async createBrand(req: Request, res: Response) {
+  createBrand = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name } = req.body;
+      const brand = await this.brandsService.createBrand(name);
 
-      const brand = await Brand.create({ name });
-
-      res.status(201).json(brand);
+      return res.status(201).json(brand);
     } catch (error) {
-      res.status(404).json({ message: 'An error occurred.' });
+      next(error);
     }
-  }
+  };
+
+  updateBrand = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = Number(req.params.id);
+      const updatedBrand = await this.brandsService.updateBrand(id, req.body);
+
+      return res.status(200).json(updatedBrand);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteBrand = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = Number(req.params.id);
+      await this.brandsService.deleteBrand(id);
+
+      return res.status(200).json({ message: "Brand deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
