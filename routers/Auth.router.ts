@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/Auth.controller";
 import { validate } from "../middlewares/validate.middleware";
-import { loginSchema, registerSchema } from "../schemas/auth.schema";
+import { loginSchema, registerSchema } from "../schemas/Auth.schema";
 
 export class AuthRouter {
   constructor(private router: Router, private controller: AuthController) {

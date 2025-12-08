@@ -27,6 +27,9 @@ import { ProductsService } from "./services/Products.service";
 // Middlewares
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 
+// Swagger
+import { swaggerSpec, swaggerUi, swaggerUiSetup } from "./config/swagger";
+
 dotenv.config();
 
 class Server {
@@ -47,10 +50,21 @@ class Server {
     app.use(express.json());
     app.use(cors());
 
-    // 🌍 GLOBAL API PREFIX → TEK SATIR
+    // 🟢 1) JSON endpoint MUST COME FIRST!
+    if (process.env.NODE_ENV !== "production") {
+      app.get("/api-docs/swagger.json", (req, res) => {
+        res.setHeader("Content-Type", "application/json");
+        return res.send(swaggerSpec);
+      });
+    }
+
+    // 🟠 2) Swagger UI MUST COME AFTER JSON ROUTE
+    app.use("/api-docs", swaggerUi.serve, swaggerUiSetup);
+
+    // 🌍 API prefix
     app.use("/api", this.mountRouters());
 
-    // GLOBAL ERROR HANDLER
+    // 🔥 Global error handler
     app.use(errorHandler);
 
     prisma
@@ -60,14 +74,17 @@ class Server {
         app.listen(port, () => {
           console.log(`🔥 Server running at http://localhost:${port}`);
           console.log(`📡 API Base URL: http://localhost:${port}/api`);
+          console.log(`📘 Swagger Docs: http://localhost:${port}/api-docs`);
+          console.log(
+            `📄 Swagger JSON: http://localhost:${port}/api-docs/swagger.json`
+          );
         });
       })
       .catch((err) => {
-        console.error("❌ Prisma database connection failed:", err);
+        console.error("❌ Prisma connection failed:", err);
       });
   }
 
-  // ✔ Router’ları tek noktadan mount eden fonksiyon
   private mountRouters() {
     const router = express.Router();
 
@@ -81,21 +98,21 @@ class Server {
   }
 }
 
-// Services
+// Instantiate services
 const productsService = new ProductsService();
 const brandsService = new BrandsService();
 const categoriesService = new CategoriesService();
 const cartService = new CartService();
 const authService = new AuthService();
 
-// Controllers
+// Instantiate controllers
 const productsController = new ProductsController(productsService);
 const brandsController = new BrandsController(brandsService);
 const categoriesController = new CategoriesController(categoriesService);
 const cartController = new CartController(cartService);
 const authController = new AuthController(authService);
 
-// Routers
+// Instantiate routers
 const productsRouter = new ProductsRouter(express.Router(), productsController);
 const brandsRouter = new BrandsRouter(express.Router(), brandsController);
 const categoriesRouter = new CategoriesRouter(

@@ -6,7 +6,7 @@ import {
   addToCartSchema,
   removeItemSchema,
   updateCartQuantitySchema,
-} from "../schemas/cart.schema";
+} from "../schemas/Cart.schema";
 
 export class CartRouter {
   constructor(private router: Router, private controller: CartController) {

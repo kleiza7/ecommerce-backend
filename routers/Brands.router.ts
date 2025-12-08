@@ -9,7 +9,7 @@ import {
   brandIdParamSchema,
   createBrandSchema,
   updateBrandSchema,
-} from "../schemas/brand.schema";
+} from "../schemas/Brands.schema";
 
 export class BrandsRouter {
   constructor(private router: Router, private controller: BrandsController) {
