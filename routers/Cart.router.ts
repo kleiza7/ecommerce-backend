@@ -14,7 +14,7 @@ export class CartRouter {
   }
 
   private setupRoutes() {
-    this.router.get("/", verifyToken, this.controller.getCart);
+    this.router.get("/get-cart", verifyToken, this.controller.getCart);
 
     this.router.post(
       "/add",

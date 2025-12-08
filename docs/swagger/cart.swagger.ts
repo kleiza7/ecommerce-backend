@@ -72,7 +72,7 @@
 
 /**
  * @swagger
- * /api/cart:
+ * /api/cart/get-cart:
  *   get:
  *     summary: Get user's cart
  *     tags: [Cart]
