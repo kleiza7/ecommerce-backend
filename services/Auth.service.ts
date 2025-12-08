@@ -1,8 +1,8 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { prisma } from "../config/prisma";
 import { USER_ROLE } from "../enums/UserRole.enum";
 import { AppError } from "../errors/AppError";
-import { User } from "../models/User.model";
 
 export class AuthService {
   async register(
@@ -11,34 +11,48 @@ export class AuthService {
     password: string,
     role: USER_ROLE
   ) {
-    const existing = await User.findOne({ where: { email } });
+    // Email already exists?
+    const existing = await prisma.user.findUnique({
+      where: { email },
+    });
+
     if (existing) {
       throw new AppError("Email already exists", 400);
     }
 
+    // Hash password
     const hashed = await bcrypt.hash(password, 10);
 
-    await User.create({
-      name,
-      email,
-      password: hashed,
-      role,
+    // Create user
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashed,
+        role, // enum Prisma'da birebir tanımlı
+      },
     });
 
     return { message: "Registered successfully" };
   }
 
   async login(email: string, password: string) {
-    const user = await User.findOne({ where: { email } });
+    // Find user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
     if (!user) {
       throw new AppError("Invalid credentials", 400);
     }
 
+    // Validate password
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       throw new AppError("Invalid credentials", 400);
     }
 
+    // JWT Create
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET as string,

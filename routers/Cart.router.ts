@@ -14,10 +14,8 @@ export class CartRouter {
   }
 
   private setupRoutes() {
-    // GET CART
     this.router.get("/", verifyToken, this.controller.getCart);
 
-    // ADD ITEM
     this.router.post(
       "/add",
       verifyToken,
@@ -25,7 +23,6 @@ export class CartRouter {
       this.controller.addItem
     );
 
-    // UPDATE QUANTITY
     this.router.put(
       "/update/:itemId",
       verifyToken,
@@ -33,7 +30,6 @@ export class CartRouter {
       this.controller.updateQuantity
     );
 
-    // REMOVE ITEM
     this.router.delete(
       "/remove/:itemId",
       verifyToken,
@@ -41,7 +37,6 @@ export class CartRouter {
       this.controller.removeItem
     );
 
-    // CLEAR CART
     this.router.delete("/clear", verifyToken, this.controller.clearCart);
   }
 

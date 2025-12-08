@@ -1,14 +1,16 @@
+import { prisma } from "../config/prisma";
 import { AppError } from "../errors/AppError";
-import { Brand } from "../models/Brand.model";
 import { generateSlug } from "../utils/Slug.util";
 
 export class BrandsService {
   async getAllBrands() {
-    return Brand.findAll();
+    return prisma.brand.findMany();
   }
 
   async getBrandById(id: number) {
-    const brand = await Brand.findByPk(id);
+    const brand = await prisma.brand.findUnique({
+      where: { id },
+    });
 
     if (!brand) {
       throw new AppError("Brand not found", 404);
@@ -20,35 +22,47 @@ export class BrandsService {
   async createBrand(name: string) {
     const slug = generateSlug(name);
 
-    return Brand.create({
-      name,
-      slug,
+    return prisma.brand.create({
+      data: {
+        name,
+        slug,
+      },
     });
   }
 
-  async updateBrand(id: number, data: Partial<Brand>) {
-    const brand = await Brand.findByPk(id);
+  async updateBrand(id: number, data: { name?: string }) {
+    const brand = await prisma.brand.findUnique({
+      where: { id },
+    });
 
     if (!brand) {
       throw new AppError("Brand not found", 404);
     }
 
-    if (data.name) {
-      data.slug = generateSlug(data.name);
-    }
+    const slug = data.name ? generateSlug(data.name) : undefined;
 
-    await brand.update(data);
-    return brand;
+    return prisma.brand.update({
+      where: { id },
+      data: {
+        ...data,
+        slug,
+      },
+    });
   }
 
   async deleteBrand(id: number) {
-    const brand = await Brand.findByPk(id);
+    const brand = await prisma.brand.findUnique({
+      where: { id },
+    });
 
     if (!brand) {
       throw new AppError("Brand not found", 404);
     }
 
-    await brand.destroy();
+    await prisma.brand.delete({
+      where: { id },
+    });
+
     return true;
   }
 }

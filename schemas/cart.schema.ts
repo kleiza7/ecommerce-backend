@@ -1,23 +1,33 @@
 import { z } from "zod";
 
+// -------------------------------
+// ADD TO CART
+// -------------------------------
 export const addToCartSchema = z.object({
   body: z.object({
-    product_id: z.number(),
-    quantity: z.number().min(1),
+    productId: z.coerce.number().int().positive("Invalid product ID"),
+
+    quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
   }),
 });
 
+// -------------------------------
+// UPDATE QUANTITY
+// -------------------------------
 export const updateCartQuantitySchema = z.object({
-  body: z.object({
-    quantity: z.number(),
-  }),
   params: z.object({
-    itemId: z.string(),
+    itemId: z.string().regex(/^\d+$/, "Invalid cart item ID"),
+  }),
+  body: z.object({
+    quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
   }),
 });
 
+// -------------------------------
+// REMOVE ITEM
+// -------------------------------
 export const removeItemSchema = z.object({
   params: z.object({
-    itemId: z.string(),
+    itemId: z.string().regex(/^\d+$/, "Invalid cart item ID"),
   }),
 });

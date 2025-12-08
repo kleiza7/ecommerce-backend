@@ -35,13 +35,18 @@ export class CategoriesController {
 
   createCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, parent_id, description, display_order } = req.body;
+      const {
+        name,
+        parentId, // Prisma version
+        description,
+        displayOrder, // Prisma version
+      } = req.body;
 
       const category = await this.categoriesService.createCategory(
         name,
-        parent_id ?? null,
+        parentId ?? null,
         description ?? null,
-        display_order
+        displayOrder
       );
 
       return res.status(201).json(category);
@@ -53,7 +58,16 @@ export class CategoriesController {
   updateCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = Number(req.params.id);
-      const updated = await this.categoriesService.updateCategory(id, req.body);
+
+      const { name, parentId, description, displayOrder } = req.body;
+
+      const updated = await this.categoriesService.updateCategory(id, {
+        name,
+        parentId,
+        description,
+        displayOrder,
+      });
+
       return res.status(200).json(updated);
     } catch (err) {
       next(err);

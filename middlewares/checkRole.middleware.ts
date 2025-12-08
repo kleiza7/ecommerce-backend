@@ -5,15 +5,22 @@ import { AuthenticatedRequest } from "../interfaces/AuthenticatedRequest.interfa
 
 export const checkRole = (...allowedRoles: USER_ROLE[]) => {
   return (req: AuthenticatedRequest, _: Response, next: NextFunction) => {
+    // Token doğrulanmamış (verifyToken çalışmamış)
     if (!req.user) {
-      throw new AppError("Unauthorized: Token missing or invalid", 401);
+      throw new AppError("Unauthorized: Missing authentication", 401);
     }
 
-    const userRole = req.user.role;
+    const { role } = req.user;
 
-    if (!allowedRoles.includes(userRole)) {
+    // Role JWT içinde enum değilse veya yanlışsa kontrollü şekilde reddet
+    if (!Object.values(USER_ROLE).includes(role)) {
+      throw new AppError("Unauthorized: Invalid role in token", 401);
+    }
+
+    // Bu role bu endpoint'e erişebilir mi?
+    if (!allowedRoles.includes(role)) {
       throw new AppError(
-        "Forbidden: You are not allowed to access this resource",
+        "Forbidden: You do not have permission to access this resource",
         403
       );
     }

@@ -12,8 +12,12 @@ export class CartController {
   ) => {
     try {
       const userId = req.user!.id;
-      const cart = await this.cartService.getCart(userId);
-      return res.status(200).json(cart);
+
+      const cartItems = await this.cartService.getCart(userId);
+
+      return res.status(200).json({
+        items: cartItems,
+      });
     } catch (error) {
       next(error);
     }
@@ -26,9 +30,14 @@ export class CartController {
   ) => {
     try {
       const userId = req.user!.id;
-      const { product_id, quantity } = req.body;
+      const { productId, quantity } = req.body;
 
-      const item = await this.cartService.addItem(userId, product_id, quantity);
+      const item = await this.cartService.addItem(
+        userId,
+        Number(productId),
+        Number(quantity)
+      );
+
       return res.status(201).json(item);
     } catch (error) {
       next(error);
@@ -48,8 +57,9 @@ export class CartController {
       const updated = await this.cartService.updateQuantity(
         userId,
         itemId,
-        quantity
+        Number(quantity)
       );
+
       return res.status(200).json(updated);
     } catch (error) {
       next(error);
@@ -66,6 +76,7 @@ export class CartController {
       const itemId = Number(req.params.itemId);
 
       await this.cartService.removeItem(userId, itemId);
+
       return res.status(200).json({ message: "Item removed from cart" });
     } catch (error) {
       next(error);
@@ -79,7 +90,9 @@ export class CartController {
   ) => {
     try {
       const userId = req.user!.id;
+
       await this.cartService.clearCart(userId);
+
       return res.status(200).json({ message: "Cart cleared" });
     } catch (error) {
       next(error);

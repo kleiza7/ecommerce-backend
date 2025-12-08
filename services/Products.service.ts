@@ -1,7 +1,5 @@
+import { prisma } from "../config/prisma";
 import { AppError } from "../errors/AppError";
-import { Brand } from "../models/Brand.model";
-import { Category } from "../models/Category.model";
-import { Product } from "../models/Product.model";
 
 export class ProductsService {
   async getProducts(params: {
@@ -13,45 +11,44 @@ export class ProductsService {
     const { page, limit, brandId, categoryId } = params;
 
     const where: any = {};
+    if (brandId) where.brandId = brandId;
+    if (categoryId) where.categoryId = categoryId;
 
-    if (brandId) {
-      where.brand_id = brandId;
-    }
+    const skip = (page - 1) * limit;
 
-    if (categoryId) {
-      where.category_id = categoryId;
-    }
+    const [items, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { id: "desc" },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          price: true,
+          brandId: true,
+          categoryId: true,
+        },
+      }),
 
-    const offset = (page - 1) * limit;
-
-    const { rows, count } = await Product.findAndCountAll({
-      where,
-      offset,
-      limit,
-      order: [["id", "DESC"]],
-      attributes: [
-        "id",
-        "name",
-        "description",
-        "price",
-        "brand_id",
-        "category_id",
-      ],
-    });
+      prisma.product.count({ where }),
+    ]);
 
     return {
-      items: rows,
+      items,
       pagination: {
-        total: count,
+        total,
         page,
         limit,
-        totalPages: Math.ceil(count / limit),
+        totalPages: Math.ceil(total / limit),
       },
     };
   }
 
   async getProductById(id: number) {
-    const product = await Product.findByPk(id);
+    const product = await prisma.product.findUnique({ where: { id } });
+
     if (!product) {
       throw new AppError("Product not found", 404);
     }
@@ -66,56 +63,71 @@ export class ProductsService {
     brandId: number;
     categoryId: number;
   }) {
-    const brand = await Brand.findByPk(data.brandId);
-    if (!brand) {
-      throw new AppError("Invalid brandId", 400);
-    }
+    // Brand check
+    const brand = await prisma.brand.findUnique({
+      where: { id: data.brandId },
+    });
+    if (!brand) throw new AppError("Invalid brandId", 400);
 
-    const category = await Category.findByPk(data.categoryId);
-    if (!category) {
-      throw new AppError("Invalid categoryId", 400);
-    }
+    // Category check
+    const category = await prisma.category.findUnique({
+      where: { id: data.categoryId },
+    });
+    if (!category) throw new AppError("Invalid categoryId", 400);
 
-    return Product.create({
-      name: data.name,
-      description: data.description,
-      price: data.price,
-      brand_id: data.brandId,
-      category_id: data.categoryId,
+    return prisma.product.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        brandId: data.brandId,
+        categoryId: data.categoryId,
+      },
     });
   }
 
-  async updateProduct(id: number, data: Partial<Product>) {
-    const product = await Product.findByPk(id);
-    if (!product) {
-      throw new AppError("Product not found", 404);
+  async updateProduct(
+    id: number,
+    data: {
+      name?: string;
+      description?: string;
+      price?: number;
+      brandId?: number;
+      categoryId?: number;
+    }
+  ) {
+    const product = await prisma.product.findUnique({
+      where: { id },
+    });
+    if (!product) throw new AppError("Product not found", 404);
+
+    if (data.brandId) {
+      const brand = await prisma.brand.findUnique({
+        where: { id: data.brandId },
+      });
+      if (!brand) throw new AppError("Invalid brandId", 400);
     }
 
-    if (data.brand_id) {
-      const brand = await Brand.findByPk(data.brand_id);
-      if (!brand) {
-        throw new AppError("Invalid brand_id", 400);
-      }
+    if (data.categoryId) {
+      const category = await prisma.category.findUnique({
+        where: { id: data.categoryId },
+      });
+      if (!category) throw new AppError("Invalid categoryId", 400);
     }
 
-    if (data.category_id) {
-      const category = await Category.findByPk(data.category_id);
-      if (!category) {
-        throw new AppError("Invalid category_id", 400);
-      }
-    }
-
-    await product.update(data);
-    return product;
+    return prisma.product.update({
+      where: { id },
+      data,
+    });
   }
 
   async deleteProduct(id: number) {
-    const product = await Product.findByPk(id);
-    if (!product) {
-      throw new AppError("Product not found", 404);
-    }
+    const product = await prisma.product.findUnique({ where: { id } });
 
-    await product.destroy();
+    if (!product) throw new AppError("Product not found", 404);
+
+    await prisma.product.delete({ where: { id } });
+
     return true;
   }
 }
