@@ -13,12 +13,14 @@ export class AuthController {
   ) => {
     try {
       const { name, email, password } = req.body;
+
       const result = await this.authService.register(
         name,
         email,
         password,
         role
       );
+
       return res.status(201).json(result);
     } catch (error) {
       next(error);
@@ -37,6 +39,7 @@ export class AuthController {
     try {
       const { email, password } = req.body;
       const result = await this.authService.login(email, password);
+
       return res.status(200).json(result);
     } catch (error) {
       next(error);

@@ -2,27 +2,33 @@ import { z } from "zod";
 
 export const createCategorySchema = z.object({
   body: z.object({
-    name: z.string().min(1),
-    parent_id: z.number().nullable().optional(),
-    description: z.string().nullable().optional(),
-    display_order: z.number(),
+    name: z.string().trim().min(1, "Category name is required"),
+
+    parentId: z.coerce.number().int().positive().nullable().optional(),
+
+    description: z.string().trim().nullable().optional(),
+
+    displayOrder: z.coerce.number().int(),
   }),
 });
 
 export const updateCategorySchema = z.object({
-  body: z.object({
-    name: z.string().optional(),
-    parent_id: z.number().nullable().optional(),
-    description: z.string().nullable().optional(),
-    display_order: z.number().optional(),
-  }),
   params: z.object({
-    id: z.string(),
+    id: z.coerce.number().int().positive("Invalid category ID"),
+  }),
+  body: z.object({
+    name: z.string().trim().min(1).optional(),
+
+    parentId: z.coerce.number().int().positive().nullable().optional(),
+
+    description: z.string().trim().nullable().optional(),
+
+    displayOrder: z.coerce.number().int().optional(),
   }),
 });
 
 export const categoryIdParamSchema = z.object({
   params: z.object({
-    id: z.string(),
+    id: z.coerce.number().int().positive("Invalid category ID"),
   }),
 });

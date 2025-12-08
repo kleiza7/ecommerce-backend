@@ -2,15 +2,19 @@ import { z } from "zod";
 
 export const registerSchema = z.object({
   body: z.object({
-    name: z.string().min(1),
-    email: z.string().email(),
-    password: z.string().min(6),
+    name: z.string().trim().min(1, "Name is required"),
+
+    email: z.string().trim().toLowerCase().email("Invalid email address"),
+
+    // Password: yalnızca minimum uzunluk, başka hiçbir kısıtlama yok
+    password: z.string().min(1, "Password is required"),
   }),
 });
 
 export const loginSchema = z.object({
   body: z.object({
-    email: z.string().email(),
-    password: z.string().min(6),
+    email: z.string().trim().toLowerCase().email("Invalid email address"),
+
+    password: z.string().min(1, "Password is required"),
   }),
 });

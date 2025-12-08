@@ -1,5 +1,5 @@
+import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
-import { ValidationError } from "sequelize";
 import { ZodError } from "zod";
 import { AppError } from "../errors/AppError";
 
@@ -9,16 +9,15 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error("ERROR:", err);
+  console.error("🔥 ERROR:", err);
 
   // -------------------------
   // ZOD VALIDATION ERRORS
   // -------------------------
   if (err instanceof ZodError) {
     return res.status(400).json({
-      success: false,
       message: "Validation failed",
-      details: err.issues.map((issue) => issue.message),
+      details: err.issues,
     });
   }
 
@@ -27,8 +26,8 @@ export const errorHandler = (
   // -------------------------
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
-      success: false,
       message: err.message,
+      details: err.details,
     });
   }
 
@@ -42,7 +41,6 @@ export const errorHandler = (
     (err as any).name === "JsonWebTokenError"
   ) {
     return res.status(401).json({
-      success: false,
       message: "Invalid token",
     });
   }
@@ -54,19 +52,51 @@ export const errorHandler = (
     (err as any).name === "TokenExpiredError"
   ) {
     return res.status(401).json({
-      success: false,
       message: "Token expired",
     });
   }
 
   // -------------------------
-  // SEQUELIZE ERRORS
+  // PRISMA ERRORS
   // -------------------------
-  if (err instanceof ValidationError) {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    let message = "Database error";
+
+    switch (err.code) {
+      case "P2002":
+        message = "Unique constraint failed";
+        break;
+
+      case "P2003":
+        message = "Foreign key constraint failed";
+        break;
+
+      case "P2025":
+        message = "Record not found";
+        break;
+    }
+
     return res.status(400).json({
-      success: false,
-      message: "Database validation error",
-      details: err.errors.map((e) => e.message),
+      message,
+      meta: err.meta,
+    });
+  }
+
+  if (err instanceof Prisma.PrismaClientValidationError) {
+    return res.status(400).json({
+      message: "Invalid data provided to database",
+    });
+  }
+
+  if (err instanceof Prisma.PrismaClientInitializationError) {
+    return res.status(500).json({
+      message: "Database initialization error",
+    });
+  }
+
+  if (err instanceof Prisma.PrismaClientRustPanicError) {
+    return res.status(500).json({
+      message: "Critical database panic",
     });
   }
 
@@ -74,7 +104,6 @@ export const errorHandler = (
   // FALLBACK
   // -------------------------
   return res.status(500).json({
-    success: false,
     message: "Something went wrong",
   });
 };

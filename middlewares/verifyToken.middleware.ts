@@ -9,17 +9,13 @@ export const verifyToken = (
   _: Response,
   next: NextFunction
 ): void => {
-  const authHeader = req.headers.authorization;
+  const header = req.headers.authorization;
 
-  if (!authHeader) {
-    throw new AppError("Unauthorized: Token missing", 401);
+  if (!header || !header.startsWith("Bearer ")) {
+    throw new AppError("Unauthorized: Token missing or invalid", 401);
   }
 
-  const [scheme, token] = authHeader.split(" ");
-
-  if (scheme !== "Bearer" || !token) {
-    throw new AppError("Unauthorized: Invalid authorization header", 401);
-  }
+  const token = header.split(" ")[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
@@ -27,18 +23,19 @@ export const verifyToken = (
       role: USER_ROLE;
     };
 
-    // Role token içinde enum değilse reject et
+    // Token içindeki role enum değilse güvenlik gereği reddet
     if (!Object.values(USER_ROLE).includes(decoded.role)) {
       throw new AppError("Unauthorized: Invalid role in token", 401);
     }
 
+    // Req içine user bilgisini ekliyoruz
     req.user = {
       id: decoded.id,
       role: decoded.role,
     };
 
     next();
-  } catch (_) {
+  } catch (err) {
     throw new AppError("Unauthorized: Invalid or expired token", 401);
   }
 };

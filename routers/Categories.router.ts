@@ -4,6 +4,7 @@ import { USER_ROLE } from "../enums/UserRole.enum";
 import { checkRole } from "../middlewares/checkRole.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { verifyToken } from "../middlewares/verifyToken.middleware";
+
 import {
   categoryIdParamSchema,
   createCategorySchema,
@@ -19,6 +20,9 @@ export class CategoriesRouter {
   }
 
   private setupRoutes() {
+    //
+    // PUBLIC ROUTES
+    //
     this.router.get("/get-all", this.controller.getAllCategories);
 
     this.router.get(
@@ -33,6 +37,9 @@ export class CategoriesRouter {
       this.controller.getChildren
     );
 
+    //
+    // SELLER ONLY ROUTES
+    //
     this.router.post(
       "/create",
       verifyToken,
