@@ -4,12 +4,11 @@ import { USER_ROLE } from "../enums/UserRole.enum";
 import { checkRole } from "../middlewares/checkRole.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { verifyToken } from "../middlewares/verifyToken.middleware";
-
 import {
   categoryIdParamSchema,
   createCategorySchema,
   updateCategorySchema,
-} from "../schemas/category.schema";
+} from "../schemas/Categories.schema";
 
 export class CategoriesRouter {
   constructor(

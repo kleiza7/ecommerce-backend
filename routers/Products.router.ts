@@ -10,7 +10,7 @@ import {
   productIdParamSchema,
   productListSchema,
   updateProductSchema,
-} from "../schemas/product.schema";
+} from "../schemas/Products.schema";
 
 export class ProductsRouter {
   constructor(private router: Router, private controller: ProductsController) {
