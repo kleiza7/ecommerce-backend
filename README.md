@@ -1,67 +1,62 @@
-# E-Commerce Backend
+# 🔐 E-Commerce Backend
 
-This repository contains a scalable backend application built for an E-Commerce platform using Node.js, Express, TypeScript, and Prisma ORM.
+Modern and scalable backend application built with **Node.js**, **Express**, **TypeScript**, and **Prisma ORM** for an E‑Commerce platform.
 
 This backend works together with the frontend application:  
 ➡️ https://github.com/kleiza7/ecommerce-frontend
 
 ---
 
-## Overview
+## ✨ Overview
 
-The system provides core e-commerce functionality:
+Core features included in this backend:
 
-- User authentication (JWT)
-- Role-based access (USER / SELLER)
-- Product, Category, Brand management
-- Shopping Cart operations
-- Prisma ORM database layer
-- Service → Controller → Router architecture
-- Global error handling
-- SQLite for development (PostgreSQL compatible)
-- Fully typed with TypeScript
-
----
-
-## Controllers Summary
-
-### AuthController
-
-- Register new users
-- Login and return JWT
-- Access protected profile
-
-### ProductsController
-
-- Create / update / delete products (SELLER only)
-- List products
-- Retrieve product details
-
-### CategoriesController
-
-- CRUD operations for categories
-
-### BrandsController
-
-- CRUD operations for brands
-
-### CartController
-
-- Get user cart
-- Add items
-- Update quantities
-- Remove items
+- 🔑 JWT authentication  
+- 👤 Role-based access (USER / SELLER)  
+- 📦 Product / Category / Brand management  
+- 🛒 Shopping Cart functionality  
+- 🧠 Clean Service → Controller → Router architecture  
+- 🧱 Prisma ORM (SQLite dev, PostgreSQL ready)  
+- 🛡 Global error handling  
+- 💯 Fully typed with TypeScript  
 
 ---
 
-## Database
+## 🧩 Controllers Summary
 
-SQLite is used for development.  
-The schema is fully compatible with PostgreSQL by simply updating `DATABASE_URL` in `.env`.
+### 🔐 Auth Controller
+- Register new users  
+- Login and return JWT  
+- Access protected profile  
+
+### 📦 Products Controller
+- Create, update, delete products (SELLER only)  
+- List products  
+- Retrieve product details  
+
+### 🏷 Categories Controller
+- Full CRUD operations  
+
+### 🏭 Brands Controller
+- Full CRUD operations  
+
+### 🛒 Cart Controller
+- Get user cart  
+- Add items  
+- Update item quantity  
+- Remove items  
 
 ---
 
-## Environment Setup
+## 🗄 Database
+
+- Uses **SQLite** for development  
+- Fully compatible with **PostgreSQL**  
+- Switch by updating `DATABASE_URL` in `.env`  
+
+---
+
+## ⚙️ Environment Setup
 
 A `.env.example` file is included.
 
@@ -71,7 +66,7 @@ Create your environment file:
 cp .env.example .env
 ```
 
-Then fill in the required variables:
+Fill in the required variables:
 
 ```ini
 DATABASE_URL="file:./dev.db"
@@ -81,7 +76,7 @@ PORT=5000
 
 ---
 
-## Running the Project
+## 🚀 Running the Project
 
 ```bash
 npm install
@@ -91,7 +86,7 @@ npm run seed   # optional
 npm run dev
 ```
 
-The server will start at:
+Server will start at:
 
 ```
 http://localhost:5000
@@ -99,12 +94,12 @@ http://localhost:5000
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Contributions and pull requests are welcome.
 
 ---
 
-## License
+## 📄 License
 
 MIT
