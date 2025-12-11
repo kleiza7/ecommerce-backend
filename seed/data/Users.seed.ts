@@ -20,6 +20,5 @@ export const seedUsers = async () => {
         role: UserRole.USER, // ✔ Prisma ENUM
       },
     ],
-    // ❌ Prisma v5+ skipDuplicates desteklemiyor → kaldırıldı
   });
 };
