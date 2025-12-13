@@ -9,8 +9,6 @@ const UPLOAD_ROOT = path.join(__dirname, "..", "uploads", "products");
 export class ProductsService {
   private foldersEnsured = false;
 
-  constructor() {}
-
   ////////////////////////////////////////////
   // ABSOLUTE URL HELPER
   ////////////////////////////////////////////
@@ -51,7 +49,6 @@ export class ProductsService {
     });
 
     if (images.length === 0) return;
-
     if (images.some((i) => i.isPrimary)) return;
 
     await prisma.productImage.update({
@@ -99,7 +96,6 @@ export class ProductsService {
     }
 
     await this.ensurePrimaryImage(productId);
-
     return created;
   }
 
@@ -149,6 +145,7 @@ export class ProductsService {
           id: true,
           name: true,
           description: true,
+          stockCount: true,
           price: true,
           brandId: true,
           categoryId: true,
@@ -165,7 +162,6 @@ export class ProductsService {
       prisma.product.count({ where }),
     ]);
 
-    // 🔥 Absolute URL dönüyoruz
     const itemsWithAbsolute = items.map((product) => ({
       ...product,
       images: product.images.map((img) => ({
@@ -196,7 +192,6 @@ export class ProductsService {
 
     if (!product) throw new AppError("Product not found", 404);
 
-    // 🔥 absolute tüm URL'ler
     return {
       ...product,
       images: product.images.map((img) => ({
@@ -216,6 +211,7 @@ export class ProductsService {
     data: {
       name: string;
       description: string;
+      stockCount: number;
       price: number;
       brandId: number;
       categoryId: number;
@@ -245,6 +241,7 @@ export class ProductsService {
     data: {
       name?: string;
       description?: string;
+      stockCount?: number;
       price?: number;
       brandId?: number;
       categoryId?: number;
@@ -255,7 +252,6 @@ export class ProductsService {
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) throw new AppError("Product not found", 404);
 
-    // DELETE IMAGES
     if (data.deletedImageIds?.length) {
       const imgs = await prisma.productImage.findMany({
         where: { id: { in: data.deletedImageIds }, productId: id },
@@ -268,10 +264,8 @@ export class ProductsService {
       });
     }
 
-    // ADD NEW IMAGES
     if (newAddedImages?.length) await this.processImages(id, newAddedImages);
 
-    // clean undefined fields
     const cleaned = Object.fromEntries(
       Object.entries(data).filter(([_, v]) => v !== undefined)
     );
