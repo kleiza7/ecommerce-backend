@@ -21,6 +21,7 @@ CREATE TABLE "Products" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "stock_count" INTEGER NOT NULL DEFAULT 0,
     "price" DECIMAL NOT NULL DEFAULT 0.0,
     "brand_id" INTEGER NOT NULL,
     "category_id" INTEGER NOT NULL,

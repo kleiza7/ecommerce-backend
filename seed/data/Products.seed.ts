@@ -120,6 +120,7 @@ export const seedProducts = async () => {
         data: {
           name,
           description: `${brand.name} ${category.name} product`,
+          stockCount: Math.floor(Math.random() * 101),
           price: Math.floor(Math.random() * 50000) + 2000,
           brandId: brand.id,
           categoryId: category.id,

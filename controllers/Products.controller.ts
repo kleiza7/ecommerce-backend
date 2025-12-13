@@ -37,15 +37,22 @@ export class ProductsController {
     }
   };
 
+  //////////////////////////////////////////////////////
+  // CREATE PRODUCT
+  //////////////////////////////////////////////////////
+
   createProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, description, price, brandId, categoryId } = req.body;
+      const { name, description, stockCount, price, brandId, categoryId } =
+        req.body;
+
       const files = req.files as Express.Multer.File[];
 
       const product = await this.productsService.createProduct(
         {
           name,
           description,
+          stockCount: Number(stockCount),
           price: Number(price),
           brandId: Number(brandId),
           categoryId: Number(categoryId),
@@ -59,11 +66,23 @@ export class ProductsController {
     }
   };
 
+  //////////////////////////////////////////////////////
+  // UPDATE PRODUCT
+  //////////////////////////////////////////////////////
+
   updateProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = Number(req.params.id);
-      const { name, description, price, brandId, categoryId, deletedImageIds } =
-        req.body;
+
+      const {
+        name,
+        description,
+        stockCount,
+        price,
+        brandId,
+        categoryId,
+        deletedImageIds,
+      } = req.body;
 
       const files = req.files as Express.Multer.File[];
 
@@ -79,6 +98,7 @@ export class ProductsController {
       const payload = {
         name,
         description,
+        stockCount: stockCount !== undefined ? Number(stockCount) : undefined,
         price: price !== undefined ? Number(price) : undefined,
         brandId: brandId !== undefined ? Number(brandId) : undefined,
         categoryId: categoryId !== undefined ? Number(categoryId) : undefined,
@@ -96,6 +116,10 @@ export class ProductsController {
       next(err);
     }
   };
+
+  //////////////////////////////////////////////////////
+  // DELETE PRODUCT
+  //////////////////////////////////////////////////////
 
   deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {

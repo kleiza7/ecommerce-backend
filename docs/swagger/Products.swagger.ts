@@ -44,12 +44,14 @@
  *                   name: "IPhone 16"
  *                   description: "Flagship phone"
  *                   price: 1999
+ *                   stockCount: 25
  *                   brandId: 1
  *                   categoryId: 4
  *                 - id: 11
  *                   name: "Samsung S25"
  *                   description: "Premium Android phone"
  *                   price: 1499
+ *                   stockCount: 0
  *                   brandId: 2
  *                   categoryId: 4
  *               pagination:
@@ -85,6 +87,7 @@
  *               name: "MacBook Pro 14"
  *               description: "M4 Pro model"
  *               price: 2999
+ *               stockCount: 12
  *               brandId: 1
  *               categoryId: 2
  *       404:
@@ -116,6 +119,7 @@
  *               - name
  *               - description
  *               - price
+ *               - stockCount
  *               - brandId
  *               - categoryId
  *               - images
@@ -129,6 +133,9 @@
  *               price:
  *                 type: number
  *                 example: 899
+ *               stockCount:
+ *                 type: number
+ *                 example: 50
  *               brandId:
  *                 type: number
  *                 example: 3
@@ -151,6 +158,7 @@
  *               name: "PlayStation 6"
  *               description: "Next-gen gaming console"
  *               price: 899
+ *               stockCount: 50
  *               brandId: 3
  *               categoryId: 8
  *               images:
@@ -162,10 +170,6 @@
  *                   isPrimary: true
  *       400:
  *         description: Brand or Category not found
- *         content:
- *           application/json:
- *             example:
- *               error: "Invalid brandId"
  *       401:
  *         description: Unauthorized
  *       403:
@@ -199,29 +203,25 @@
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Updated name"
  *               description:
  *                 type: string
- *                 example: "Updated description"
  *               price:
  *                 type: number
- *                 example: 1200
+ *               stockCount:
+ *                 type: number
+ *                 example: 30
  *               brandId:
  *                 type: number
- *                 example: 2
  *               categoryId:
  *                 type: number
- *                 example: 5
  *               newAddedImages:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
- *                 description: "Images to add"
  *               deletedImageIds:
  *                 type: string
  *                 example: "[3,5]"
- *                 description: "JSON array string of image IDs to delete"
  *     responses:
  *       200:
  *         description: Product updated successfully
@@ -232,19 +232,9 @@
  *               name: "Updated name"
  *               description: "Updated description"
  *               price: 1200
+ *               stockCount: 30
  *               brandId: 2
  *               categoryId: 5
- *               images:
- *                 - id: 55
- *                   originalUrl: "/uploads/products/original/aaa.jpg"
- *                   thumbUrl: "/uploads/products/thumbs/aaa.jpg"
- *                   mediumUrl: "/uploads/products/medium/aaa.jpg"
- *                   largeUrl: "/uploads/products/large/aaa.jpg"
- *                   isPrimary: true
- *       400:
- *         description: Validation error
- *       404:
- *         description: Product not found
  */
 
 ///////////////////////////////////////////////////////////////
@@ -274,8 +264,4 @@
  *               message: "Product deleted successfully"
  *       404:
  *         description: Product not found
- *         content:
- *           application/json:
- *             example:
- *               error: "Product not found"
  */
