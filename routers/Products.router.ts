@@ -2,9 +2,12 @@ import { Router } from "express";
 import { ProductsController } from "../controllers/Products.controller";
 import { USER_ROLE } from "../enums/UserRole.enum";
 import { checkRole } from "../middlewares/checkRole.middleware";
+import {
+  uploadNewProductImages,
+  uploadProductImages,
+} from "../middlewares/imageUpload.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { verifyToken } from "../middlewares/verifyToken.middleware";
-
 import {
   createProductSchema,
   productIdParamSchema,
@@ -37,6 +40,7 @@ export class ProductsRouter {
       "/create",
       verifyToken,
       checkRole(USER_ROLE.SELLER),
+      uploadProductImages,
       validate(createProductSchema),
       this.controller.createProduct
     );
@@ -46,6 +50,7 @@ export class ProductsRouter {
       "/update/:id",
       verifyToken,
       checkRole(USER_ROLE.SELLER),
+      uploadNewProductImages,
       validate(updateProductSchema),
       this.controller.updateProduct
     );

@@ -1,6 +1,7 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Application } from "express";
+import path from "path";
 import { prisma } from "./config/prisma";
 
 // Controllers
@@ -50,7 +51,12 @@ class Server {
     app.use(express.json());
     app.use(cors());
 
-    // 🟢 1) JSON endpoint MUST COME FIRST!
+    // 🟢 STATIC SERVE — uploads root'tan çalışsın
+    const uploadsPath = path.join(process.cwd(), "uploads");
+    console.log("📂 Serving uploads from:", uploadsPath);
+    app.use("/uploads", express.static(uploadsPath));
+
+    // 🟢 Swagger JSON
     if (process.env.NODE_ENV !== "production") {
       app.get("/api-docs/swagger.json", (req, res) => {
         res.setHeader("Content-Type", "application/json");
@@ -58,7 +64,7 @@ class Server {
       });
     }
 
-    // 🟠 2) Swagger UI MUST COME AFTER JSON ROUTE
+    // 🟠 Swagger UI
     app.use("/api-docs", swaggerUi.serve, swaggerUiSetup);
 
     // 🌍 API prefix
@@ -78,6 +84,7 @@ class Server {
           console.log(
             `📄 Swagger JSON: http://localhost:${port}/api-docs/swagger.json`
           );
+          console.log(`🖼️ Static uploads: http://localhost:${port}/uploads`);
         });
       })
       .catch((err) => {

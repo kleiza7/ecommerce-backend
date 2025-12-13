@@ -96,7 +96,7 @@
  */
 
 ///////////////////////////////////////////////////////////////
-// CREATE PRODUCT (SELLER ONLY)
+// CREATE PRODUCT (SELLER ONLY + IMAGES)
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
@@ -109,7 +109,7 @@
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -118,6 +118,7 @@
  *               - price
  *               - brandId
  *               - categoryId
+ *               - images
  *             properties:
  *               name:
  *                 type: string
@@ -134,6 +135,12 @@
  *               categoryId:
  *                 type: number
  *                 example: 8
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: "Product images (min 1, max 10)"
  *     responses:
  *       201:
  *         description: Product created successfully
@@ -146,6 +153,13 @@
  *               price: 899
  *               brandId: 3
  *               categoryId: 8
+ *               images:
+ *                 - id: 101
+ *                   originalUrl: "/uploads/products/original/abc.jpg"
+ *                   thumbUrl: "/uploads/products/thumbs/abc.jpg"
+ *                   mediumUrl: "/uploads/products/medium/abc.jpg"
+ *                   largeUrl: "/uploads/products/large/abc.jpg"
+ *                   isPrimary: true
  *       400:
  *         description: Brand or Category not found
  *         content:
@@ -153,21 +167,13 @@
  *             example:
  *               error: "Invalid brandId"
  *       401:
- *         description: Unauthorized (token missing)
- *         content:
- *           application/json:
- *             example:
- *               error: "Unauthorized"
+ *         description: Unauthorized
  *       403:
- *         description: Forbidden (SELLER role required)
- *         content:
- *           application/json:
- *             example:
- *               error: "Seller role required"
+ *         description: Seller role required
  */
 
 ///////////////////////////////////////////////////////////////
-// UPDATE PRODUCT (SELLER ONLY)
+// UPDATE PRODUCT (SELLER ONLY + IMAGE ADD/DELETE SUPPORT)
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
@@ -185,9 +191,9 @@
  *           type: number
  *         example: 10
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -206,6 +212,16 @@
  *               categoryId:
  *                 type: number
  *                 example: 5
+ *               newAddedImages:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: "Images to add"
+ *               deletedImageIds:
+ *                 type: string
+ *                 example: "[3,5]"
+ *                 description: "JSON array string of image IDs to delete"
  *     responses:
  *       200:
  *         description: Product updated successfully
@@ -218,18 +234,17 @@
  *               price: 1200
  *               brandId: 2
  *               categoryId: 5
+ *               images:
+ *                 - id: 55
+ *                   originalUrl: "/uploads/products/original/aaa.jpg"
+ *                   thumbUrl: "/uploads/products/thumbs/aaa.jpg"
+ *                   mediumUrl: "/uploads/products/medium/aaa.jpg"
+ *                   largeUrl: "/uploads/products/large/aaa.jpg"
+ *                   isPrimary: true
  *       400:
- *         description: Brand/category validation error
- *         content:
- *           application/json:
- *             example:
- *               error: "Invalid categoryId"
+ *         description: Validation error
  *       404:
  *         description: Product not found
- *         content:
- *           application/json:
- *             example:
- *               error: "Product not found"
  */
 
 ///////////////////////////////////////////////////////////////
