@@ -13,25 +13,31 @@ export const seedCategories = async () => {
     },
   });
 
-  // 2) Phones (child)
-  await prisma.category.create({
-    data: {
-      name: "Phones",
-      slug: generateSlug("Phones"),
-      parentId: electronics.id,
-      description: "Mobile phones",
-      displayOrder: 2,
-    },
-  });
+  // 2) Child categories under Electronics
+  const childCategories = [
+    { name: "Phones", description: "Mobile phones" },
+    { name: "Laptops", description: "Laptops and notebooks" },
+    { name: "Tablets", description: "Tablet devices" },
+    { name: "Smart Watches", description: "Wearable smart watches" },
+    { name: "Headphones", description: "Wireless and wired headphones" },
+    { name: "Monitors", description: "Computer monitors and displays" },
+    { name: "Keyboards", description: "Mechanical and membrane keyboards" },
+    { name: "Mice", description: "Computer mouse devices" },
+    { name: "Cameras", description: "Photo and video cameras" },
+    { name: "Gaming Consoles", description: "PlayStation, Xbox, Nintendo" },
+  ];
 
-  // 3) Laptops (child)
-  await prisma.category.create({
-    data: {
-      name: "Laptops",
-      slug: generateSlug("Laptops"),
-      parentId: electronics.id,
-      description: "Laptops and notebooks",
-      displayOrder: 3,
-    },
-  });
+  let order = 2;
+
+  for (const c of childCategories) {
+    await prisma.category.create({
+      data: {
+        name: c.name,
+        slug: generateSlug(c.name),
+        parentId: electronics.id,
+        description: c.description,
+        displayOrder: order++,
+      },
+    });
+  }
 };

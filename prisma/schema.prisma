@@ -45,20 +45,46 @@ model Category {
 //////////////////////////////////////////////////////
 
 model Product {
-  id          Int        @id @default(autoincrement())
+  id          Int             @id @default(autoincrement())
   name        String
   description String
-  price       Decimal     @default(0.0)
+  price       Decimal          @default(0.0)
 
-  brandId     Int         @map("brand_id")
-  categoryId  Int         @map("category_id")
+  brandId     Int              @map("brand_id")
+  categoryId  Int              @map("category_id")
 
-  brand       Brand       @relation(fields: [brandId], references: [id])
-  category    Category    @relation(fields: [categoryId], references: [id])
+  brand       Brand            @relation(fields: [brandId], references: [id])
+  category    Category         @relation(fields: [categoryId], references: [id])
 
   cartItems   CartItem[]
 
+  // 🔥 Yeni ekleme → Image relation
+  images      ProductImage[]
+
   @@map("Products")
+}
+
+//////////////////////////////////////////////////////
+// PRODUCT IMAGE MODEL  (🔥 MİMARİ 2 + isPrimary FINAL)
+//////////////////////////////////////////////////////
+
+model ProductImage {
+  id          Int      @id @default(autoincrement())
+
+  productId   Int       @map("product_id")
+  product     Product   @relation(fields: [productId], references: [id])
+
+  originalUrl String
+  thumbUrl    String
+  mediumUrl   String
+  largeUrl    String
+
+  isPrimary   Boolean   @default(false)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("ProductImages")
 }
 
 //////////////////////////////////////////////////////

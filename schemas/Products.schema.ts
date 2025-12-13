@@ -16,6 +16,8 @@ export const createProductSchema = z.object({
     price: z.coerce.number().min(0, "Price must be 0 or greater"),
     brandId: z.coerce.number().int().positive("Invalid brand ID"),
     categoryId: z.coerce.number().int().positive("Invalid category ID"),
+
+    // ⚠️ Images are NOT validated here — handled by Multer
   }),
 });
 
@@ -29,6 +31,8 @@ export const updateProductSchema = z.object({
     price: z.coerce.number().min(0, "Price must be 0 or greater").optional(),
     brandId: z.coerce.number().int().positive().optional(),
     categoryId: z.coerce.number().int().positive().optional(),
+
+    // ⚠️ Images optional & handled by Multer
   }),
 });
 

@@ -1,43 +1,140 @@
+import fs from "fs/promises";
+import path from "path";
+import sharp from "sharp";
 import { prisma } from "../../config/prisma";
-import { generateSlug } from "../../utils/Slug.util";
 
+//
+// PATHS
+//
+const SEED_IMAGES = path.join(__dirname, "..", "assets");
+const UPLOAD_ROOT = path.join(__dirname, "..", "..", "uploads", "products");
+
+const ensureUploadFolders = async () => {
+  const folders = ["original", "thumb", "medium", "large"];
+  for (const f of folders) {
+    await fs.mkdir(path.join(UPLOAD_ROOT, f), { recursive: true });
+  }
+};
+
+//
+// Dummy image filenames (your 4 JPG files)
+//
+const DUMMY_IMAGES = [
+  "dummy-image-1.jpg",
+  "dummy-image-2.jpg",
+  "dummy-image-3.jpg",
+  "dummy-image-4.jpg",
+];
+
+//
+// Helper: generate unique filename
+//
+const generateFilename = (ext: string) =>
+  `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+
+//
+// Process 1 dummy image → create original + thumb + medium + large
+//
+const seedProcessImage = async (productId: number, filename: string) => {
+  const sourcePath = path.join(SEED_IMAGES, filename);
+  const ext = path.extname(filename);
+
+  const finalName = generateFilename(ext);
+
+  const originalPath = path.join(UPLOAD_ROOT, "original", finalName);
+  const thumbPath = path.join(UPLOAD_ROOT, "thumb", finalName);
+  const mediumPath = path.join(UPLOAD_ROOT, "medium", finalName);
+  const largePath = path.join(UPLOAD_ROOT, "large", finalName);
+
+  // Copy original
+  await fs.copyFile(sourcePath, originalPath);
+
+  // Generate resized versions
+  await sharp(originalPath).resize({ width: 200 }).toFile(thumbPath);
+  await sharp(originalPath).resize({ width: 600 }).toFile(mediumPath);
+  await sharp(originalPath).resize({ width: 1200 }).toFile(largePath);
+
+  // DB kayıt
+  return prisma.productImage.create({
+    data: {
+      productId,
+      originalUrl: `/uploads/products/original/${finalName}`,
+      thumbUrl: `/uploads/products/thumb/${finalName}`,
+      mediumUrl: `/uploads/products/medium/${finalName}`,
+      largeUrl: `/uploads/products/large/${finalName}`,
+      isPrimary: false,
+    },
+  });
+};
+
+//
+// Make sure at least one image is primary
+//
+const ensurePrimary = async (productId: number) => {
+  const images = await prisma.productImage.findMany({
+    where: { productId },
+  });
+
+  if (!images.some((img) => img.isPrimary)) {
+    await prisma.productImage.update({
+      where: { id: images[0].id },
+      data: { isPrimary: true },
+    });
+  }
+};
+
+//
+// MAIN SEED FUNCTION
+//
 export const seedProducts = async () => {
-  // --- Load foreign keys dynamically (Prisma version) ---
-  const apple = await prisma.brand.findUnique({
-    where: { slug: generateSlug("Apple") },
-  });
+  console.log("Seeding products...");
 
-  if (!apple) throw new Error("Brand 'Apple' not found in seed");
+  await ensureUploadFolders();
 
-  const phones = await prisma.category.findUnique({
-    where: { slug: generateSlug("Phones") },
-  });
+  const brands = await prisma.brand.findMany();
+  const categories = await prisma.category.findMany();
 
-  const laptops = await prisma.category.findUnique({
-    where: { slug: generateSlug("Laptops") },
-  });
+  if (!brands.length) throw new Error("No brands found");
+  if (!categories.length) throw new Error("No categories found");
 
-  if (!phones || !laptops) {
-    throw new Error("Category 'phones' or 'laptops' not found in seed");
+  const rand = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
+
+  // Product names per category (kısaltılmış hali)
+  const productNames: Record<string, string[]> = {
+    Phones: ["iPhone 15", "Galaxy S23", "Huawei P50"],
+    Laptops: ["MacBook Pro", "Dell XPS", "MSI Stealth"],
+    Tablets: ["iPad Pro", "Galaxy Tab", "Xiaomi Pad"],
+    // ... diğerleri aynı kalabilir
+  };
+
+  // 10 ürün per kategori
+  for (const category of categories) {
+    const names = productNames[category.name] || [];
+
+    for (let i = 0; i < 10; i++) {
+      const brand = rand(brands);
+      const name = names[i] || `${category.name} Product ${i + 1}`;
+
+      // Create product
+      const product = await prisma.product.create({
+        data: {
+          name,
+          description: `${brand.name} ${category.name} product`,
+          price: Math.floor(Math.random() * 50000) + 2000,
+          brandId: brand.id,
+          categoryId: category.id,
+        },
+      });
+
+      // Process 4 dummy images for each product
+      for (const dummy of DUMMY_IMAGES) {
+        await seedProcessImage(product.id, dummy);
+      }
+
+      // Set primary image
+      await ensurePrimary(product.id);
+    }
   }
 
-  // --- Create products ---
-  await prisma.product.createMany({
-    data: [
-      {
-        name: "iPhone 15",
-        description: "Apple smartphone",
-        price: 42000,
-        brandId: apple.id,
-        categoryId: phones.id,
-      },
-      {
-        name: "MacBook Air",
-        description: "Apple laptop",
-        price: 56000,
-        brandId: apple.id,
-        categoryId: laptops.id,
-      },
-    ],
-  });
+  console.log("Product seeding completed ✔");
 };

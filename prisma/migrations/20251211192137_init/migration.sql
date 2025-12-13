@@ -29,6 +29,20 @@ CREATE TABLE "Products" (
 );
 
 -- CreateTable
+CREATE TABLE "ProductImages" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "product_id" INTEGER NOT NULL,
+    "originalUrl" TEXT NOT NULL,
+    "thumbUrl" TEXT NOT NULL,
+    "mediumUrl" TEXT NOT NULL,
+    "largeUrl" TEXT NOT NULL,
+    "isPrimary" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "ProductImages_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Products" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "Users" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,
