@@ -37,10 +37,6 @@ export class ProductsController {
     }
   };
 
-  //////////////////////////////////////////////////////
-  // CREATE PRODUCT
-  //////////////////////////////////////////////////////
-
   createProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, description, stockCount, price, brandId, categoryId } =
@@ -65,10 +61,6 @@ export class ProductsController {
       next(err);
     }
   };
-
-  //////////////////////////////////////////////////////
-  // UPDATE PRODUCT
-  //////////////////////////////////////////////////////
 
   updateProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -116,10 +108,6 @@ export class ProductsController {
       next(err);
     }
   };
-
-  //////////////////////////////////////////////////////
-  // DELETE PRODUCT
-  //////////////////////////////////////////////////////
 
   deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {

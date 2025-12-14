@@ -36,7 +36,6 @@ export class CategoriesService {
   ) {
     const slug = generateSlug(name);
 
-    // parent geçerli mi?
     if (parentId) {
       const parent = await prisma.category.findUnique({
         where: { id: parentId },
@@ -75,7 +74,6 @@ export class CategoriesService {
       throw new AppError("Category not found", 404);
     }
 
-    // parent değişiyor mu?
     if (data.parentId !== undefined && data.parentId !== null) {
       if (data.parentId === id) {
         throw new AppError("A category cannot be its own parent", 400);
@@ -90,7 +88,6 @@ export class CategoriesService {
       }
     }
 
-    // isim değişmişse slug güncellenir
     const slug = data.name ? generateSlug(data.name) : undefined;
 
     return prisma.category.update({

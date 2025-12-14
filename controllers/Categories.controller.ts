@@ -35,12 +35,7 @@ export class CategoriesController {
 
   createCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const {
-        name,
-        parentId, // Prisma version
-        description,
-        displayOrder, // Prisma version
-      } = req.body;
+      const { name, parentId, description, displayOrder } = req.body;
 
       const category = await this.categoriesService.createCategory(
         name,

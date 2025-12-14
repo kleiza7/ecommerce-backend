@@ -9,17 +9,11 @@ const UPLOAD_ROOT = path.join(__dirname, "..", "uploads", "products");
 export class ProductsService {
   private foldersEnsured = false;
 
-  ////////////////////////////////////////////
-  // ABSOLUTE URL HELPER
-  ////////////////////////////////////////////
   private absolute(url: string) {
     const base = process.env.BASE_URL || "";
     return `${base}${url}`;
   }
 
-  ////////////////////////////////////////////
-  // Ensure upload folders exist
-  ////////////////////////////////////////////
   private async ensureFolders() {
     if (this.foldersEnsured) return;
 
@@ -39,9 +33,6 @@ export class ProductsService {
     return path.join(__dirname, "..", url);
   }
 
-  ////////////////////////////////////////////
-  // Primary image fixer
-  ////////////////////////////////////////////
   private async ensurePrimaryImage(productId: number) {
     const images = await prisma.productImage.findMany({
       where: { productId },
@@ -57,9 +48,6 @@ export class ProductsService {
     });
   }
 
-  ////////////////////////////////////////////
-  // PROCESS UPLOADED IMAGES
-  ////////////////////////////////////////////
   private async processImages(productId: number, files: Express.Multer.File[]) {
     if (!files || files.length === 0) return [];
 
@@ -99,9 +87,6 @@ export class ProductsService {
     return created;
   }
 
-  ////////////////////////////////////////////
-  // DELETE IMAGE FILES
-  ////////////////////////////////////////////
   private async deleteImageFiles(image: any) {
     const urls = [
       image.originalUrl,
@@ -118,9 +103,6 @@ export class ProductsService {
     }
   }
 
-  ////////////////////////////////////////////
-  // GET PRODUCTS LIST
-  ////////////////////////////////////////////
   async getProducts(params: {
     page: number;
     limit: number;
@@ -181,9 +163,6 @@ export class ProductsService {
     };
   }
 
-  ////////////////////////////////////////////
-  // GET PRODUCT DETAIL
-  ////////////////////////////////////////////
   async getProductById(id: number) {
     const product = await prisma.product.findUnique({
       where: { id },
@@ -204,9 +183,6 @@ export class ProductsService {
     };
   }
 
-  ////////////////////////////////////////////
-  // CREATE PRODUCT
-  ////////////////////////////////////////////
   async createProduct(
     data: {
       name: string;
@@ -233,9 +209,6 @@ export class ProductsService {
     return this.getProductById(product.id);
   }
 
-  ////////////////////////////////////////////
-  // UPDATE PRODUCT
-  ////////////////////////////////////////////
   async updateProduct(
     id: number,
     data: {
@@ -278,9 +251,6 @@ export class ProductsService {
     return this.getProductById(id);
   }
 
-  ////////////////////////////////////////////
-  // DELETE PRODUCT
-  ////////////////////////////////////////////
   async deleteProduct(id: number) {
     const product = await prisma.product.findUnique({
       where: { id },

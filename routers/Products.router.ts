@@ -21,21 +21,18 @@ export class ProductsRouter {
   }
 
   private setupRoutes() {
-    // LIST (pagination + filters)
     this.router.post(
       "/list",
       validate(productListSchema),
       this.controller.getProducts
     );
 
-    // GET BY ID
     this.router.get(
       "/get-by-id/:id",
       validate(productIdParamSchema),
       this.controller.getProductById
     );
 
-    // CREATE (SELLER ONLY)
     this.router.post(
       "/create",
       verifyToken,
@@ -45,7 +42,6 @@ export class ProductsRouter {
       this.controller.createProduct
     );
 
-    // UPDATE (SELLER ONLY)
     this.router.put(
       "/update/:id",
       verifyToken,
@@ -55,7 +51,6 @@ export class ProductsRouter {
       this.controller.updateProduct
     );
 
-    // DELETE (SELLER ONLY)
     this.router.delete(
       "/delete/:id",
       verifyToken,

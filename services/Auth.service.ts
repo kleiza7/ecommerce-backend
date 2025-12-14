@@ -11,7 +11,6 @@ export class AuthService {
     password: string,
     role: USER_ROLE
   ) {
-    // Email already exists?
     const existing = await prisma.user.findUnique({
       where: { email },
     });
@@ -20,16 +19,14 @@ export class AuthService {
       throw new AppError("Email already exists", 400);
     }
 
-    // Hash password
     const hashed = await bcrypt.hash(password, 10);
 
-    // Create user
     await prisma.user.create({
       data: {
         name,
         email,
         password: hashed,
-        role, // enum Prisma'da birebir tanımlı
+        role,
       },
     });
 
@@ -37,7 +34,6 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -46,19 +42,27 @@ export class AuthService {
       throw new AppError("Invalid credentials", 400);
     }
 
-    // Validate password
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       throw new AppError("Invalid credentials", 400);
     }
 
-    // JWT Create
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET as string,
       { expiresIn: "1d" }
     );
 
-    return { token };
+    const publicUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
+
+    return {
+      accessToken,
+      user: publicUser,
+    };
   }
 }

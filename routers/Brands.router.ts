@@ -17,9 +17,6 @@ export class BrandsRouter {
   }
 
   private setupRoutes() {
-    //
-    // PUBLIC ROUTES
-    //
     this.router.get("/get-all", this.controller.getAllBrands);
 
     this.router.get(
@@ -28,9 +25,6 @@ export class BrandsRouter {
       this.controller.getBrandById
     );
 
-    //
-    // SELLER ONLY ROUTES
-    //
     this.router.post(
       "/create",
       verifyToken,

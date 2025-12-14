@@ -1,9 +1,5 @@
 import { z } from "zod";
 
-//////////////////////////////////////////////////////
-// PRODUCT LIST
-//////////////////////////////////////////////////////
-
 export const productListSchema = z.object({
   body: z.object({
     page: z.coerce.number().int().min(1).default(1),
@@ -12,10 +8,6 @@ export const productListSchema = z.object({
     categoryId: z.coerce.number().int().positive().optional(),
   }),
 });
-
-//////////////////////////////////////////////////////
-// CREATE PRODUCT
-//////////////////////////////////////////////////////
 
 export const createProductSchema = z.object({
   body: z.object({
@@ -32,10 +24,6 @@ export const createProductSchema = z.object({
     // ⚠️ Images are NOT validated here — handled by Multer
   }),
 });
-
-//////////////////////////////////////////////////////
-// UPDATE PRODUCT
-//////////////////////////////////////////////////////
 
 export const updateProductSchema = z.object({
   params: z.object({
@@ -56,10 +44,6 @@ export const updateProductSchema = z.object({
     // ⚠️ Images optional & handled by Multer
   }),
 });
-
-//////////////////////////////////////////////////////
-// PRODUCT ID PARAM
-//////////////////////////////////////////////////////
 
 export const productIdParamSchema = z.object({
   params: z.object({
