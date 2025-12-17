@@ -22,5 +22,14 @@ export const prisma = new PrismaClient({
           },
         },
       },
+
+      cartItem: {
+        priceSnapshot: {
+          needs: { priceSnapshot: true },
+          compute(cartItem) {
+            return Number(cartItem.priceSnapshot);
+          },
+        },
+      },
     },
   });

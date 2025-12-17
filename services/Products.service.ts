@@ -3,16 +3,12 @@ import path from "path";
 import sharp from "sharp";
 import { prisma } from "../config/prisma";
 import { AppError } from "../errors/AppError";
+import { getUrlWithBaseUrl } from "../utils/Common.util";
 
 const UPLOAD_ROOT = path.join(__dirname, "..", "uploads", "products");
 
 export class ProductsService {
   private foldersEnsured = false;
-
-  private absolute(url: string) {
-    const base = process.env.BASE_URL || "";
-    return `${base}${url}`;
-  }
 
   private async ensureFolders() {
     if (this.foldersEnsured) return;
@@ -148,7 +144,7 @@ export class ProductsService {
       ...product,
       images: product.images.map((img) => ({
         ...img,
-        thumbUrl: this.absolute(img.thumbUrl),
+        thumbUrl: getUrlWithBaseUrl(img.thumbUrl),
       })),
     }));
 
@@ -175,10 +171,10 @@ export class ProductsService {
       ...product,
       images: product.images.map((img) => ({
         ...img,
-        originalUrl: this.absolute(img.originalUrl),
-        thumbUrl: this.absolute(img.thumbUrl),
-        mediumUrl: this.absolute(img.mediumUrl),
-        largeUrl: this.absolute(img.largeUrl),
+        originalUrl: getUrlWithBaseUrl(img.originalUrl),
+        thumbUrl: getUrlWithBaseUrl(img.thumbUrl),
+        mediumUrl: getUrlWithBaseUrl(img.mediumUrl),
+        largeUrl: getUrlWithBaseUrl(img.largeUrl),
       })),
     };
   }
