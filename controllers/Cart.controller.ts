@@ -5,6 +5,9 @@ import { CartService } from "../services/Cart.service";
 export class CartController {
   constructor(private cartService: CartService) {}
 
+  /**
+   * GET CART
+   */
   getCart = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -23,6 +26,9 @@ export class CartController {
     }
   };
 
+  /**
+   * ADD ITEM
+   */
   addItem = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -44,6 +50,9 @@ export class CartController {
     }
   };
 
+  /**
+   * UPDATE ITEM QUANTITY
+   */
   updateQuantity = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -66,6 +75,33 @@ export class CartController {
     }
   };
 
+  /**
+   * MERGE GUEST CART (LOGIN SONRASI)
+   */
+  mergeGuestCart = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const userId = req.user!.id;
+      const { items } = req.body as {
+        items: { productId: number; quantity: number }[];
+      };
+
+      const mergedCart = await this.cartService.mergeGuestCart(userId, items);
+
+      return res.status(200).json({
+        items: mergedCart,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * REMOVE ITEM
+   */
   removeItem = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -83,6 +119,9 @@ export class CartController {
     }
   };
 
+  /**
+   * CLEAR CART
+   */
   clearCart = async (
     req: AuthenticatedRequest,
     res: Response,
