@@ -102,14 +102,20 @@ export class ProductsService {
   async getProducts(params: {
     page: number;
     limit: number;
-    brandId?: number;
-    categoryId?: number;
+    brandIds: number[];
+    categoryIds: number[];
   }) {
-    const { page, limit, brandId, categoryId } = params;
+    const { page, limit, brandIds, categoryIds } = params;
 
     const where: any = {};
-    if (brandId) where.brandId = brandId;
-    if (categoryId) where.categoryId = categoryId;
+
+    if (brandIds.length > 0) {
+      where.brandId = { in: brandIds };
+    }
+
+    if (categoryIds.length > 0) {
+      where.categoryId = { in: categoryIds };
+    }
 
     const skip = (page - 1) * limit;
 

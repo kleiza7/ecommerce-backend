@@ -9,16 +9,19 @@ export class ProductsController {
       const page = Number(req.body.page ?? 1);
       const limit = Number(req.body.limit ?? 20);
 
-      const brandId = req.body.brandId ? Number(req.body.brandId) : undefined;
-      const categoryId = req.body.categoryId
-        ? Number(req.body.categoryId)
-        : undefined;
+      const brandIds = Array.isArray(req.body.brandIds)
+        ? req.body.brandIds.map(Number)
+        : [];
+
+      const categoryIds = Array.isArray(req.body.categoryIds)
+        ? req.body.categoryIds.map(Number)
+        : [];
 
       const result = await this.productsService.getProducts({
         page,
         limit,
-        brandId,
-        categoryId,
+        brandIds,
+        categoryIds,
       });
 
       return res.status(200).json(result);
