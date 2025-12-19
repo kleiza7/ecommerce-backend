@@ -130,12 +130,17 @@ export const seedCategories = async () => {
 
   const createCategoryRecursive = async (
     category: CategorySeed,
-    parentId: number | null
+    parentId: number | null,
+    parentSlug: string | null
   ) => {
+    const slug = parentSlug
+      ? generateSlug(`${parentSlug}-${category.name}`)
+      : generateSlug(category.name);
+
     const created = await prisma.category.create({
       data: {
         name: category.name,
-        slug: generateSlug(category.name),
+        slug,
         description: category.description ?? null,
         parentId,
         displayOrder: displayOrder++,
@@ -144,12 +149,12 @@ export const seedCategories = async () => {
 
     if (category.children?.length) {
       for (const child of category.children) {
-        await createCategoryRecursive(child, created.id);
+        await createCategoryRecursive(child, created.id, slug);
       }
     }
   };
 
   for (const category of categories) {
-    await createCategoryRecursive(category, null);
+    await createCategoryRecursive(category, null, null);
   }
 };
