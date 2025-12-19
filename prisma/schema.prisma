@@ -6,10 +6,6 @@ datasource db {
   provider = "sqlite"
 }
 
-//////////////////////////////////////////////////////
-// BRAND MODEL
-//////////////////////////////////////////////////////
-
 model Brand {
   id       Int       @id @default(autoincrement())
   name     String
@@ -20,50 +16,60 @@ model Brand {
   @@map("Brands")
 }
 
-//////////////////////////////////////////////////////
-// CATEGORY MODEL
-//////////////////////////////////////////////////////
-
 model Category {
-  id           Int         @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   name         String
-  slug         String       @unique
+  slug         String     @unique
   description  String?
-  displayOrder Int          @default(0)
+  displayOrder Int        @default(0)
 
-  parentId     Int?         @map("parent_id")
-  parent       Category?     @relation("CategoryToCategory", fields: [parentId], references: [id])
-  children     Category[]    @relation("CategoryToCategory")
+  parentId     Int?       @map("parent_id")
+  parent       Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children     Category[] @relation("CategoryToCategory")
 
   products     Product[]
 
+  @@index([parentId])
   @@map("Categories")
 }
 
-//////////////////////////////////////////////////////
-// PRODUCT MODEL
-//////////////////////////////////////////////////////
-
 model Product {
-  id          Int        @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String
-  price       Decimal     @default(0.0)
+  stockCount  Int       @default(0) @map("stock_count")
+  price       Decimal   @default(0.0)
 
-  brandId     Int         @map("brand_id")
-  categoryId  Int         @map("category_id")
+  brandId     Int       @map("brand_id")
+  categoryId  Int       @map("category_id")
 
-  brand       Brand       @relation(fields: [brandId], references: [id])
-  category    Category    @relation(fields: [categoryId], references: [id])
+  brand       Brand     @relation(fields: [brandId], references: [id])
+  category    Category  @relation(fields: [categoryId], references: [id])
 
   cartItems   CartItem[]
+  images      ProductImage[]
 
   @@map("Products")
 }
 
-//////////////////////////////////////////////////////
-// USER MODEL
-//////////////////////////////////////////////////////
+model ProductImage {
+  id          Int      @id @default(autoincrement())
+
+  productId   Int      @map("product_id")
+  product     Product  @relation(fields: [productId], references: [id])
+
+  originalUrl String
+  thumbUrl    String
+  mediumUrl   String
+  largeUrl    String
+
+  isPrimary   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("ProductImages")
+}
 
 enum UserRole {
   USER
@@ -71,44 +77,36 @@ enum UserRole {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
+  id       Int      @id @default(autoincrement())
   name     String
-  email    String     @unique
+  email    String   @unique
   password String
-  role     UserRole   @default(USER)
+  role     UserRole @default(USER)
 
   cart     Cart?
 
   @@map("Users")
 }
 
-//////////////////////////////////////////////////////
-// CART MODEL
-//////////////////////////////////////////////////////
-
 model Cart {
   id       Int       @id @default(autoincrement())
-  userId   Int        @unique @map("user_id")
+  userId   Int       @unique @map("user_id")
 
-  user     User       @relation(fields: [userId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
   items    CartItem[]
 
   @@map("Carts")
 }
 
-//////////////////////////////////////////////////////
-// CART ITEM MODEL
-//////////////////////////////////////////////////////
-
 model CartItem {
   id            Int      @id @default(autoincrement())
-  cartId        Int       @map("cart_id")
-  productId     Int       @map("product_id")
-  quantity      Int       @default(1)
-  priceSnapshot Decimal    @default(0.0) @map("price_snapshot")
+  cartId        Int      @map("cart_id")
+  productId     Int      @map("product_id")
+  quantity      Int      @default(1)
+  priceSnapshot Decimal  @default(0.0) @map("price_snapshot")
 
-  cart          Cart      @relation(fields: [cartId], references: [id])
-  product       Product   @relation(fields: [productId], references: [id])
+  cart          Cart     @relation(fields: [cartId], references: [id])
+  product       Product  @relation(fields: [productId], references: [id])
 
   @@map("CartItems")
 }

@@ -1,9 +1,18 @@
-node_modules
+# Node modules
+node_modules/
 
-dist
+# Build output
+dist/
 
+# Lock file
 package-lock.json
 
+# Environment files
 .env
 
+# SQLite database
 ecommerce.sqlite
+
+# Uploads: ignore everything, but keep folder structure with .gitkeep
+uploads/**
+!uploads/**/*.gitkeep

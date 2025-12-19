@@ -23,12 +23,10 @@ export const verifyToken = (
       role: USER_ROLE;
     };
 
-    // Token içindeki role enum değilse güvenlik gereği reddet
     if (!Object.values(USER_ROLE).includes(decoded.role)) {
       throw new AppError("Unauthorized: Invalid role in token", 401);
     }
 
-    // Req içine user bilgisini ekliyoruz
     req.user = {
       id: decoded.id,
       role: decoded.role,

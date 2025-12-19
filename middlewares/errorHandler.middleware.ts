@@ -11,9 +11,6 @@ export const errorHandler = (
 ) => {
   console.error("🔥 ERROR:", err);
 
-  // -------------------------
-  // ZOD VALIDATION ERRORS
-  // -------------------------
   if (err instanceof ZodError) {
     return res.status(400).json({
       message: "Validation failed",
@@ -21,9 +18,6 @@ export const errorHandler = (
     });
   }
 
-  // -------------------------
-  // CUSTOM APP ERROR
-  // -------------------------
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       message: err.message,
@@ -31,9 +25,6 @@ export const errorHandler = (
     });
   }
 
-  // -------------------------
-  // JWT ERRORS
-  // -------------------------
   if (
     typeof err === "object" &&
     err !== null &&
@@ -56,9 +47,6 @@ export const errorHandler = (
     });
   }
 
-  // -------------------------
-  // PRISMA ERRORS
-  // -------------------------
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     let message = "Database error";
 
@@ -100,9 +88,6 @@ export const errorHandler = (
     });
   }
 
-  // -------------------------
-  // FALLBACK
-  // -------------------------
   return res.status(500).json({
     message: "Something went wrong",
   });

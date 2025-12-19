@@ -39,14 +39,11 @@ const swaggerOptions: swaggerJsdoc.Options = {
     },
   },
 
-  // Swagger dokümanlarının bulunduğu klasör (DOĞRU PATH)
   apis: [__dirname + "/../docs/swagger/*.ts"],
 };
 
-// Statik spec (jsdoc tarafından oluşturulan)
 export const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-// Dinamik server injection için custom middleware
 export const swaggerUiSetup = (
   req: Request,
   res: Response,
@@ -57,7 +54,6 @@ export const swaggerUiSetup = (
   const protocol = req.protocol;
   const host = req.get("host");
 
-  // Dinamik server URL
   spec.servers = [
     {
       url: `${protocol}://${host}/api`,

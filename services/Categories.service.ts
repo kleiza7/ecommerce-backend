@@ -3,9 +3,13 @@ import { AppError } from "../errors/AppError";
 import { generateSlug } from "../utils/Slug.util";
 
 export class CategoriesService {
+  /**
+   * Flat + ordered category list
+   * Frontend builds the tree
+   */
   async getAllCategories() {
     return prisma.category.findMany({
-      orderBy: { displayOrder: "asc" },
+      orderBy: [{ parentId: "asc" }, { displayOrder: "asc" }],
     });
   }
 
@@ -21,23 +25,16 @@ export class CategoriesService {
     return category;
   }
 
-  async getChildren(id: number) {
-    return prisma.category.findMany({
-      where: { parentId: id },
-      orderBy: { displayOrder: "asc" },
-    });
-  }
-
-  async createCategory(
-    name: string,
-    parentId: number | null,
-    description: string | null,
-    displayOrder: number
-  ) {
+  async createCategory(data: {
+    name: string;
+    parentId: number | null;
+    description: string | null;
+    displayOrder: number;
+  }) {
+    const { name, parentId, description, displayOrder } = data;
     const slug = generateSlug(name);
 
-    // parent geçerli mi?
-    if (parentId) {
+    if (parentId !== null) {
       const parent = await prisma.category.findUnique({
         where: { id: parentId },
       });
@@ -75,7 +72,6 @@ export class CategoriesService {
       throw new AppError("Category not found", 404);
     }
 
-    // parent değişiyor mu?
     if (data.parentId !== undefined && data.parentId !== null) {
       if (data.parentId === id) {
         throw new AppError("A category cannot be its own parent", 400);
@@ -90,7 +86,6 @@ export class CategoriesService {
       }
     }
 
-    // isim değişmişse slug güncellenir
     const slug = data.name ? generateSlug(data.name) : undefined;
 
     return prisma.category.update({
@@ -111,12 +106,15 @@ export class CategoriesService {
       throw new AppError("Category not found", 404);
     }
 
-    const child = await prisma.category.findFirst({
+    const hasChildren = await prisma.category.findFirst({
       where: { parentId: id },
     });
 
-    if (child) {
-      throw new AppError("Category has children and cannot be deleted", 400);
+    if (hasChildren) {
+      throw new AppError(
+        "Category has child categories and cannot be deleted",
+        400
+      );
     }
 
     await prisma.category.delete({

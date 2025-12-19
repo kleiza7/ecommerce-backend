@@ -10,4 +10,26 @@ const adapter = new PrismaBetterSqlite3({
 
 export const prisma = new PrismaClient({
   adapter,
-});
+})
+  // TODO: search this after
+  .$extends({
+    result: {
+      product: {
+        price: {
+          needs: { price: true },
+          compute(product) {
+            return Number(product.price);
+          },
+        },
+      },
+
+      cartItem: {
+        priceSnapshot: {
+          needs: { priceSnapshot: true },
+          compute(cartItem) {
+            return Number(cartItem.priceSnapshot);
+          },
+        },
+      },
+    },
+  });

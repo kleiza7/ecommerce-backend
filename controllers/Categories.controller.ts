@@ -23,31 +23,16 @@ export class CategoriesController {
     }
   };
 
-  getChildren = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const id = Number(req.params.id);
-      const children = await this.categoriesService.getChildren(id);
-      return res.status(200).json(children);
-    } catch (err) {
-      next(err);
-    }
-  };
-
   createCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const {
-        name,
-        parentId, // Prisma version
-        description,
-        displayOrder, // Prisma version
-      } = req.body;
+      const { name, parentId, description, displayOrder } = req.body;
 
-      const category = await this.categoriesService.createCategory(
+      const category = await this.categoriesService.createCategory({
         name,
-        parentId ?? null,
-        description ?? null,
-        displayOrder
-      );
+        parentId: parentId ?? null,
+        description: description ?? null,
+        displayOrder,
+      });
 
       return res.status(201).json(category);
     } catch (err) {
@@ -58,7 +43,6 @@ export class CategoriesController {
   updateCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = Number(req.params.id);
-
       const { name, parentId, description, displayOrder } = req.body;
 
       const updated = await this.categoriesService.updateCategory(id, {

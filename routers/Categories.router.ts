@@ -19,9 +19,6 @@ export class CategoriesRouter {
   }
 
   private setupRoutes() {
-    //
-    // PUBLIC ROUTES
-    //
     this.router.get("/get-all", this.controller.getAllCategories);
 
     this.router.get(
@@ -30,15 +27,6 @@ export class CategoriesRouter {
       this.controller.getCategoryById
     );
 
-    this.router.get(
-      "/get-children/:id",
-      validate(categoryIdParamSchema),
-      this.controller.getChildren
-    );
-
-    //
-    // SELLER ONLY ROUTES
-    //
     this.router.post(
       "/create",
       verifyToken,

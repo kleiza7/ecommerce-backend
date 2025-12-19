@@ -7,23 +7,26 @@ export class ProductsController {
   getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const page = Number(req.body.page ?? 1);
-      const limit = Number(req.body.limit ?? 10);
+      const limit = Number(req.body.limit ?? 20);
 
-      const brandId = req.body.brandId ? Number(req.body.brandId) : undefined;
-      const categoryId = req.body.categoryId
-        ? Number(req.body.categoryId)
-        : undefined;
+      const brandIds = Array.isArray(req.body.brandIds)
+        ? req.body.brandIds.map(Number)
+        : [];
+
+      const categoryIds = Array.isArray(req.body.categoryIds)
+        ? req.body.categoryIds.map(Number)
+        : [];
 
       const result = await this.productsService.getProducts({
         page,
         limit,
-        brandId,
-        categoryId,
+        brandIds,
+        categoryIds,
       });
 
       return res.status(200).json(result);
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   };
 
@@ -32,26 +35,33 @@ export class ProductsController {
       const id = Number(req.params.id);
       const product = await this.productsService.getProductById(id);
       return res.status(200).json(product);
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   };
 
   createProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, description, price, brandId, categoryId } = req.body;
+      const { name, description, stockCount, price, brandId, categoryId } =
+        req.body;
 
-      const product = await this.productsService.createProduct({
-        name,
-        description,
-        price: Number(price),
-        brandId: Number(brandId),
-        categoryId: Number(categoryId),
-      });
+      const files = req.files as Express.Multer.File[];
+
+      const product = await this.productsService.createProduct(
+        {
+          name,
+          description,
+          stockCount: Number(stockCount),
+          price: Number(price),
+          brandId: Number(brandId),
+          categoryId: Number(categoryId),
+        },
+        files
+      );
 
       return res.status(201).json(product);
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   };
 
@@ -59,19 +69,46 @@ export class ProductsController {
     try {
       const id = Number(req.params.id);
 
-      const { name, description, price, brandId, categoryId } = req.body;
-
-      const updated = await this.productsService.updateProduct(id, {
+      const {
         name,
         description,
+        stockCount,
+        price,
+        brandId,
+        categoryId,
+        deletedImageIds,
+      } = req.body;
+
+      const files = req.files as Express.Multer.File[];
+
+      let parsedDeletedIds: number[] = [];
+      if (deletedImageIds) {
+        try {
+          parsedDeletedIds = JSON.parse(deletedImageIds);
+        } catch {
+          parsedDeletedIds = [];
+        }
+      }
+
+      const payload = {
+        name,
+        description,
+        stockCount: stockCount !== undefined ? Number(stockCount) : undefined,
         price: price !== undefined ? Number(price) : undefined,
         brandId: brandId !== undefined ? Number(brandId) : undefined,
         categoryId: categoryId !== undefined ? Number(categoryId) : undefined,
-      });
+        deletedImageIds: parsedDeletedIds,
+      };
+
+      const updated = await this.productsService.updateProduct(
+        id,
+        payload,
+        files
+      );
 
       return res.status(200).json(updated);
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   };
 
@@ -79,10 +116,9 @@ export class ProductsController {
     try {
       const id = Number(req.params.id);
       await this.productsService.deleteProduct(id);
-
       return res.status(200).json({ message: "Product deleted successfully" });
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   };
 }

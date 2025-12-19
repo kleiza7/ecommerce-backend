@@ -21,11 +21,26 @@ CREATE TABLE "Products" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "stock_count" INTEGER NOT NULL DEFAULT 0,
     "price" DECIMAL NOT NULL DEFAULT 0.0,
     "brand_id" INTEGER NOT NULL,
     "category_id" INTEGER NOT NULL,
     CONSTRAINT "Products_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "Brands" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "Products_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "Categories" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "ProductImages" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "product_id" INTEGER NOT NULL,
+    "originalUrl" TEXT NOT NULL,
+    "thumbUrl" TEXT NOT NULL,
+    "mediumUrl" TEXT NOT NULL,
+    "largeUrl" TEXT NOT NULL,
+    "isPrimary" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "ProductImages_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Products" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -60,6 +75,9 @@ CREATE UNIQUE INDEX "Brands_slug_key" ON "Brands"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Categories_slug_key" ON "Categories"("slug");
+
+-- CreateIndex
+CREATE INDEX "Categories_parent_id_idx" ON "Categories"("parent_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
