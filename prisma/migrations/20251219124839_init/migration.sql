@@ -77,6 +77,9 @@ CREATE UNIQUE INDEX "Brands_slug_key" ON "Brands"("slug");
 CREATE UNIQUE INDEX "Categories_slug_key" ON "Categories"("slug");
 
 -- CreateIndex
+CREATE INDEX "Categories_parent_id_idx" ON "Categories"("parent_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 
 -- CreateIndex
