@@ -27,12 +27,6 @@ export class CategoriesRouter {
       this.controller.getCategoryById
     );
 
-    this.router.get(
-      "/get-children/:id",
-      validate(categoryIdParamSchema),
-      this.controller.getChildren
-    );
-
     this.router.post(
       "/create",
       verifyToken,
