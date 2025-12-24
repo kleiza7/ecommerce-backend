@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "check:ts": "tsc --noEmit",
     "seed": "ts-node ./seed/index.ts",
-    "reset:db": "rm ecommerce.sqlite && rm -rf prisma/migrations && find uploads -type f ! -name '.gitkeep' -delete && npx prisma generate && npx prisma migrate dev --name init && npm run seed",
+    "reset:db": "bash scripts/reset-db.sh",
     "studio": "npx prisma studio",
     "prisma:migrate": "npx prisma migrate dev",
     "prisma:generate": "npx prisma generate"
