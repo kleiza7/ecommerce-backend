@@ -29,6 +29,7 @@ import { ProductsService } from "./services/Products.service";
 
 // Swagger
 import { swaggerSpec, swaggerUi, swaggerUiSetup } from "./config/swagger";
+import { errorHandler } from "./middlewares/errorHandler.middleware";
 
 dotenv.config();
 
@@ -70,7 +71,7 @@ class Server {
     app.use("/api", this.mountRouters());
 
     // 🔥 Global error handler
-    // app.use(errorHandler);
+    app.use(errorHandler);
 
     prisma
       .$connect()
