@@ -35,7 +35,7 @@ export class ProductsService {
       orderBy: { id: "asc" },
     });
 
-    if (images.length === 0) return;
+    if (!images.length) return;
     if (images.some((i) => i.isPrimary)) return;
 
     await prisma.productImage.update({
@@ -45,10 +45,9 @@ export class ProductsService {
   }
 
   private async processImages(productId: number, files: Express.Multer.File[]) {
-    if (!files || files.length === 0) return [];
+    if (!files?.length) return [];
 
     await this.ensureFolders();
-
     const created: any[] = [];
 
     for (const file of files) {
@@ -61,6 +60,7 @@ export class ProductsService {
       const largePath = path.join(UPLOAD_ROOT, "large", filename);
 
       await fs.rename(file.path, originalPath);
+
       await sharp(originalPath).resize({ width: 200 }).toFile(thumbPath);
       await sharp(originalPath).resize({ width: 600 }).toFile(mediumPath);
       await sharp(originalPath).resize({ width: 1200 }).toFile(largePath);
@@ -92,9 +92,8 @@ export class ProductsService {
     ];
 
     for (const url of urls) {
-      const abs = this.pathFromUrl(url);
       try {
-        await fs.unlink(abs);
+        await fs.unlink(this.pathFromUrl(url));
       } catch {}
     }
   }
@@ -108,12 +107,10 @@ export class ProductsService {
     const { page, limit, brandIds, categoryIds } = params;
 
     const where: any = {};
-
-    if (brandIds.length > 0) {
+    if (brandIds.length) {
       where.brandId = { in: brandIds };
     }
-
-    if (categoryIds.length > 0) {
+    if (categoryIds.length) {
       where.categoryId = { in: categoryIds };
     }
 
@@ -136,7 +133,7 @@ export class ProductsService {
           images: {
             select: {
               id: true,
-              thumbUrl: true,
+              mediumUrl: true,
               isPrimary: true,
             },
             orderBy: { isPrimary: "desc" },
@@ -150,7 +147,7 @@ export class ProductsService {
       ...product,
       images: product.images.map((img) => ({
         ...img,
-        thumbUrl: getUrlWithBaseUrl(img.thumbUrl),
+        mediumUrl: getUrlWithBaseUrl(img.mediumUrl),
       })),
     }));
 
@@ -205,7 +202,6 @@ export class ProductsService {
       throw new AppError("Invalid categoryId", 400);
 
     const product = await prisma.product.create({ data });
-
     await this.processImages(product.id, files);
 
     return this.getProductById(product.id);
@@ -261,7 +257,9 @@ export class ProductsService {
 
     if (!product) throw new AppError("Product not found", 404);
 
-    for (const img of product.images) await this.deleteImageFiles(img);
+    for (const img of product.images) {
+      await this.deleteImageFiles(img);
+    }
 
     await prisma.productImage.deleteMany({ where: { productId: id } });
     await prisma.product.delete({ where: { id } });
