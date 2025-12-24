@@ -26,7 +26,6 @@ import { CategoriesService } from "./services/Categories.service";
 import { ProductsService } from "./services/Products.service";
 
 // Middlewares
-import { errorHandler } from "./middlewares/errorHandler.middleware";
 
 // Swagger
 import { swaggerSpec, swaggerUi, swaggerUiSetup } from "./config/swagger";
@@ -71,7 +70,7 @@ class Server {
     app.use("/api", this.mountRouters());
 
     // 🔥 Global error handler
-    app.use(errorHandler);
+    // app.use(errorHandler);
 
     prisma
       .$connect()
