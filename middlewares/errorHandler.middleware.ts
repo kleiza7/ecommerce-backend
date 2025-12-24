@@ -9,6 +9,11 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  // 🔑 Eğer response zaten gönderildiyse zinciri kırma
+  if (res.headersSent) {
+    return next(err);
+  }
+
   console.error("🔥 ERROR:", err);
 
   if (err instanceof ZodError) {
@@ -54,11 +59,9 @@ export const errorHandler = (
       case "P2002":
         message = "Unique constraint failed";
         break;
-
       case "P2003":
         message = "Foreign key constraint failed";
         break;
-
       case "P2025":
         message = "Record not found";
         break;
@@ -88,6 +91,7 @@ export const errorHandler = (
     });
   }
 
+  // 🔑 En sonda mutlaka generic error
   return res.status(500).json({
     message: "Something went wrong",
   });
