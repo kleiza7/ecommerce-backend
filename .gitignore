@@ -16,3 +16,6 @@ ecommerce.sqlite
 # Uploads: ignore everything, but keep folder structure with .gitkeep
 uploads/**
 !uploads/**/*.gitkeep
+
+
+.DS_Store
