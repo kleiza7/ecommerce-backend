@@ -1,86 +1,127 @@
-# 🔐 E‑Commerce Backend (Phase‑1)
+# 🔐 E-Commerce Backend (Phase-1)
 
 **Production API:**  
 https://ecommerce-backend-z39w.onrender.com/
 
-Modern, scalable, and production‑ready backend application built with **Node.js**, **Express**, **TypeScript**, and **Prisma ORM** for a full‑featured E‑Commerce platform.
+Modern, scalable, and production-ready backend application built with **Node.js**, **Express**, **TypeScript**, and **Prisma ORM** for a full-featured E-Commerce platform.
 
 This backend works together with the frontend application:  
 ➡️ https://github.com/kleiza7/ecommerce-frontend
 
 ---
 
-## ✨ What Was Built (Phase‑1)
+## ✨ What Was Built (Phase-1)
 
-This project reflects real‑world production backend architecture and deployment concerns.
+This project reflects **real-world production backend architecture** and deployment concerns rather than a simple CRUD demo.
 
 ### ✅ Core Highlights
 
 - 🔑 JWT Authentication
-- 👤 Role‑based authorization (USER / SELLER)
+- 👤 Role-based authorization (USER / SELLER)
 - 📦 Products, Categories, Brands domain modeling
 - 🛒 Shopping Cart with quantity & price snapshot logic
-- 🧠 Clean Router → Controller → Service architecture
+- 🧠 Clean **Router → Controller → Service** architecture
 - 🧱 Prisma ORM (SQLite dev, PostgreSQL ready)
 - 🛡 Global error handling
 - 💯 Strict TypeScript typing
-- 🌍 Environment‑aware file handling (Local / CDN)
+- 🌍 Environment-aware image handling (Local filesystem / Cloudinary CDN)
 
 ---
 
-## 🧠 Architecture
+## 🧠 Architecture Overview
 
 ```
 Router → Controller → Service → Prisma
 ```
 
-- Controllers handle HTTP only
+- Controllers handle HTTP concerns only
 - Services contain business logic
-- Utilities are environment‑agnostic
+- Utilities handle environment-specific behavior
 
 ---
 
-## 🖼 Image Handling
+## 🖼 Image Handling Strategy
 
 ### Local Development
 
-- Stored under `/uploads`
-- Automatic resizing (original / thumb / medium / large)
+- Images stored under `/uploads`
+- Automatic generation of:
+  - original
+  - thumb
+  - medium
+  - large
+- URLs served via Express static middleware
 
 ### Production
 
-- Cloudinary CDN
-- URLs stored in database
+- Images uploaded to **Cloudinary CDN**
+- CDN URLs stored directly in database
 - No filesystem dependency
 
-Same codebase — behavior controlled by `NODE_ENV`.
+Same codebase — behavior controlled only by `NODE_ENV`.
 
 ---
 
-## 🌱 Seeding
+## 🌱 Database Seeding
 
-- Deterministic seed
-- Shared dummy images
-- Minimal disk & CDN usage
-- Works in both local & production
+- Deterministic seed logic
+- Uses **4 shared dummy images**
+- Reused across all products
+- Results in:
+  - Minimal disk usage (local)
+  - Minimal CDN usage (production)
+- Seed works in **both local and production environments**
+
+---
+
+## 🛒 Cart Logic
+
+- Per-user cart
+- Quantity control
+- Price snapshot stored at add-to-cart time
+- Ready for:
+  - cart merge (guest → authenticated)
+  - stock validation
 
 ---
 
 ## ⚙️ Environment Setup
 
+A `.env.example` file is included.
+
 ```bash
 cp .env.example .env
 ```
 
+### Required Environment Variables
+
 ```ini
-DATABASE_URL="file:./dev.db"
-JWT_SECRET="your_secret_key"
+# Server
 PORT=5000
+
+# Auth
+JWT_SECRET=your_jwt_secret
+
+# Database
+DATABASE_URL="file:./dev.db"
+
+# Base URL (used for absolute image URLs)
+BASE_URL=http://localhost:5000
+
+# Environment
+NODE_ENV=development
+
+# Cloudinary (production only)
+CLOUDINARY_CLOUD_NAME=xxxx
+CLOUDINARY_API_KEY=xxxx
+CLOUDINARY_API_SECRET=xxxx
 ```
+
+> ℹ️ In production, images are uploaded to Cloudinary and their URLs are saved in the database automatically.
 
 ---
 
-## 🚀 Local Run
+## 🚀 Running Locally
 
 ```bash
 npm install
@@ -89,16 +130,40 @@ npm run reset:db
 npm run dev
 ```
 
+Server will run at:
+
+```
+http://localhost:5000
+```
+
 ---
 
-## 📌 Phase‑1 Completed
+## 🚀 Production Notes
 
-✔ Auth  
+- Clean CI-safe TypeScript build
+- Deterministic deploy behavior
+- CDN-based asset handling
+- Stateless backend design
+- Ready for horizontal scaling
+
+---
+
+## 📌 Phase-1 Scope (Completed)
+
+✔ Authentication & Roles  
 ✔ Products / Categories / Brands  
-✔ Cart  
+✔ Shopping Cart  
 ✔ Image handling (Local + CDN)  
-✔ Seeding  
-✔ Production deploy
+✔ Robust seeding strategy  
+✔ Production deployment
+
+**Phase-2** will include:
+
+- Orders
+- Payments
+- Stock synchronization
+- Cart merge
+- WebSocket updates
 
 ---
 
