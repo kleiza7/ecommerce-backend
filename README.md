@@ -1,72 +1,76 @@
-# 🔐 E-Commerce Backend
+# 🔐 E‑Commerce Backend (Phase‑1)
 
-Modern and scalable backend application built with **Node.js**, **Express**, **TypeScript**, and **Prisma ORM** for an E‑Commerce platform.
+**Production API:**  
+https://ecommerce-backend-z39w.onrender.com/
+
+Modern, scalable, and production‑ready backend application built with **Node.js**, **Express**, **TypeScript**, and **Prisma ORM** for a full‑featured E‑Commerce platform.
 
 This backend works together with the frontend application:  
 ➡️ https://github.com/kleiza7/ecommerce-frontend
 
 ---
 
-## ✨ Overview
+## ✨ What Was Built (Phase‑1)
 
-Core features included in this backend:
+This project reflects real‑world production backend architecture and deployment concerns.
 
-- 🔑 JWT authentication  
-- 👤 Role-based access (USER / SELLER)  
-- 📦 Product / Category / Brand management  
-- 🛒 Shopping Cart functionality  
-- 🧠 Clean Service → Controller → Router architecture  
-- 🧱 Prisma ORM (SQLite dev, PostgreSQL ready)  
-- 🛡 Global error handling  
-- 💯 Fully typed with TypeScript  
+### ✅ Core Highlights
 
----
-
-## 🧩 Controllers Summary
-
-### 🔐 Auth Controller
-- Register new users  
-- Login and return JWT  
-- Access protected profile  
-
-### 📦 Products Controller
-- Create, update, delete products (SELLER only)  
-- List products  
-- Retrieve product details  
-
-### 🏷 Categories Controller
-- Full CRUD operations  
-
-### 🏭 Brands Controller
-- Full CRUD operations  
-
-### 🛒 Cart Controller
-- Get user cart  
-- Add items  
-- Update item quantity  
-- Remove items  
+- 🔑 JWT Authentication
+- 👤 Role‑based authorization (USER / SELLER)
+- 📦 Products, Categories, Brands domain modeling
+- 🛒 Shopping Cart with quantity & price snapshot logic
+- 🧠 Clean Router → Controller → Service architecture
+- 🧱 Prisma ORM (SQLite dev, PostgreSQL ready)
+- 🛡 Global error handling
+- 💯 Strict TypeScript typing
+- 🌍 Environment‑aware file handling (Local / CDN)
 
 ---
 
-## 🗄 Database
+## 🧠 Architecture
 
-- Uses **SQLite** for development  
-- Fully compatible with **PostgreSQL**  
-- Switch by updating `DATABASE_URL` in `.env`  
+```
+Router → Controller → Service → Prisma
+```
+
+- Controllers handle HTTP only
+- Services contain business logic
+- Utilities are environment‑agnostic
+
+---
+
+## 🖼 Image Handling
+
+### Local Development
+
+- Stored under `/uploads`
+- Automatic resizing (original / thumb / medium / large)
+
+### Production
+
+- Cloudinary CDN
+- URLs stored in database
+- No filesystem dependency
+
+Same codebase — behavior controlled by `NODE_ENV`.
+
+---
+
+## 🌱 Seeding
+
+- Deterministic seed
+- Shared dummy images
+- Minimal disk & CDN usage
+- Works in both local & production
 
 ---
 
 ## ⚙️ Environment Setup
 
-A `.env.example` file is included.
-
-Create your environment file:
-
 ```bash
 cp .env.example .env
 ```
-
-Fill in the required variables:
 
 ```ini
 DATABASE_URL="file:./dev.db"
@@ -76,27 +80,25 @@ PORT=5000
 
 ---
 
-## 🚀 Running the Project
+## 🚀 Local Run
 
 ```bash
 npm install
 npx prisma generate
-npx prisma migrate dev
-npm run seed   # optional
+npm run reset:db
 npm run dev
-```
-
-Server will start at:
-
-```
-http://localhost:5000
 ```
 
 ---
 
-## 🤝 Contributing
+## 📌 Phase‑1 Completed
 
-Contributions and pull requests are welcome.
+✔ Auth  
+✔ Products / Categories / Brands  
+✔ Cart  
+✔ Image handling (Local + CDN)  
+✔ Seeding  
+✔ Production deploy
 
 ---
 
