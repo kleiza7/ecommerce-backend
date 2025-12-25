@@ -49,7 +49,17 @@ class Server {
     const port = process.env.PORT || 5000;
 
     app.use(express.json());
-    app.use(cors());
+    app.use(
+      cors({
+        origin: true, // 🔥 HER ORIGIN KABUL
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      })
+    );
+
+    // 🔴 PRE-FLIGHT (OPTIONS) HER PATH İÇİN
+    app.options("*", cors());
 
     // 🟢 STATIC SERVE — uploads root'tan çalışsın
     const uploadsPath = path.join(process.cwd(), "uploads");
