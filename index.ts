@@ -26,10 +26,10 @@ import { CategoriesService } from "./services/Categories.service";
 import { ProductsService } from "./services/Products.service";
 
 // Middlewares
+import { errorHandler } from "./middlewares/errorHandler.middleware";
 
 // Swagger
 import { swaggerSpec, swaggerUi, swaggerUiSetup } from "./config/swagger";
-import { errorHandler } from "./middlewares/errorHandler.middleware";
 
 dotenv.config();
 
