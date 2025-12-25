@@ -63,6 +63,8 @@ model ProductImage {
   mediumUrl   String
   largeUrl    String
 
+  publicId    String?   // 👈 CDN (Cloudinary) için EKLENDİ
+
   isPrimary   Boolean  @default(false)
 
   createdAt   DateTime @default(now())
