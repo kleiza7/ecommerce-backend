@@ -4,16 +4,10 @@
     "module": "CommonJS",
     "rootDir": ".",
     "outDir": "./dist",
-
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "sourceMap": true,
-
-    "moduleResolution": "node",
-    "types": ["node", "express"],
-    "lib": ["ES2020"],
-    "resolveJsonModule": true
+    "sourceMap": true
   },
   "include": ["index.ts", "src/**/*.ts", "seed/**/*.ts"]
 }

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only ./index.ts",
     "build": "tsc",
+    "build:prod": "tsc && node scripts/copy-seed-assets.js",
     "start": "node dist/index.js",
     "check:ts": "tsc --noEmit",
     "seed": "ts-node ./seed/index.ts",
