@@ -1,6 +1,6 @@
 import cors from "cors";
 import dotenv from "dotenv";
-import express, { Application } from "express";
+import express, { Application, Request, Response } from "express";
 import path from "path";
 import { prisma } from "./config/prisma";
 
@@ -48,57 +48,91 @@ class Server {
     const app: Application = express();
     const port = process.env.PORT || 5000;
 
+    /* =========================
+       CORE MIDDLEWARES
+    ========================== */
+
     app.use(express.json());
+
     app.use(
       cors({
-        origin: true, // 🔥 HER ORIGIN KABUL
+        origin: true, // 🔥 Tüm origin'lere izin (local + vercel + prod)
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
       })
     );
 
-    // 🔴 PRE-FLIGHT (OPTIONS) HER PATH İÇİN
-    app.options("*", cors());
+    // 🔥 Preflight — Express 5 uyumlu
+    app.use((req, res, next) => {
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+      }
+      next();
+    });
 
-    // 🟢 STATIC SERVE — uploads root'tan çalışsın
+    /* =========================
+       STATIC FILES
+    ========================== */
+
     const uploadsPath = path.join(process.cwd(), "uploads");
     console.log("📂 Serving uploads from:", uploadsPath);
     app.use("/uploads", express.static(uploadsPath));
 
-    // 🟢 Swagger JSON
+    /* =========================
+       SWAGGER
+    ========================== */
+
     if (process.env.NODE_ENV !== "production") {
-      app.get("/api-docs/swagger.json", (req, res) => {
+      app.get("/api-docs/swagger.json", (_req: Request, res: Response) => {
         res.setHeader("Content-Type", "application/json");
-        return res.send(swaggerSpec);
+        res.send(swaggerSpec);
       });
     }
 
-    // 🟠 Swagger UI
     app.use("/api-docs", swaggerUi.serve, swaggerUiSetup);
 
-    // 🌍 API prefix
+    /* =========================
+       API ROUTES
+    ========================== */
+
     app.use("/api", this.mountRouters());
 
-    // 🔥 Global error handler
+    /* =========================
+       404 HANDLER
+    ========================== */
+
+    app.all("/*", (_req: Request, res: Response) => {
+      res.status(404).json({
+        message: "Route not found",
+      });
+    });
+
+    /* =========================
+       GLOBAL ERROR HANDLER
+    ========================== */
+
     app.use(errorHandler);
+
+    /* =========================
+       START SERVER
+    ========================== */
 
     prisma
       .$connect()
       .then(() => {
-        console.log("🟢 Connected to SQLite via Prisma");
+        console.log("🟢 Prisma connected");
+
         app.listen(port, () => {
-          console.log(`🔥 Server running at http://localhost:${port}`);
-          console.log(`📡 API Base URL: http://localhost:${port}/api`);
-          console.log(`📘 Swagger Docs: http://localhost:${port}/api-docs`);
-          console.log(
-            `📄 Swagger JSON: http://localhost:${port}/api-docs/swagger.json`
-          );
-          console.log(`🖼️ Static uploads: http://localhost:${port}/uploads`);
+          console.log(`🔥 Server running on port ${port}`);
+          console.log(`📡 API: /api`);
+          console.log(`📘 Swagger: /api-docs`);
+          console.log(`🖼️ Uploads: /uploads`);
         });
       })
       .catch((err) => {
         console.error("❌ Prisma connection failed:", err);
+        process.exit(1);
       });
   }
 
@@ -115,21 +149,25 @@ class Server {
   }
 }
 
-// Instantiate services
+/* =========================
+   DEPENDENCY INJECTION
+========================= */
+
+// Services
 const productsService = new ProductsService();
 const brandsService = new BrandsService();
 const categoriesService = new CategoriesService();
 const cartService = new CartService();
 const authService = new AuthService();
 
-// Instantiate controllers
+// Controllers
 const productsController = new ProductsController(productsService);
 const brandsController = new BrandsController(brandsService);
 const categoriesController = new CategoriesController(categoriesService);
 const cartController = new CartController(cartService);
 const authController = new AuthController(authService);
 
-// Instantiate routers
+// Routers
 const productsRouter = new ProductsRouter(express.Router(), productsController);
 const brandsRouter = new BrandsRouter(express.Router(), brandsController);
 const categoriesRouter = new CategoriesRouter(
@@ -139,7 +177,7 @@ const categoriesRouter = new CategoriesRouter(
 const cartRouter = new CartRouter(express.Router(), cartController);
 const authRouter = new AuthRouter(express.Router(), authController);
 
-// Start server
+// Start
 new Server(
   productsRouter,
   brandsRouter,
