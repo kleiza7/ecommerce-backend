@@ -51,7 +51,7 @@ class Server {
     app.use(express.json());
     app.use(cors());
 
-    // 🟢 STATIC SERVE — uploads root'tan çalışsın
+    // 🟢 STATIC SERVE — uploads roottan çalışsın
     const uploadsPath = path.join(process.cwd(), "uploads");
     console.log("📂 Serving uploads from:", uploadsPath);
     app.use("/uploads", express.static(uploadsPath));
