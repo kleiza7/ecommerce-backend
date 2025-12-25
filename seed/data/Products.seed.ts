@@ -1,9 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
+import cloudinary from "../../config/cloudinary";
 import { prisma } from "../../config/prisma";
 
-// TODO: burada her ürün için 4 resim kullandın, yani aslında bir ürünün bir resmi için 1'er kayıt oluşmalı, ürün sayısı * resim sayısı * 4 şeklinde toplam dosyalarda olmalı ama sen boyuttan kaçmak için hepsinde aynı resmi kullandın bunu göz önünde bulundur
+const isProd = process.env.NODE_ENV === "production";
 
 const SEED_IMAGES = path.join(__dirname, "..", "assets");
 const UPLOAD_ROOT = path.join(__dirname, "..", "..", "uploads", "products");
@@ -15,12 +16,9 @@ const DUMMY_IMAGES = [
   "dummy-image-4.jpg",
 ];
 
-const IMAGE_URL_SETS = DUMMY_IMAGES.map((img) => ({
-  originalUrl: `/uploads/products/original/${img}`,
-  thumbUrl: `/uploads/products/thumb/${img}`,
-  mediumUrl: `/uploads/products/medium/${img}`,
-  largeUrl: `/uploads/products/large/${img}`,
-}));
+/* ===========================
+   LOCAL HELPERS (DEĞİŞMEDİ)
+=========================== */
 
 const ensureUploadFolders = async () => {
   for (const f of ["original", "thumb", "medium", "large"]) {
@@ -28,10 +26,6 @@ const ensureUploadFolders = async () => {
   }
 };
 
-/**
- * 🔥 Dummy image'ları SADECE 1 KERE üretir
- * Toplam disk image = 16
- */
 const ensureDummyImages = async () => {
   for (const img of DUMMY_IMAGES) {
     const source = path.join(SEED_IMAGES, img);
@@ -43,23 +37,68 @@ const ensureDummyImages = async () => {
 
     try {
       await fs.access(original);
-      continue; // varsa tekrar üretme
+      continue;
     } catch {}
 
     await fs.copyFile(source, original);
-    await sharp(original).resize({ width: 200 }).toFile(thumb);
-    await sharp(original).resize({ width: 600 }).toFile(medium);
-    await sharp(original).resize({ width: 1200 }).toFile(large);
+    await sharp(original).resize(200).toFile(thumb);
+    await sharp(original).resize(600).toFile(medium);
+    await sharp(original).resize(1200).toFile(large);
   }
+};
+
+/* ===========================
+   IMAGE URL FACTORY
+=========================== */
+
+const getLocalImageUrls = (img: string) => ({
+  originalUrl: `/uploads/products/original/${img}`,
+  thumbUrl: `/uploads/products/thumb/${img}`,
+  mediumUrl: `/uploads/products/medium/${img}`,
+  largeUrl: `/uploads/products/large/${img}`,
+  publicId: null,
+});
+
+/**
+ * 🔥 CDN CACHE
+ * Aynı dummy image CDN'e SADECE 1 KERE yüklenir
+ */
+const cloudinaryCache = new Map<string, any>();
+
+const uploadToCloudinary = async (img: string) => {
+  if (cloudinaryCache.has(img)) {
+    return cloudinaryCache.get(img);
+  }
+
+  const source = path.join(SEED_IMAGES, img);
+
+  const result = await cloudinary.uploader.upload(source, {
+    folder: "products",
+  });
+
+  const data = {
+    originalUrl: result.secure_url,
+    thumbUrl: cloudinary.url(result.public_id, { width: 200, crop: "scale" }),
+    mediumUrl: cloudinary.url(result.public_id, { width: 600, crop: "scale" }),
+    largeUrl: cloudinary.url(result.public_id, { width: 1200, crop: "scale" }),
+    publicId: result.public_id,
+  };
+
+  cloudinaryCache.set(img, data);
+  return data;
 };
 
 const rand = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
 export const seedProducts = async () => {
-  console.log("🌱 Seeding products (shared dummy images mode)...");
+  console.log(
+    `🌱 Seeding products (${isProd ? "PROD / CDN" : "LOCAL / DISK"})`
+  );
 
-  await ensureUploadFolders();
-  await ensureDummyImages();
+  if (!isProd) {
+    await ensureUploadFolders();
+    await ensureDummyImages();
+  }
 
   const brands = await prisma.brand.findMany();
   const categories = await prisma.category.findMany();
@@ -68,64 +107,36 @@ export const seedProducts = async () => {
     (c) => !categories.some((x) => x.parentId === c.id)
   );
 
-  const categoryBrandMap: Record<string, string[]> = {
-    "android-phones": ["Samsung", "Xiaomi", "Huawei", "Oppo", "OnePlus"],
-    iphones: ["Apple"],
-    "gaming-laptops": ["MSI", "Asus", "Dell", "HP"],
-    ultrabooks: ["Apple", "Dell", "HP", "Lenovo"],
-    "mens-shoes": ["Nike", "Adidas", "Puma"],
-    "womens-shoes": ["Nike", "Adidas", "Zara"],
-    football: ["Nike", "Adidas", "Puma"],
-    basketball: ["Nike", "Under Armour"],
-    makeup: ["L'Oréal", "Maybelline"],
-    skincare: ["Nivea", "Garnier"],
-  };
-
-  const createProductWithImages = async (
-    brandId: number,
-    categoryId: number,
-    name: string,
-    description: string
-  ) => {
-    const product = await prisma.product.create({
-      data: {
-        name,
-        description,
-        stockCount: Math.floor(Math.random() * 100) + 1,
-        price: Math.floor(Math.random() * 45000) + 3000,
-        brandId,
-        categoryId,
-      },
-    });
-
-    // 🔥 HER PRODUCT → 4 ProductImage row
-    await prisma.productImage.createMany({
-      data: IMAGE_URL_SETS.map((urls, index) => ({
-        productId: product.id,
-        ...urls,
-        isPrimary: index === 0,
-      })),
-    });
-  };
-
-  // Örnek: her leaf’e 10 product
   for (const category of leafCategories) {
-    const allowed =
-      categoryBrandMap[category.slug] ?? brands.map((b) => b.name);
-
-    const eligibleBrands = brands.filter((b) => allowed.includes(b.name));
-
     for (let i = 0; i < 10; i++) {
-      const brand = rand(eligibleBrands);
+      const brand = rand(brands);
 
-      await createProductWithImages(
-        brand.id,
-        category.id,
-        `${brand.name} ${category.name} ${i + 1}`,
-        `${brand.name} ${category.name} product`
-      );
+      const product = await prisma.product.create({
+        data: {
+          name: `${brand.name} ${category.name} ${i + 1}`,
+          description: `${brand.name} ${category.name} product`,
+          stockCount: Math.floor(Math.random() * 100) + 1,
+          price: Math.floor(Math.random() * 45000) + 3000,
+          brandId: brand.id,
+          categoryId: category.id,
+        },
+      });
+
+      for (let j = 0; j < DUMMY_IMAGES.length; j++) {
+        const imageData = isProd
+          ? await uploadToCloudinary(DUMMY_IMAGES[j])
+          : getLocalImageUrls(DUMMY_IMAGES[j]);
+
+        await prisma.productImage.create({
+          data: {
+            productId: product.id,
+            ...imageData,
+            isPrimary: j === 0,
+          },
+        });
+      }
     }
   }
 
-  console.log("✅ Product seeding completed (16 disk images, N×4 DB rows)");
+  console.log("✅ Product seeding completed");
 };
