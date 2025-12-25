@@ -3,23 +3,33 @@ import fs from "fs";
 import multer from "multer";
 import path from "path";
 
+const isProd = process.env.NODE_ENV === "production";
+
 const makeUploader = (folder: string, fieldName: string, maxCount: number) => {
-  const uploadDir = path.join(__dirname, "..", "uploads", folder, "original");
+  let storage: multer.StorageEngine;
 
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  if (isProd) {
+    // 🔥 PROD → MEMORY (Cloudinary için)
+    storage = multer.memoryStorage();
+  } else {
+    // 🟢 LOCAL → DISK
+    const uploadDir = path.join(__dirname, "..", "uploads", folder, "original");
+
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    storage = multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, uploadDir);
+      },
+      filename: (req, file, cb) => {
+        const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        const ext = path.extname(file.originalname);
+        cb(null, unique + ext);
+      },
+    });
   }
-
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-      const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      const ext = path.extname(file.originalname);
-      cb(null, unique + ext);
-    },
-  });
 
   const fileFilter = (req: Request, file: Express.Multer.File, cb: any) => {
     const allowed = ["image/jpeg", "image/png", "image/webp"];

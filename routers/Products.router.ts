@@ -5,7 +5,7 @@ import { checkRole } from "../middlewares/checkRole.middleware";
 import {
   uploadNewProductImages,
   uploadProductImages,
-} from "../middlewares/imageUpload.middleware";
+} from "../middlewares/productImageUpload.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { verifyToken } from "../middlewares/verifyToken.middleware";
 import {
