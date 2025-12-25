@@ -56,14 +56,14 @@ class Server {
 
     app.use(
       cors({
-        origin: true, // 🔥 Tüm origin'lere izin (local + vercel + prod)
+        origin: true, // local + vercel + prod
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
       })
     );
 
-    // 🔥 Preflight — Express 5 uyumlu
+    // ✅ EXPRESS 5 SAFE PREFLIGHT
     app.use((req, res, next) => {
       if (req.method === "OPTIONS") {
         return res.sendStatus(204);
@@ -99,10 +99,10 @@ class Server {
     app.use("/api", this.mountRouters());
 
     /* =========================
-       404 HANDLER
+       404 HANDLER (EXPRESS 5 SAFE)
     ========================== */
 
-    app.all("/*", (_req: Request, res: Response) => {
+    app.use(/.*/, (_req: Request, res: Response) => {
       res.status(404).json({
         message: "Route not found",
       });
@@ -125,7 +125,7 @@ class Server {
 
         app.listen(port, () => {
           console.log(`🔥 Server running on port ${port}`);
-          console.log(`📡 API: /api`);
+          console.log(`📡 API Base: /api`);
           console.log(`📘 Swagger: /api-docs`);
           console.log(`🖼️ Uploads: /uploads`);
         });
