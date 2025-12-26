@@ -8,10 +8,8 @@ export const addToCartSchema = z.object({
 });
 
 export const updateCartQuantitySchema = z.object({
-  params: z.object({
-    itemId: z.string().regex(/^\d+$/, "Invalid cart item ID"),
-  }),
   body: z.object({
+    itemId: z.coerce.number().int().positive("Invalid cart item ID"),
     quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
   }),
 });

@@ -55,15 +55,15 @@ export class CategoriesService {
     });
   }
 
-  async updateCategory(
-    id: number,
-    data: {
-      name?: string;
-      parentId?: number | null;
-      description?: string | null;
-      displayOrder?: number;
-    }
-  ) {
+  async updateCategory(payload: {
+    id: number;
+    name: string;
+    parentId: number | null;
+    description: string | null;
+    displayOrder: number;
+  }) {
+    const { id, name, parentId, description, displayOrder } = payload;
+
     const category = await prisma.category.findUnique({
       where: { id },
     });
@@ -72,13 +72,14 @@ export class CategoriesService {
       throw new AppError("Category not found", 404);
     }
 
-    if (data.parentId !== undefined && data.parentId !== null) {
-      if (data.parentId === id) {
+    // 🔒 Parent validation (full update olduğu için her zaman çalışır)
+    if (parentId !== null) {
+      if (parentId === id) {
         throw new AppError("A category cannot be its own parent", 400);
       }
 
       const parent = await prisma.category.findUnique({
-        where: { id: data.parentId },
+        where: { id: parentId },
       });
 
       if (!parent) {
@@ -86,12 +87,15 @@ export class CategoriesService {
       }
     }
 
-    const slug = data.name ? generateSlug(data.name) : undefined;
+    const slug = generateSlug(name);
 
     return prisma.category.update({
       where: { id },
       data: {
-        ...data,
+        name,
+        parentId,
+        description,
+        displayOrder,
         slug,
       },
     });

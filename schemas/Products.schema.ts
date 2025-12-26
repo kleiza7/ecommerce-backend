@@ -32,20 +32,17 @@ export const createProductSchema = z.object({
 });
 
 export const updateProductSchema = z.object({
-  params: z.object({
-    id: z.coerce.number().int().positive("Invalid product ID"),
-  }),
   body: z.object({
-    name: z.string().trim().optional(),
-    description: z.string().trim().optional(),
+    id: z.coerce.number().int().positive("Invalid product ID"),
+    name: z.string().trim().min(1, "Product name is required"),
+    description: z.string().trim(),
     stockCount: z.coerce
       .number()
       .int()
-      .min(0, "Stock count must be 0 or greater")
-      .optional(),
-    price: z.coerce.number().min(0, "Price must be 0 or greater").optional(),
-    brandId: z.coerce.number().int().positive().optional(),
-    categoryId: z.coerce.number().int().positive().optional(),
+      .min(0, "Stock count must be 0 or greater"),
+    price: z.coerce.number().min(0, "Price must be 0 or greater"),
+    brandId: z.coerce.number().int().positive("Invalid brand ID"),
+    categoryId: z.coerce.number().int().positive("Invalid category ID"),
 
     // ⚠️ Images optional & handled by Multer
   }),

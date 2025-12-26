@@ -30,7 +30,9 @@ export class BrandsService {
     });
   }
 
-  async updateBrand(id: number, data: { name?: string }) {
+  async updateBrand(payload: { id: number; name: string }) {
+    const { id, name } = payload;
+
     const brand = await prisma.brand.findUnique({
       where: { id },
     });
@@ -39,12 +41,12 @@ export class BrandsService {
       throw new AppError("Brand not found", 404);
     }
 
-    const slug = data.name ? generateSlug(data.name) : undefined;
+    const slug = generateSlug(name);
 
     return prisma.brand.update({
       where: { id },
       data: {
-        ...data,
+        name,
         slug,
       },
     });

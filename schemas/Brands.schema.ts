@@ -7,11 +7,9 @@ export const createBrandSchema = z.object({
 });
 
 export const updateBrandSchema = z.object({
-  params: z.object({
-    id: z.coerce.number().int().positive("Invalid brand ID"),
-  }),
   body: z.object({
-    name: z.string().trim().min(1).optional(),
+    id: z.coerce.number().int().positive("Invalid brand ID"),
+    name: z.string().trim().min(1, "Brand name is required"),
   }),
 });
 

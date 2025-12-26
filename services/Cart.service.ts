@@ -110,13 +110,17 @@ export class CartService {
     const cart = await this.getOrCreateCart(userId);
 
     const existing = await prisma.cartItem.findFirst({
-      where: { id: itemId, cartId: cart.id },
+      where: {
+        id: itemId,
+        cartId: cart.id,
+      },
     });
 
     if (!existing) {
       throw new AppError("Cart item not found", 404);
     }
 
+    // 🔒 Business invariant (stock logic ŞİMDİLİK YOK)
     if (quantity <= 0) {
       throw new AppError("Quantity must be greater than zero", 400);
     }
@@ -138,7 +142,7 @@ export class CartService {
       },
     });
 
-    // 🔥 INLINE MUTATE
+    // 🔥 INLINE MUTATE (presentation concern)
     for (const img of updated.product.images) {
       img.thumbUrl = getUrlWithBaseUrl(img.thumbUrl);
     }
