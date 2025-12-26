@@ -36,8 +36,12 @@ export class BrandsController {
 
   updateBrand = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id = Number(req.params.id);
-      const updatedBrand = await this.brandsService.updateBrand(id, req.body);
+      const { id, name } = req.body;
+
+      const updatedBrand = await this.brandsService.updateBrand({
+        id,
+        name,
+      });
 
       return res.status(200).json(updatedBrand);
     } catch (error) {

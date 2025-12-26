@@ -134,18 +134,29 @@ export class ProductsService {
   =========================== */
 
   async updateProduct(
-    id: number,
-    data: {
-      name?: string;
-      description?: string;
-      stockCount?: number;
-      price?: number;
-      brandId?: number;
-      categoryId?: number;
-      deletedImageIds?: number[];
+    payload: {
+      id: number;
+      name: string;
+      description: string;
+      stockCount: number;
+      price: number;
+      brandId: number;
+      categoryId: number;
+      deletedImageIds: number[];
     },
     newAddedImages: Express.Multer.File[]
   ) {
+    const {
+      id,
+      name,
+      description,
+      stockCount,
+      price,
+      brandId,
+      categoryId,
+      deletedImageIds,
+    } = payload;
+
     return prisma.$transaction(async (tx) => {
       const product = await tx.product.findUnique({
         where: { id },
@@ -159,9 +170,9 @@ export class ProductsService {
       /* ===========================
        DELETE IMAGES
     ============================ */
-      if (data.deletedImageIds?.length) {
+      if (deletedImageIds.length) {
         const imagesToDelete = product.images.filter((img) =>
-          data.deletedImageIds!.includes(img.id)
+          deletedImageIds.includes(img.id)
         );
 
         // 🔥 CDN / Local delete
@@ -170,7 +181,7 @@ export class ProductsService {
         // 🔥 DB delete
         await tx.productImage.deleteMany({
           where: {
-            id: { in: data.deletedImageIds },
+            id: { in: deletedImageIds },
             productId: id,
           },
         });
@@ -179,27 +190,25 @@ export class ProductsService {
       /* ===========================
        ADD NEW IMAGES
     ============================ */
-      if (newAddedImages?.length) {
-        // burada prisma yerine tx kullanmıyoruz
-        // çünkü processProductImages kendi içinde prisma kullanıyor
+      if (newAddedImages.length) {
+        // processProductImages kendi içinde prisma kullandığı için tx vermiyoruz
         await processProductImages(id, newAddedImages);
       }
 
       /* ===========================
-       UPDATE PRODUCT FIELDS
+       UPDATE PRODUCT (FULL REPLACE)
     ============================ */
-      const cleaned = Object.fromEntries(
-        Object.entries(data).filter(
-          ([key, value]) => value !== undefined && key !== "deletedImageIds"
-        )
-      );
-
-      if (Object.keys(cleaned).length) {
-        await tx.product.update({
-          where: { id },
-          data: cleaned,
-        });
-      }
+      await tx.product.update({
+        where: { id },
+        data: {
+          name,
+          description,
+          stockCount,
+          price,
+          brandId,
+          categoryId,
+        },
+      });
 
       return this.getProductById(id);
     });

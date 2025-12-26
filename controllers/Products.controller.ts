@@ -67,9 +67,8 @@ export class ProductsController {
 
   updateProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id = Number(req.params.id);
-
       const {
+        id,
         name,
         description,
         stockCount,
@@ -81,6 +80,7 @@ export class ProductsController {
 
       const files = req.files as Express.Multer.File[];
 
+      // deletedImageIds body'de string geliyorsa (multipart), güvenli parse
       let parsedDeletedIds: number[] = [];
       if (deletedImageIds) {
         try {
@@ -91,20 +91,17 @@ export class ProductsController {
       }
 
       const payload = {
+        id,
         name,
         description,
-        stockCount: stockCount !== undefined ? Number(stockCount) : undefined,
-        price: price !== undefined ? Number(price) : undefined,
-        brandId: brandId !== undefined ? Number(brandId) : undefined,
-        categoryId: categoryId !== undefined ? Number(categoryId) : undefined,
+        stockCount,
+        price,
+        brandId,
+        categoryId,
         deletedImageIds: parsedDeletedIds,
       };
 
-      const updated = await this.productsService.updateProduct(
-        id,
-        payload,
-        files
-      );
+      const updated = await this.productsService.updateProduct(payload, files);
 
       return res.status(200).json(updated);
     } catch (err) {

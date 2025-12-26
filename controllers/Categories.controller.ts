@@ -42,10 +42,10 @@ export class CategoriesController {
 
   updateCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id = Number(req.params.id);
-      const { name, parentId, description, displayOrder } = req.body;
+      const { id, name, parentId, description, displayOrder } = req.body;
 
-      const updated = await this.categoriesService.updateCategory(id, {
+      const updated = await this.categoriesService.updateCategory({
+        id,
         name,
         parentId,
         description,

@@ -34,7 +34,7 @@ export class CartRouter {
      * UPDATE ITEM QUANTITY
      */
     this.router.put(
-      "/update/:itemId",
+      "/update",
       verifyToken,
       validate(updateCartQuantitySchema),
       this.controller.updateQuantity

@@ -60,13 +60,12 @@ export class CartController {
   ) => {
     try {
       const userId = req.user!.id;
-      const itemId = Number(req.params.itemId);
-      const { quantity } = req.body;
+      const { itemId, quantity } = req.body;
 
       const updated = await this.cartService.updateQuantity(
         userId,
         itemId,
-        Number(quantity)
+        quantity
       );
 
       return res.status(200).json(updated);

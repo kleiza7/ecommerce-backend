@@ -34,7 +34,7 @@ export class BrandsRouter {
     );
 
     this.router.put(
-      "/update/:id",
+      "/update",
       verifyToken,
       checkRole(USER_ROLE.SELLER),
       validate(updateBrandSchema),
