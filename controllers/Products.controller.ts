@@ -42,8 +42,15 @@ export class ProductsController {
 
   createProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, description, stockCount, price, brandId, categoryId } =
-        req.body;
+      const {
+        name,
+        description,
+        stockCount,
+        price,
+        brandId,
+        categoryId,
+        currencyId, // ✅ EKLENDİ
+      } = req.body;
 
       const files = req.files as Express.Multer.File[];
 
@@ -55,6 +62,7 @@ export class ProductsController {
           price: Number(price),
           brandId: Number(brandId),
           categoryId: Number(categoryId),
+          currencyId: Number(currencyId), // ✅ EKLENDİ
         },
         files
       );
@@ -75,6 +83,7 @@ export class ProductsController {
         price,
         brandId,
         categoryId,
+        currencyId, // ✅ EKLENDİ
         deletedImageIds,
       } = req.body;
 
@@ -91,13 +100,14 @@ export class ProductsController {
       }
 
       const payload = {
-        id,
+        id: Number(id),
         name,
         description,
-        stockCount,
-        price,
-        brandId,
-        categoryId,
+        stockCount: Number(stockCount),
+        price: Number(price),
+        brandId: Number(brandId),
+        categoryId: Number(categoryId),
+        currencyId: Number(currencyId), // ✅ EKLENDİ
         deletedImageIds: parsedDeletedIds,
       };
 

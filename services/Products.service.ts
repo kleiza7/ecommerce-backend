@@ -39,6 +39,7 @@ export class ProductsService {
           price: true,
           brandId: true,
           categoryId: true,
+          currencyId: true, // ✅ SADECE ID
           images: {
             select: {
               id: true,
@@ -105,6 +106,7 @@ export class ProductsService {
       price: number;
       brandId: number;
       categoryId: number;
+      currencyId: number;
     },
     files: Express.Multer.File[]
   ) {
@@ -120,6 +122,12 @@ export class ProductsService {
       !(await prisma.category.findUnique({ where: { id: data.categoryId } }))
     ) {
       throw new AppError("Invalid categoryId", 400);
+    }
+
+    if (
+      !(await prisma.currency.findUnique({ where: { id: data.currencyId } }))
+    ) {
+      throw new AppError("Invalid currencyId", 400);
     }
 
     const product = await prisma.product.create({ data });
@@ -142,6 +150,7 @@ export class ProductsService {
       price: number;
       brandId: number;
       categoryId: number;
+      currencyId: number;
       deletedImageIds: number[];
     },
     newAddedImages: Express.Multer.File[]
@@ -154,6 +163,7 @@ export class ProductsService {
       price,
       brandId,
       categoryId,
+      currencyId,
       deletedImageIds,
     } = payload;
 
@@ -167,18 +177,20 @@ export class ProductsService {
         throw new AppError("Product not found", 404);
       }
 
+      if (!(await tx.currency.findUnique({ where: { id: currencyId } }))) {
+        throw new AppError("Invalid currencyId", 400);
+      }
+
       /* ===========================
-       DELETE IMAGES
-    ============================ */
+         DELETE IMAGES
+      ============================ */
       if (deletedImageIds.length) {
         const imagesToDelete = product.images.filter((img) =>
           deletedImageIds.includes(img.id)
         );
 
-        // 🔥 CDN / Local delete
         await deleteProductImages(imagesToDelete);
 
-        // 🔥 DB delete
         await tx.productImage.deleteMany({
           where: {
             id: { in: deletedImageIds },
@@ -188,16 +200,15 @@ export class ProductsService {
       }
 
       /* ===========================
-       ADD NEW IMAGES
-    ============================ */
+         ADD NEW IMAGES
+      ============================ */
       if (newAddedImages.length) {
-        // processProductImages kendi içinde prisma kullandığı için tx vermiyoruz
         await processProductImages(id, newAddedImages);
       }
 
       /* ===========================
-       UPDATE PRODUCT (FULL REPLACE)
-    ============================ */
+         UPDATE PRODUCT (FULL)
+      ============================ */
       await tx.product.update({
         where: { id },
         data: {
@@ -207,6 +218,7 @@ export class ProductsService {
           price,
           brandId,
           categoryId,
+          currencyId,
         },
       });
 

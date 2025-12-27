@@ -17,7 +17,7 @@ const DUMMY_IMAGES = [
 ];
 
 /* ===========================
-   LOCAL HELPERS (DEĞİŞMEDİ)
+   LOCAL HELPERS
 =========================== */
 
 const ensureUploadFolders = async () => {
@@ -103,6 +103,15 @@ export const seedProducts = async () => {
   const brands = await prisma.brand.findMany();
   const categories = await prisma.category.findMany();
 
+  // 🔥 DEFAULT CURRENCY = TRY
+  const tryCurrency = await prisma.currency.findUnique({
+    where: { code: "TRY" },
+  });
+
+  if (!tryCurrency) {
+    throw new Error("❌ TRY currency not found. Run seedCurrencies first.");
+  }
+
   const leafCategories = categories.filter(
     (c) => !categories.some((x) => x.parentId === c.id)
   );
@@ -119,6 +128,7 @@ export const seedProducts = async () => {
           price: Math.floor(Math.random() * 45000) + 3000,
           brandId: brand.id,
           categoryId: category.id,
+          currencyId: tryCurrency.id, // ✅ DEFAULT TRY
         },
       });
 
