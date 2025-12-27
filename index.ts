@@ -9,6 +9,7 @@ import { AuthController } from "./controllers/Auth.controller";
 import { BrandsController } from "./controllers/Brands.controller";
 import { CartController } from "./controllers/Cart.controller";
 import { CategoriesController } from "./controllers/Categories.controller";
+import { CurrencyController } from "./controllers/Currencies.controller";
 import { ProductsController } from "./controllers/Products.controller";
 
 // Routers
@@ -16,6 +17,7 @@ import { AuthRouter } from "./routers/Auth.router";
 import { BrandsRouter } from "./routers/Brands.router";
 import { CartRouter } from "./routers/Cart.router";
 import { CategoriesRouter } from "./routers/Categories.router";
+import { CurrencyRouter } from "./routers/Currencies.router";
 import { ProductsRouter } from "./routers/Products.router";
 
 // Services
@@ -23,6 +25,7 @@ import { AuthService } from "./services/Auth.service";
 import { BrandsService } from "./services/Brands.service";
 import { CartService } from "./services/Cart.service";
 import { CategoriesService } from "./services/Categories.service";
+import { CurrencyService } from "./services/Currencies.service";
 import { ProductsService } from "./services/Products.service";
 
 // Middlewares
@@ -38,6 +41,7 @@ class Server {
     private productsRouter: ProductsRouter,
     private brandsRouter: BrandsRouter,
     private categoriesRouter: CategoriesRouter,
+    private currencyRouter: CurrencyRouter,
     private cartRouter: CartRouter,
     private authRouter: AuthRouter
   ) {
@@ -58,7 +62,7 @@ class Server {
 
     // 🟢 Swagger JSON
     if (process.env.NODE_ENV !== "production") {
-      app.get("/api-docs/swagger.json", (req, res) => {
+      app.get("/api-docs/swagger.json", (_req, res) => {
         res.setHeader("Content-Type", "application/json");
         return res.send(swaggerSpec);
       });
@@ -98,6 +102,7 @@ class Server {
     router.use("/products", this.productsRouter.getRouter());
     router.use("/brands", this.brandsRouter.getRouter());
     router.use("/categories", this.categoriesRouter.getRouter());
+    router.use("/currencies", this.currencyRouter.getRouter());
     router.use("/cart", this.cartRouter.getRouter());
     router.use("/auth", this.authRouter.getRouter());
 
@@ -109,6 +114,7 @@ class Server {
 const productsService = new ProductsService();
 const brandsService = new BrandsService();
 const categoriesService = new CategoriesService();
+const currencyService = new CurrencyService();
 const cartService = new CartService();
 const authService = new AuthService();
 
@@ -116,6 +122,7 @@ const authService = new AuthService();
 const productsController = new ProductsController(productsService);
 const brandsController = new BrandsController(brandsService);
 const categoriesController = new CategoriesController(categoriesService);
+const currencyController = new CurrencyController(currencyService);
 const cartController = new CartController(cartService);
 const authController = new AuthController(authService);
 
@@ -126,6 +133,7 @@ const categoriesRouter = new CategoriesRouter(
   express.Router(),
   categoriesController
 );
+const currencyRouter = new CurrencyRouter(express.Router(), currencyController);
 const cartRouter = new CartRouter(express.Router(), cartController);
 const authRouter = new AuthRouter(express.Router(), authController);
 
@@ -134,6 +142,7 @@ new Server(
   productsRouter,
   brandsRouter,
   categoriesRouter,
+  currencyRouter,
   cartRouter,
   authRouter
 );

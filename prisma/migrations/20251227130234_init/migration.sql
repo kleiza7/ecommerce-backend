@@ -17,6 +17,13 @@ CREATE TABLE "Categories" (
 );
 
 -- CreateTable
+CREATE TABLE "Currencies" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "code" TEXT NOT NULL,
+    "symbol" TEXT NOT NULL
+);
+
+-- CreateTable
 CREATE TABLE "Products" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,
@@ -25,8 +32,10 @@ CREATE TABLE "Products" (
     "price" DECIMAL NOT NULL DEFAULT 0.0,
     "brand_id" INTEGER NOT NULL,
     "category_id" INTEGER NOT NULL,
+    "currency_id" INTEGER NOT NULL,
     CONSTRAINT "Products_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "Brands" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Products_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "Categories" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Products_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "Categories" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Products_currency_id_fkey" FOREIGN KEY ("currency_id") REFERENCES "Currencies" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -79,6 +88,9 @@ CREATE UNIQUE INDEX "Categories_slug_key" ON "Categories"("slug");
 
 -- CreateIndex
 CREATE INDEX "Categories_parent_id_idx" ON "Categories"("parent_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Currencies_code_key" ON "Currencies"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");

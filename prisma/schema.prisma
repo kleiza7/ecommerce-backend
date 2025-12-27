@@ -33,6 +33,16 @@ model Category {
   @@map("Categories")
 }
 
+model Currency {
+  id     Int    @id @default(autoincrement())
+  code   String @unique // TRY, USD, EUR
+  symbol String // ₺, $, €
+
+  products Product[]
+
+  @@map("Currencies")
+}
+
 model Product {
   id          Int       @id @default(autoincrement())
   name        String
@@ -42,9 +52,11 @@ model Product {
 
   brandId     Int       @map("brand_id")
   categoryId  Int       @map("category_id")
+  currencyId  Int       @map("currency_id")
 
   brand       Brand     @relation(fields: [brandId], references: [id])
   category    Category  @relation(fields: [categoryId], references: [id])
+  currency    Currency  @relation(fields: [currencyId], references: [id])
 
   cartItems   CartItem[]
   images      ProductImage[]
@@ -63,7 +75,7 @@ model ProductImage {
   mediumUrl   String
   largeUrl    String
 
-  publicId    String?   // 👈 CDN (Cloudinary) için EKLENDİ
+  publicId    String?
 
   isPrimary   Boolean  @default(false)
 
@@ -106,6 +118,13 @@ model CartItem {
   productId     Int      @map("product_id")
   quantity      Int      @default(1)
   priceSnapshot Decimal  @default(0.0) @map("price_snapshot")
+
+  // TODO (Phase 3):
+  // - currencyId snapshot eklenmeli
+  // - order / payment sırasında ürünün para birimi sabitlenmeli
+  // - product.currencyId değişse bile cart/order etkilenmemeli
+  // - önerilen alan:
+  //   currencyId Int @map("currency_id")
 
   cart          Cart     @relation(fields: [cartId], references: [id])
   product       Product  @relation(fields: [productId], references: [id])

@@ -47,6 +47,7 @@
  *                   stockCount: 25
  *                   brandId: 1
  *                   categoryId: 4
+ *                   currencyId: 1
  *                 - id: 11
  *                   name: "Samsung S25"
  *                   description: "Premium Android phone"
@@ -54,6 +55,7 @@
  *                   stockCount: 0
  *                   brandId: 2
  *                   categoryId: 4
+ *                   currencyId: 1
  *               pagination:
  *                 total: 27
  *                 page: 1
@@ -90,12 +92,9 @@
  *               stockCount: 12
  *               brandId: 1
  *               categoryId: 2
+ *               currencyId: 1
  *       404:
  *         description: Product not found
- *         content:
- *           application/json:
- *             example:
- *               error: "Product not found"
  */
 
 ///////////////////////////////////////////////////////////////
@@ -122,6 +121,7 @@
  *               - stockCount
  *               - brandId
  *               - categoryId
+ *               - currencyId
  *               - images
  *             properties:
  *               name:
@@ -142,34 +142,19 @@
  *               categoryId:
  *                 type: number
  *                 example: 8
+ *               currencyId:
+ *                 type: number
+ *                 example: 1
  *               images:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
- *                 description: "Product images (min 1, max 10)"
  *     responses:
  *       201:
  *         description: Product created successfully
- *         content:
- *           application/json:
- *             example:
- *               id: 23
- *               name: "PlayStation 6"
- *               description: "Next-gen gaming console"
- *               price: 899
- *               stockCount: 50
- *               brandId: 3
- *               categoryId: 8
- *               images:
- *                 - id: 101
- *                   originalUrl: "/uploads/products/original/abc.jpg"
- *                   thumbUrl: "/uploads/products/thumbs/abc.jpg"
- *                   mediumUrl: "/uploads/products/medium/abc.jpg"
- *                   largeUrl: "/uploads/products/large/abc.jpg"
- *                   isPrimary: true
  *       400:
- *         description: Brand or Category not found
+ *         description: Brand, Category or Currency not found
  *       401:
  *         description: Unauthorized
  *       403:
@@ -181,26 +166,31 @@
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
- * /api/products/update/{id}:
+ * /api/products/update:
  *   put:
  *     summary: Update an existing product (SELLER role required)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: number
- *         example: 10
  *     requestBody:
- *       required: false
+ *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - id
+ *               - name
+ *               - description
+ *               - price
+ *               - stockCount
+ *               - brandId
+ *               - categoryId
+ *               - currencyId
  *             properties:
+ *               id:
+ *                 type: number
+ *                 example: 10
  *               name:
  *                 type: string
  *               description:
@@ -209,32 +199,23 @@
  *                 type: number
  *               stockCount:
  *                 type: number
- *                 example: 30
  *               brandId:
  *                 type: number
  *               categoryId:
  *                 type: number
+ *               currencyId:
+ *                 type: number
+ *               deletedImageIds:
+ *                 type: string
+ *                 example: "[3,5]"
  *               newAddedImages:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
- *               deletedImageIds:
- *                 type: string
- *                 example: "[3,5]"
  *     responses:
  *       200:
  *         description: Product updated successfully
- *         content:
- *           application/json:
- *             example:
- *               id: 10
- *               name: "Updated name"
- *               description: "Updated description"
- *               price: 1200
- *               stockCount: 30
- *               brandId: 2
- *               categoryId: 5
  */
 
 ///////////////////////////////////////////////////////////////
@@ -258,10 +239,6 @@
  *     responses:
  *       200:
  *         description: Product deleted successfully
- *         content:
- *           application/json:
- *             example:
- *               message: "Product deleted successfully"
  *       404:
  *         description: Product not found
  */

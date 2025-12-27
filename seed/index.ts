@@ -2,6 +2,7 @@ import { prisma } from "../config/prisma";
 
 import { seedBrands } from "./data/Brands.seed";
 import { seedCategories } from "./data/Categories.seed";
+import { seedCurrencies } from "./data/Currencies.seed";
 import { seedProducts } from "./data/Products.seed";
 import { seedUsers } from "./data/Users.seed";
 
@@ -15,6 +16,9 @@ const main = async () => {
 
     console.log("➡ Seeding brands...");
     await seedBrands();
+
+    console.log("➡ Seeding currencies...");
+    await seedCurrencies();
 
     console.log("➡ Seeding users...");
     await seedUsers();
