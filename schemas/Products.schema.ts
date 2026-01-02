@@ -2,18 +2,22 @@ import { z } from "zod";
 
 export const productListSchema = z.object({
   body: z.object({
-    page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(10),
+    page: z.coerce.number().int().min(1).optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+
     brandIds: z
       .array(z.coerce.number().int().positive())
       .optional()
       .default([]),
+
     categoryIds: z
       .array(z.coerce.number().int().positive())
       .optional()
       .default([]),
 
-    // 🔜 currency filter şimdilik YOK (Phase 3 / FE ihtiyacı)
+    sellerId: z.coerce.number().int().positive().optional(),
+
+    // 🔜 currency filter (Phase 3)
   }),
 });
 

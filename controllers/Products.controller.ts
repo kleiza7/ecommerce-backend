@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from "express";
+import { PRODUCT_STATUS } from "../enums/ProductStatus.enum";
+import { AuthenticatedRequest } from "../interfaces/AuthenticatedRequest.interface";
 import { ProductsService } from "../services/Products.service";
 
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
-  getProducts = async (req: Request, res: Response, next: NextFunction) => {
+  getProductsList = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const page = Number(req.body.page ?? 1);
       const limit = Number(req.body.limit ?? 20);
@@ -17,11 +19,17 @@ export class ProductsController {
         ? req.body.categoryIds.map(Number)
         : [];
 
-      const result = await this.productsService.getProducts({
-        page,
-        limit,
+      const sellerId =
+        typeof req.body.sellerId === "number"
+          ? Number(req.body.sellerId)
+          : undefined;
+
+      const result = await this.productsService.getProductsList({
+        pagination: { page, limit },
         brandIds,
         categoryIds,
+        sellerId,
+        statuses: [PRODUCT_STATUS.APPROVED],
       });
 
       return res.status(200).json(result);
@@ -30,6 +38,122 @@ export class ProductsController {
     }
   };
 
+  getProductsBySeller = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const sellerId = req.user!.id;
+
+      const brandIds = Array.isArray(req.body.brandIds)
+        ? req.body.brandIds.map(Number)
+        : [];
+
+      const categoryIds = Array.isArray(req.body.categoryIds)
+        ? req.body.categoryIds.map(Number)
+        : [];
+
+      const result = await this.productsService.getProductsList({
+        brandIds,
+        categoryIds,
+        sellerId,
+        statuses: [
+          PRODUCT_STATUS.APPROVED,
+          PRODUCT_STATUS.WAITING_FOR_APPROVE,
+          PRODUCT_STATUS.NOT_APPROVED,
+        ],
+      });
+
+      return res.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getWaitingApprovalProducts = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const brandIds = Array.isArray(req.body.brandIds)
+        ? req.body.brandIds.map(Number)
+        : [];
+
+      const categoryIds = Array.isArray(req.body.categoryIds)
+        ? req.body.categoryIds.map(Number)
+        : [];
+
+      const sellerId =
+        typeof req.body.sellerId === "number"
+          ? Number(req.body.sellerId)
+          : undefined;
+
+      const result = await this.productsService.getProductsList({
+        brandIds,
+        categoryIds,
+        sellerId,
+        statuses: [PRODUCT_STATUS.WAITING_FOR_APPROVE],
+      });
+
+      return res.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /* ===========================
+     ADMIN - APPROVE
+  =========================== */
+  approveProduct = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const productId = Number(req.params.id);
+
+      await this.productsService.changeProductStatus({
+        productId,
+        status: PRODUCT_STATUS.APPROVED,
+      });
+
+      return res.status(200).json({
+        message: "Product approved successfully",
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /* ===========================
+     ADMIN - REJECT
+  =========================== */
+  rejectProduct = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const productId = Number(req.params.id);
+
+      await this.productsService.changeProductStatus({
+        productId,
+        status: PRODUCT_STATUS.NOT_APPROVED,
+      });
+
+      return res.status(200).json({
+        message: "Product rejected successfully",
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /* ===========================
+     GET BY ID
+  =========================== */
   getProductById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = Number(req.params.id);
@@ -40,7 +164,14 @@ export class ProductsController {
     }
   };
 
-  createProduct = async (req: Request, res: Response, next: NextFunction) => {
+  /* ===========================
+     CREATE
+  =========================== */
+  createProduct = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const {
         name,
@@ -49,9 +180,10 @@ export class ProductsController {
         price,
         brandId,
         categoryId,
-        currencyId, // ✅ EKLENDİ
+        currencyId,
       } = req.body;
 
+      const sellerId = req.user!.id;
       const files = req.files as Express.Multer.File[];
 
       const product = await this.productsService.createProduct(
@@ -62,7 +194,8 @@ export class ProductsController {
           price: Number(price),
           brandId: Number(brandId),
           categoryId: Number(categoryId),
-          currencyId: Number(currencyId), // ✅ EKLENDİ
+          currencyId: Number(currencyId),
+          sellerId,
         },
         files
       );
@@ -73,7 +206,14 @@ export class ProductsController {
     }
   };
 
-  updateProduct = async (req: Request, res: Response, next: NextFunction) => {
+  /* ===========================
+     UPDATE
+  =========================== */
+  updateProduct = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const {
         id,
@@ -83,13 +223,13 @@ export class ProductsController {
         price,
         brandId,
         categoryId,
-        currencyId, // ✅ EKLENDİ
+        currencyId,
         deletedImageIds,
       } = req.body;
 
+      const sellerId = req.user!.id;
       const files = req.files as Express.Multer.File[];
 
-      // deletedImageIds body'de string geliyorsa (multipart), güvenli parse
       let parsedDeletedIds: number[] = [];
       if (deletedImageIds) {
         try {
@@ -99,19 +239,21 @@ export class ProductsController {
         }
       }
 
-      const payload = {
-        id: Number(id),
-        name,
-        description,
-        stockCount: Number(stockCount),
-        price: Number(price),
-        brandId: Number(brandId),
-        categoryId: Number(categoryId),
-        currencyId: Number(currencyId), // ✅ EKLENDİ
-        deletedImageIds: parsedDeletedIds,
-      };
-
-      const updated = await this.productsService.updateProduct(payload, files);
+      const updated = await this.productsService.updateProduct(
+        {
+          id: Number(id),
+          name,
+          description,
+          stockCount: Number(stockCount),
+          price: Number(price),
+          brandId: Number(brandId),
+          categoryId: Number(categoryId),
+          currencyId: Number(currencyId),
+          sellerId,
+          deletedImageIds: parsedDeletedIds,
+        },
+        files
+      );
 
       return res.status(200).json(updated);
     } catch (err) {
@@ -119,11 +261,23 @@ export class ProductsController {
     }
   };
 
-  deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
+  /* ===========================
+     DELETE (SOFT)
+  =========================== */
+  deleteProduct = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const id = Number(req.params.id);
-      await this.productsService.deleteProduct(id);
-      return res.status(200).json({ message: "Product deleted successfully" });
+      const sellerId = req.user!.id;
+
+      await this.productsService.deleteProduct(id, sellerId);
+
+      return res.status(200).json({
+        message: "Product deleted successfully",
+      });
     } catch (err) {
       next(err);
     }

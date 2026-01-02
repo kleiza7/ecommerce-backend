@@ -1,4 +1,5 @@
 import { prisma } from "../config/prisma";
+import { PRODUCT_STATUS } from "../enums/ProductStatus.enum";
 import { AppError } from "../errors/AppError";
 import { getUrlWithBaseUrl } from "../utils/Common.util";
 import {
@@ -8,28 +9,46 @@ import {
 
 export class ProductsService {
   /* ===========================
-     GET LIST
+     GET LIST (COMMON)
   =========================== */
 
-  async getProducts(params: {
-    page: number;
-    limit: number;
+  async getProductsList(params: {
+    pagination?: {
+      page: number;
+      limit: number;
+    };
     brandIds: number[];
     categoryIds: number[];
+    sellerId?: number;
+    statuses?: PRODUCT_STATUS[];
   }) {
-    const { page, limit, brandIds, categoryIds } = params;
+    const { pagination, brandIds, categoryIds, sellerId, statuses } = params;
 
-    const where: any = {};
+    const where: {
+      brandId?: { in: number[] };
+      categoryId?: { in: number[] };
+      sellerId?: number;
+      status?: { in: PRODUCT_STATUS[] };
+    } = {};
+
     if (brandIds.length) where.brandId = { in: brandIds };
     if (categoryIds.length) where.categoryId = { in: categoryIds };
+    if (sellerId !== undefined) where.sellerId = sellerId;
+    if (statuses && statuses.length) where.status = { in: statuses };
 
-    const skip = (page - 1) * limit;
+    const withPagination = Boolean(pagination);
+
+    const skip = withPagination
+      ? (pagination!.page - 1) * pagination!.limit
+      : undefined;
+
+    const take = withPagination ? pagination!.limit : undefined;
 
     const [items, total] = await Promise.all([
       prisma.product.findMany({
         where,
         skip,
-        take: limit,
+        take,
         orderBy: { id: "desc" },
         select: {
           id: true,
@@ -39,7 +58,9 @@ export class ProductsService {
           price: true,
           brandId: true,
           categoryId: true,
-          currencyId: true, // ✅ SADECE ID
+          currencyId: true,
+          sellerId: true,
+          status: true,
           images: {
             select: {
               id: true,
@@ -50,22 +71,28 @@ export class ProductsService {
           },
         },
       }),
-      prisma.product.count({ where }),
+      withPagination ? prisma.product.count({ where }) : Promise.resolve(0),
     ]);
 
-    return {
-      items: items.map((product) => ({
-        ...product,
-        images: product.images.map((img) => ({
-          ...img,
-          mediumUrl: getUrlWithBaseUrl(img.mediumUrl),
-        })),
+    const mappedItems = items.map((product) => ({
+      ...product,
+      images: product.images.map((img) => ({
+        ...img,
+        mediumUrl: getUrlWithBaseUrl(img.mediumUrl),
       })),
+    }));
+
+    if (!withPagination) {
+      return { items: mappedItems };
+    }
+
+    return {
+      items: mappedItems,
       pagination: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: pagination!.page,
+        limit: pagination!.limit,
+        totalPages: Math.ceil(total / pagination!.limit),
       },
     };
   }
@@ -95,6 +122,36 @@ export class ProductsService {
   }
 
   /* ===========================
+     ADMIN - CHANGE PRODUCT STATUS
+  =========================== */
+
+  async changeProductStatus(params: {
+    productId: number;
+    status: PRODUCT_STATUS;
+  }) {
+    const { productId, status } = params;
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
+
+    if (product.status === PRODUCT_STATUS.DELETED) {
+      throw new AppError("Deleted product status cannot be changed", 400);
+    }
+
+    await prisma.product.update({
+      where: { id: productId },
+      data: { status },
+    });
+
+    return true;
+  }
+
+  /* ===========================
      CREATE
   =========================== */
 
@@ -107,6 +164,7 @@ export class ProductsService {
       brandId: number;
       categoryId: number;
       currencyId: number;
+      sellerId: number;
     },
     files: Express.Multer.File[]
   ) {
@@ -130,7 +188,12 @@ export class ProductsService {
       throw new AppError("Invalid currencyId", 400);
     }
 
-    const product = await prisma.product.create({ data });
+    const product = await prisma.product.create({
+      data: {
+        ...data,
+        status: PRODUCT_STATUS.WAITING_FOR_APPROVE,
+      },
+    });
 
     await processProductImages(product.id, files);
 
@@ -151,6 +214,7 @@ export class ProductsService {
       brandId: number;
       categoryId: number;
       currencyId: number;
+      sellerId: number;
       deletedImageIds: number[];
     },
     newAddedImages: Express.Multer.File[]
@@ -164,6 +228,7 @@ export class ProductsService {
       brandId,
       categoryId,
       currencyId,
+      sellerId,
       deletedImageIds,
     } = payload;
 
@@ -173,17 +238,24 @@ export class ProductsService {
         include: { images: true },
       });
 
-      if (!product) {
-        throw new AppError("Product not found", 404);
+      if (!product) throw new AppError("Product not found", 404);
+      if (product.sellerId !== sellerId) throw new AppError("Forbidden", 403);
+      if (product.status === PRODUCT_STATUS.DELETED) {
+        throw new AppError("Deleted product cannot be updated", 400);
+      }
+
+      if (!(await tx.brand.findUnique({ where: { id: brandId } }))) {
+        throw new AppError("Invalid brandId", 400);
+      }
+
+      if (!(await tx.category.findUnique({ where: { id: categoryId } }))) {
+        throw new AppError("Invalid categoryId", 400);
       }
 
       if (!(await tx.currency.findUnique({ where: { id: currencyId } }))) {
         throw new AppError("Invalid currencyId", 400);
       }
 
-      /* ===========================
-         DELETE IMAGES
-      ============================ */
       if (deletedImageIds.length) {
         const imagesToDelete = product.images.filter((img) =>
           deletedImageIds.includes(img.id)
@@ -199,16 +271,10 @@ export class ProductsService {
         });
       }
 
-      /* ===========================
-         ADD NEW IMAGES
-      ============================ */
       if (newAddedImages.length) {
         await processProductImages(id, newAddedImages);
       }
 
-      /* ===========================
-         UPDATE PRODUCT (FULL)
-      ============================ */
       await tx.product.update({
         where: { id },
         data: {
@@ -219,6 +285,7 @@ export class ProductsService {
           brandId,
           categoryId,
           currencyId,
+          status: PRODUCT_STATUS.WAITING_FOR_APPROVE,
         },
       });
 
@@ -227,33 +294,20 @@ export class ProductsService {
   }
 
   /* ===========================
-     DELETE
+     DELETE (SOFT)
   =========================== */
 
-  async deleteProduct(id: number) {
-    return prisma.$transaction(async (tx) => {
-      const product = await tx.product.findUnique({
-        where: { id },
-        include: { images: true },
-      });
+  async deleteProduct(id: number, sellerId: number) {
+    const product = await prisma.product.findUnique({ where: { id } });
 
-      if (!product) {
-        throw new AppError("Product not found", 404);
-      }
+    if (!product) throw new AppError("Product not found", 404);
+    if (product.sellerId !== sellerId) throw new AppError("Forbidden", 403);
 
-      // 🔥 CDN / Local delete
-      await deleteProductImages(product.images);
-
-      // 🔥 DB delete
-      await tx.productImage.deleteMany({
-        where: { productId: id },
-      });
-
-      await tx.product.delete({
-        where: { id },
-      });
-
-      return true;
+    await prisma.product.update({
+      where: { id },
+      data: { status: PRODUCT_STATUS.DELETED },
     });
+
+    return true;
   }
 }
