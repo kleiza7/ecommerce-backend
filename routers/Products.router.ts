@@ -24,7 +24,39 @@ export class ProductsRouter {
     this.router.post(
       "/list",
       validate(productListSchema),
-      this.controller.getProducts
+      this.controller.getProductsList
+    );
+
+    this.router.post(
+      "/get-products-by-seller",
+      verifyToken,
+      checkRole(USER_ROLE.SELLER),
+      validate(productListSchema),
+      this.controller.getProductsBySeller
+    );
+
+    this.router.post(
+      "/get-waiting-approval-products",
+      verifyToken,
+      checkRole(USER_ROLE.ADMIN),
+      validate(productListSchema),
+      this.controller.getWaitingApprovalProducts
+    );
+
+    this.router.put(
+      "/approve/:id",
+      verifyToken,
+      checkRole(USER_ROLE.ADMIN),
+      validate(productIdParamSchema),
+      this.controller.approveProduct
+    );
+
+    this.router.put(
+      "/reject/:id",
+      verifyToken,
+      checkRole(USER_ROLE.ADMIN),
+      validate(productIdParamSchema),
+      this.controller.rejectProduct
     );
 
     this.router.get(

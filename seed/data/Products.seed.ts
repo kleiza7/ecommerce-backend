@@ -1,3 +1,4 @@
+import { ProductStatus } from "@prisma/client";
 import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
@@ -128,7 +129,9 @@ export const seedProducts = async () => {
           price: Math.floor(Math.random() * 45000) + 3000,
           brandId: brand.id,
           categoryId: category.id,
-          currencyId: tryCurrency.id, // ✅ DEFAULT TRY
+          currencyId: tryCurrency.id,
+          sellerId: 1,
+          status: ProductStatus.APPROVED,
         },
       });
 
