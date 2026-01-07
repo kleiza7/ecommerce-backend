@@ -9,20 +9,18 @@ import {
 
 export class ProductsService {
   /* ===========================
-     GET LIST (COMMON)
+     GET LIST (INTERNAL)
   =========================== */
 
-  async getProductsList(params: {
-    pagination?: {
-      page: number;
-      limit: number;
-    };
+  private async getProductsBaseQuery(params: {
     brandIds: number[];
     categoryIds: number[];
     sellerIds: number[];
     statuses?: PRODUCT_STATUS[];
+    skip?: number;
+    take?: number;
   }) {
-    const { pagination, brandIds, categoryIds, sellerIds, statuses } = params;
+    const { brandIds, categoryIds, sellerIds, statuses, skip, take } = params;
 
     const where: {
       brandId?: { in: number[] };
@@ -35,14 +33,6 @@ export class ProductsService {
     if (categoryIds.length) where.categoryId = { in: categoryIds };
     if (sellerIds.length) where.sellerId = { in: sellerIds };
     if (statuses && statuses.length) where.status = { in: statuses };
-
-    const withPagination = Boolean(pagination);
-
-    const skip = withPagination
-      ? (pagination!.page - 1) * pagination!.limit
-      : undefined;
-
-    const take = withPagination ? pagination!.limit : undefined;
 
     const [items, total] = await Promise.all([
       prisma.product.findMany({
@@ -71,7 +61,7 @@ export class ProductsService {
           },
         },
       }),
-      withPagination ? prisma.product.count({ where }) : Promise.resolve(0),
+      prisma.product.count({ where }),
     ]);
 
     const mappedItems = items.map((product) => ({
@@ -82,19 +72,68 @@ export class ProductsService {
       })),
     }));
 
-    if (!withPagination) {
-      return { items: mappedItems };
-    }
+    return { items: mappedItems, total };
+  }
+
+  /* ===========================
+     GET LIST WITH PAGINATION
+  =========================== */
+
+  async getProductsListWithPagination(params: {
+    pagination: {
+      page: number;
+      limit: number;
+    };
+    brandIds: number[];
+    categoryIds: number[];
+    sellerIds: number[];
+    statuses?: PRODUCT_STATUS[];
+  }) {
+    const { pagination, brandIds, categoryIds, sellerIds, statuses } = params;
+
+    const skip = (pagination.page - 1) * pagination.limit;
+    const take = pagination.limit;
+
+    const { items, total } = await this.getProductsBaseQuery({
+      brandIds,
+      categoryIds,
+      sellerIds,
+      statuses,
+      skip,
+      take,
+    });
 
     return {
-      items: mappedItems,
+      items,
       pagination: {
         total,
-        page: pagination!.page,
-        limit: pagination!.limit,
-        totalPages: Math.ceil(total / pagination!.limit),
+        page: pagination.page,
+        limit: pagination.limit,
+        totalPages: Math.ceil(total / pagination.limit),
       },
     };
+  }
+
+  /* ===========================
+     GET LIST WITHOUT PAGINATION
+  =========================== */
+
+  async getProductsListWithoutPagination(params: {
+    brandIds: number[];
+    categoryIds: number[];
+    sellerIds: number[];
+    statuses?: PRODUCT_STATUS[];
+  }) {
+    const { brandIds, categoryIds, sellerIds, statuses } = params;
+
+    const { items } = await this.getProductsBaseQuery({
+      brandIds,
+      categoryIds,
+      sellerIds,
+      statuses,
+    });
+
+    return items;
   }
 
   /* ===========================

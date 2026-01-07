@@ -27,19 +27,17 @@ export class ProductsRouter {
       this.controller.getProductsList
     );
 
-    this.router.post(
+    this.router.get(
       "/get-products-by-seller",
       verifyToken,
       checkRole(USER_ROLE.SELLER),
-      validate(productListSchema),
       this.controller.getProductsBySeller
     );
 
-    this.router.post(
+    this.router.get(
       "/get-waiting-approval-products",
       verifyToken,
       checkRole(USER_ROLE.ADMIN),
-      validate(productListSchema),
       this.controller.getWaitingApprovalProducts
     );
 

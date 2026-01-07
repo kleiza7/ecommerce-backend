@@ -7,7 +7,7 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   /* ===========================
-     PUBLIC PRODUCT LIST
+     PUBLIC PRODUCT LIST (POST)
   =========================== */
   getProductsList = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -26,7 +26,7 @@ export class ProductsController {
         ? req.body.sellerIds.map(Number)
         : [];
 
-      const result = await this.productsService.getProductsList({
+      const result = await this.productsService.getProductsListWithPagination({
         pagination: { page, limit },
         brandIds,
         categoryIds,
@@ -41,7 +41,7 @@ export class ProductsController {
   };
 
   /* ===========================
-     SELLER - OWN PRODUCTS
+     SELLER - OWN PRODUCTS (GET)
   =========================== */
   getProductsBySeller = async (
     req: AuthenticatedRequest,
@@ -51,24 +51,17 @@ export class ProductsController {
     try {
       const sellerId = req.user!.id;
 
-      const brandIds = Array.isArray(req.body.brandIds)
-        ? req.body.brandIds.map(Number)
-        : [];
-
-      const categoryIds = Array.isArray(req.body.categoryIds)
-        ? req.body.categoryIds.map(Number)
-        : [];
-
-      const result = await this.productsService.getProductsList({
-        brandIds,
-        categoryIds,
-        sellerIds: [sellerId],
-        statuses: [
-          PRODUCT_STATUS.APPROVED,
-          PRODUCT_STATUS.WAITING_FOR_APPROVE,
-          PRODUCT_STATUS.NOT_APPROVED,
-        ],
-      });
+      const result =
+        await this.productsService.getProductsListWithoutPagination({
+          brandIds: [],
+          categoryIds: [],
+          sellerIds: [sellerId],
+          statuses: [
+            PRODUCT_STATUS.APPROVED,
+            PRODUCT_STATUS.WAITING_FOR_APPROVE,
+            PRODUCT_STATUS.NOT_APPROVED,
+          ],
+        });
 
       return res.status(200).json(result);
     } catch (err) {
@@ -77,7 +70,7 @@ export class ProductsController {
   };
 
   /* ===========================
-     ADMIN - WAITING APPROVAL
+     ADMIN - WAITING APPROVAL (GET)
   =========================== */
   getWaitingApprovalProducts = async (
     req: AuthenticatedRequest,
@@ -85,24 +78,13 @@ export class ProductsController {
     next: NextFunction
   ) => {
     try {
-      const brandIds = Array.isArray(req.body.brandIds)
-        ? req.body.brandIds.map(Number)
-        : [];
-
-      const categoryIds = Array.isArray(req.body.categoryIds)
-        ? req.body.categoryIds.map(Number)
-        : [];
-
-      const sellerIds = Array.isArray(req.body.sellerIds)
-        ? req.body.sellerIds.map(Number)
-        : [];
-
-      const result = await this.productsService.getProductsList({
-        brandIds,
-        categoryIds,
-        sellerIds,
-        statuses: [PRODUCT_STATUS.WAITING_FOR_APPROVE],
-      });
+      const result =
+        await this.productsService.getProductsListWithoutPagination({
+          brandIds: [],
+          categoryIds: [],
+          sellerIds: [],
+          statuses: [PRODUCT_STATUS.WAITING_FOR_APPROVE],
+        });
 
       return res.status(200).json(result);
     } catch (err) {
