@@ -19,21 +19,21 @@ export class ProductsService {
     };
     brandIds: number[];
     categoryIds: number[];
-    sellerId?: number;
+    sellerIds: number[];
     statuses?: PRODUCT_STATUS[];
   }) {
-    const { pagination, brandIds, categoryIds, sellerId, statuses } = params;
+    const { pagination, brandIds, categoryIds, sellerIds, statuses } = params;
 
     const where: {
       brandId?: { in: number[] };
       categoryId?: { in: number[] };
-      sellerId?: number;
+      sellerId?: { in: number[] };
       status?: { in: PRODUCT_STATUS[] };
     } = {};
 
     if (brandIds.length) where.brandId = { in: brandIds };
     if (categoryIds.length) where.categoryId = { in: categoryIds };
-    if (sellerId !== undefined) where.sellerId = sellerId;
+    if (sellerIds.length) where.sellerId = { in: sellerIds };
     if (statuses && statuses.length) where.status = { in: statuses };
 
     const withPagination = Boolean(pagination);

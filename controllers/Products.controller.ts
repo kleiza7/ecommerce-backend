@@ -6,6 +6,9 @@ import { ProductsService } from "../services/Products.service";
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
+  /* ===========================
+     PUBLIC PRODUCT LIST
+  =========================== */
   getProductsList = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const page = Number(req.body.page ?? 1);
@@ -19,16 +22,15 @@ export class ProductsController {
         ? req.body.categoryIds.map(Number)
         : [];
 
-      const sellerId =
-        typeof req.body.sellerId === "number"
-          ? Number(req.body.sellerId)
-          : undefined;
+      const sellerIds = Array.isArray(req.body.sellerIds)
+        ? req.body.sellerIds.map(Number)
+        : [];
 
       const result = await this.productsService.getProductsList({
         pagination: { page, limit },
         brandIds,
         categoryIds,
-        sellerId,
+        sellerIds,
         statuses: [PRODUCT_STATUS.APPROVED],
       });
 
@@ -38,6 +40,9 @@ export class ProductsController {
     }
   };
 
+  /* ===========================
+     SELLER - OWN PRODUCTS
+  =========================== */
   getProductsBySeller = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -57,7 +62,7 @@ export class ProductsController {
       const result = await this.productsService.getProductsList({
         brandIds,
         categoryIds,
-        sellerId,
+        sellerIds: [sellerId],
         statuses: [
           PRODUCT_STATUS.APPROVED,
           PRODUCT_STATUS.WAITING_FOR_APPROVE,
@@ -71,6 +76,9 @@ export class ProductsController {
     }
   };
 
+  /* ===========================
+     ADMIN - WAITING APPROVAL
+  =========================== */
   getWaitingApprovalProducts = async (
     req: AuthenticatedRequest,
     res: Response,
@@ -85,15 +93,14 @@ export class ProductsController {
         ? req.body.categoryIds.map(Number)
         : [];
 
-      const sellerId =
-        typeof req.body.sellerId === "number"
-          ? Number(req.body.sellerId)
-          : undefined;
+      const sellerIds = Array.isArray(req.body.sellerIds)
+        ? req.body.sellerIds.map(Number)
+        : [];
 
       const result = await this.productsService.getProductsList({
         brandIds,
         categoryIds,
-        sellerId,
+        sellerIds,
         statuses: [PRODUCT_STATUS.WAITING_FOR_APPROVE],
       });
 

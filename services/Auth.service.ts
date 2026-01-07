@@ -5,6 +5,18 @@ import { USER_ROLE } from "../enums/UserRole.enum";
 import { AppError } from "../errors/AppError";
 
 export class AuthService {
+  async getAllSellers() {
+    const sellers = await prisma.user.findMany({
+      where: { role: USER_ROLE.SELLER },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    return sellers;
+  }
+
   async register(
     name: string,
     email: string,

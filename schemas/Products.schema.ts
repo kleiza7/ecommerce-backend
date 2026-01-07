@@ -15,7 +15,10 @@ export const productListSchema = z.object({
       .optional()
       .default([]),
 
-    sellerId: z.coerce.number().int().positive().optional(),
+    sellerIds: z
+      .array(z.coerce.number().int().positive())
+      .optional()
+      .default([]),
 
     // 🔜 currency filter (Phase 3)
   }),

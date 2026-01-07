@@ -9,6 +9,8 @@ export class AuthRouter {
   }
 
   private setupRoutes() {
+    this.router.get("/get-all-sellers", this.controller.getAllSellers);
+
     this.router.post(
       "/register-user",
       validate(registerSchema),
