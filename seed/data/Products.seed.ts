@@ -1,4 +1,4 @@
-import { ProductStatus } from "@prisma/client";
+import { ProductStatus, UserRole } from "@prisma/client";
 import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
@@ -104,14 +104,24 @@ export const seedProducts = async () => {
   const brands = await prisma.brand.findMany();
   const categories = await prisma.category.findMany();
 
-  // 🔥 DEFAULT CURRENCY = TRY
-  const tryCurrency = await prisma.currency.findUnique({
+  const defaultCurrency = await prisma.currency.findUnique({
     where: { code: "TRY" },
   });
 
-  if (!tryCurrency) {
-    throw new Error("❌ TRY currency not found. Run seedCurrencies first.");
+  if (!defaultCurrency) {
+    throw new Error("❌ Default currency not found. Run seedCurrencies first.");
   }
+
+  const sellers = await prisma.user.findMany({
+    where: { role: UserRole.SELLER },
+    select: { id: true },
+  });
+
+  if (!sellers.length) {
+    throw new Error("❌ No sellers found. Run seedUsers first.");
+  }
+
+  const sellerIds = sellers.map((s) => s.id);
 
   const leafCategories = categories.filter(
     (c) => !categories.some((x) => x.parentId === c.id)
@@ -129,8 +139,8 @@ export const seedProducts = async () => {
           price: Math.floor(Math.random() * 45000) + 3000,
           brandId: brand.id,
           categoryId: category.id,
-          currencyId: tryCurrency.id,
-          sellerId: 1,
+          currencyId: defaultCurrency.id,
+          sellerId: rand(sellerIds),
           status: ProductStatus.APPROVED,
         },
       });

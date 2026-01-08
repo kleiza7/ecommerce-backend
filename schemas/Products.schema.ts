@@ -15,7 +15,10 @@ export const productListSchema = z.object({
       .optional()
       .default([]),
 
-    sellerId: z.coerce.number().int().positive().optional(),
+    sellerIds: z
+      .array(z.coerce.number().int().positive())
+      .optional()
+      .default([]),
 
     // 🔜 currency filter (Phase 3)
   }),
@@ -51,8 +54,8 @@ export const updateProductSchema = z.object({
     brandId: z.coerce.number().int().positive("Invalid brand ID"),
     categoryId: z.coerce.number().int().positive("Invalid category ID"),
     currencyId: z.coerce.number().int().positive("Invalid currency ID"),
-
     // ⚠️ Images optional & handled by Multer
+    deletedImageIds: z.string(),
   }),
 });
 

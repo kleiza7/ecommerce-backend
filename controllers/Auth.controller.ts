@@ -27,6 +27,16 @@ export class AuthController {
     }
   };
 
+  getAllSellers = async (_: Request, res: Response, next: NextFunction) => {
+    try {
+      const sellers = await this.authService.getAllSellers();
+
+      return res.status(200).json(sellers);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   registerUser = (req: Request, res: Response, next: NextFunction) => {
     return this.registerWithRole(req, res, next, USER_ROLE.USER);
   };
