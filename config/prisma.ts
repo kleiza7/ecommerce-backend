@@ -31,5 +31,23 @@ export const prisma = new PrismaClient({
           },
         },
       },
+
+      order: {
+        totalPrice: {
+          needs: { totalPrice: true },
+          compute(order) {
+            return Number(order.totalPrice);
+          },
+        },
+      },
+
+      orderItem: {
+        priceSnapshot: {
+          needs: { priceSnapshot: true },
+          compute(orderItem) {
+            return Number(orderItem.priceSnapshot);
+          },
+        },
+      },
     },
   });

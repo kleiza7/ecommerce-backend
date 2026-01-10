@@ -1,4 +1,4 @@
-import { ProductStatus, UserRole } from "@prisma/client";
+import { PRODUCT_STATUS, USER_ROLE } from "@prisma/client";
 import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
@@ -113,7 +113,7 @@ export const seedProducts = async () => {
   }
 
   const sellers = await prisma.user.findMany({
-    where: { role: UserRole.SELLER },
+    where: { role: USER_ROLE.SELLER },
     select: { id: true },
   });
 
@@ -141,7 +141,7 @@ export const seedProducts = async () => {
           categoryId: category.id,
           currencyId: defaultCurrency.id,
           sellerId: rand(sellerIds),
-          status: ProductStatus.APPROVED,
+          status: PRODUCT_STATUS.APPROVED,
         },
       });
 

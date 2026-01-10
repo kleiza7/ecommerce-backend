@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { CurrencyController } from "../controllers/Currencies.controller";
+import { CurrenciesController } from "../controllers/Currencies.controller";
 import { USER_ROLE } from "../enums/UserRole.enum";
 import { checkRole } from "../middlewares/checkRole.middleware";
 import { validate } from "../middlewares/validate.middleware";
@@ -10,8 +10,11 @@ import {
   updateCurrencySchema,
 } from "../schemas/Currencies.schema";
 
-export class CurrencyRouter {
-  constructor(private router: Router, private controller: CurrencyController) {
+export class CurrenciesRouter {
+  constructor(
+    private router: Router,
+    private controller: CurrenciesController
+  ) {
     this.setupRoutes();
   }
 
