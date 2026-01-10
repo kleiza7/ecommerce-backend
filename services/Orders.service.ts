@@ -4,10 +4,6 @@ import { AppError } from "../errors/AppError";
 import { getUrlWithBaseUrl } from "../utils/Common.util";
 
 export class OrdersService {
-  /* ===========================
-     CREATE (CART -> ORDER)
-  =========================== */
-
   async createOrder(userId: number) {
     return prisma.$transaction(async (tx) => {
       const cart = await tx.cart.findUnique({
@@ -36,17 +32,25 @@ export class OrdersService {
         throw new AppError("Cart is empty", 400);
       }
 
-      let totalPrice = 0;
+      const currencyId = cart.items[0].currencyId;
 
       for (const item of cart.items) {
+        if (item.currencyId !== currencyId) {
+          throw new AppError("Mixed currency orders are not allowed", 400);
+        }
+
         if (item.product.stockCount < item.quantity) {
           throw new AppError(
             `Insufficient stock for product ${item.product.name}`,
             400
           );
         }
+      }
 
-        totalPrice += Number(item.product.price) * item.quantity;
+      let totalPrice = 0;
+
+      for (const item of cart.items) {
+        totalPrice += Number(item.priceSnapshot) * item.quantity;
       }
 
       const order = await tx.order.create({
@@ -54,6 +58,7 @@ export class OrdersService {
           userId,
           status: ORDER_STATUS.PENDING,
           totalPrice,
+          currencyId,
         },
       });
 
@@ -62,8 +67,9 @@ export class OrdersService {
           orderId: order.id,
           productId: item.productId,
           productName: item.product.name,
-          priceSnapshot: item.product.price,
+          priceSnapshot: item.priceSnapshot,
           quantity: item.quantity,
+          currencyId: item.currencyId,
         })),
       });
 
@@ -124,10 +130,6 @@ export class OrdersService {
     });
   }
 
-  /* ===========================
-     COMPLETE PAYMENT
-  =========================== */
-
   async completePayment(orderId: number, userId: number) {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -152,10 +154,6 @@ export class OrdersService {
 
     return true;
   }
-
-  /* ===========================
-     CANCEL
-  =========================== */
 
   async cancelOrder(orderId: number, userId: number) {
     return prisma.$transaction(async (tx) => {
@@ -196,10 +194,6 @@ export class OrdersService {
     });
   }
 
-  /* ===========================
-     GET LIST BY USER
-  =========================== */
-
   async getOrdersListByUser(userId: number) {
     const orders = await prisma.order.findMany({
       where: { userId },
@@ -238,10 +232,6 @@ export class OrdersService {
       })),
     }));
   }
-
-  /* ===========================
-     GET BY ID
-  =========================== */
 
   async getOrderById(orderId: number, userId: number) {
     const order = await prisma.order.findUnique({

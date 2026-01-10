@@ -35,7 +35,6 @@ export class CartService {
       },
     });
 
-    // 🔥 INLINE MUTATE
     for (const item of items) {
       for (const img of item.product.images) {
         img.thumbUrl = getUrlWithBaseUrl(img.thumbUrl);
@@ -51,6 +50,23 @@ export class CartService {
   async addItem(userId: number, productId: number, quantity: number) {
     const cart = await this.getOrCreateCart(userId);
 
+    const product = await prisma.product.findUniqueOrThrow({
+      where: { id: productId },
+    });
+
+    const existingItems = await prisma.cartItem.findMany({
+      where: { cartId: cart.id },
+      select: { currencyId: true },
+    });
+
+    if (existingItems.length > 0) {
+      const cartCurrencyId = existingItems[0].currencyId;
+
+      if (cartCurrencyId !== product.currencyId) {
+        throw new AppError("Mixed currency carts are not allowed", 400);
+      }
+    }
+
     const existing = await prisma.cartItem.findFirst({
       where: { cartId: cart.id, productId },
     });
@@ -60,22 +76,23 @@ export class CartService {
     if (existing) {
       const updated = await prisma.cartItem.update({
         where: { id: existing.id },
-        data: { quantity: existing.quantity + quantity },
-      });
-      itemId = updated.id;
-    } else {
-      const product = await prisma.product.findUniqueOrThrow({
-        where: { id: productId },
+        data: {
+          quantity: existing.quantity + quantity,
+        },
       });
 
+      itemId = updated.id;
+    } else {
       const created = await prisma.cartItem.create({
         data: {
           cartId: cart.id,
           productId,
           quantity,
           priceSnapshot: product.price,
+          currencyId: product.currencyId,
         },
       });
+
       itemId = created.id;
     }
 
@@ -95,7 +112,6 @@ export class CartService {
       },
     });
 
-    // 🔥 INLINE MUTATE
     for (const img of item.product.images) {
       img.thumbUrl = getUrlWithBaseUrl(img.thumbUrl);
     }
@@ -120,7 +136,6 @@ export class CartService {
       throw new AppError("Cart item not found", 404);
     }
 
-    // 🔒 Business invariant (stock logic ŞİMDİLİK YOK)
     if (quantity <= 0) {
       throw new AppError("Quantity must be greater than zero", 400);
     }
@@ -142,7 +157,6 @@ export class CartService {
       },
     });
 
-    // 🔥 INLINE MUTATE (presentation concern)
     for (const img of updated.product.images) {
       img.thumbUrl = getUrlWithBaseUrl(img.thumbUrl);
     }
@@ -179,6 +193,7 @@ export class CartService {
     }
 
     await prisma.cartItem.delete({ where: { id: itemId } });
+
     return true;
   }
 
