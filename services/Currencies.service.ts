@@ -1,7 +1,7 @@
 import { prisma } from "../config/prisma";
 import { AppError } from "../errors/AppError";
 
-export class CurrencyService {
+export class CurrenciesService {
   async getAllCurrencies() {
     return prisma.currency.findMany();
   }

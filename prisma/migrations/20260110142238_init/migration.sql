@@ -77,10 +77,40 @@ CREATE TABLE "CartItems" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "cart_id" INTEGER NOT NULL,
     "product_id" INTEGER NOT NULL,
+    "currency_id" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL DEFAULT 1,
     "price_snapshot" DECIMAL NOT NULL DEFAULT 0.0,
     CONSTRAINT "CartItems_cart_id_fkey" FOREIGN KEY ("cart_id") REFERENCES "Carts" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "CartItems_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Products" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "CartItems_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Products" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "CartItems_currency_id_fkey" FOREIGN KEY ("currency_id") REFERENCES "Currencies" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Orders" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "user_id" INTEGER NOT NULL,
+    "currency_id" INTEGER NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "totalPrice" DECIMAL NOT NULL DEFAULT 0.0,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Orders_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "Users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Orders_currency_id_fkey" FOREIGN KEY ("currency_id") REFERENCES "Currencies" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "OrderItems" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "order_id" INTEGER NOT NULL,
+    "product_id" INTEGER NOT NULL,
+    "currency_id" INTEGER NOT NULL,
+    "productName" TEXT NOT NULL,
+    "price_snapshot" DECIMAL NOT NULL DEFAULT 0.0,
+    "quantity" INTEGER NOT NULL DEFAULT 1,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "OrderItems_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "Orders" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "OrderItems_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Products" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "OrderItems_currency_id_fkey" FOREIGN KEY ("currency_id") REFERENCES "Currencies" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateIndex
@@ -106,3 +136,12 @@ CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Carts_user_id_key" ON "Carts"("user_id");
+
+-- CreateIndex
+CREATE INDEX "Orders_user_id_idx" ON "Orders"("user_id");
+
+-- CreateIndex
+CREATE INDEX "Orders_status_idx" ON "Orders"("status");
+
+-- CreateIndex
+CREATE INDEX "OrderItems_order_id_idx" ON "OrderItems"("order_id");

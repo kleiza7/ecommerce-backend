@@ -3,13 +3,14 @@ import dotenv from "dotenv";
 import express, { Application } from "express";
 import path from "path";
 import { prisma } from "./config/prisma";
+import { CurrenciesRouter } from "./routers/Currencies.router";
 
 // Controllers
 import { AuthController } from "./controllers/Auth.controller";
 import { BrandsController } from "./controllers/Brands.controller";
 import { CartController } from "./controllers/Cart.controller";
 import { CategoriesController } from "./controllers/Categories.controller";
-import { CurrencyController } from "./controllers/Currencies.controller";
+import { OrdersController } from "./controllers/Orders.controller";
 import { ProductsController } from "./controllers/Products.controller";
 
 // Routers
@@ -17,7 +18,7 @@ import { AuthRouter } from "./routers/Auth.router";
 import { BrandsRouter } from "./routers/Brands.router";
 import { CartRouter } from "./routers/Cart.router";
 import { CategoriesRouter } from "./routers/Categories.router";
-import { CurrencyRouter } from "./routers/Currencies.router";
+import { OrdersRouter } from "./routers/Orders.router";
 import { ProductsRouter } from "./routers/Products.router";
 
 // Services
@@ -25,7 +26,7 @@ import { AuthService } from "./services/Auth.service";
 import { BrandsService } from "./services/Brands.service";
 import { CartService } from "./services/Cart.service";
 import { CategoriesService } from "./services/Categories.service";
-import { CurrencyService } from "./services/Currencies.service";
+import { OrdersService } from "./services/Orders.service";
 import { ProductsService } from "./services/Products.service";
 
 // Middlewares
@@ -33,6 +34,8 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 
 // Swagger
 import { swaggerSpec, swaggerUi, swaggerUiSetup } from "./config/swagger";
+import { CurrenciesController } from "./controllers/Currencies.controller";
+import { CurrenciesService } from "./services/Currencies.service";
 
 dotenv.config();
 
@@ -41,8 +44,9 @@ class Server {
     private productsRouter: ProductsRouter,
     private brandsRouter: BrandsRouter,
     private categoriesRouter: CategoriesRouter,
-    private currencyRouter: CurrencyRouter,
+    private currenciesRouter: CurrenciesRouter,
     private cartRouter: CartRouter,
+    private ordersRouter: OrdersRouter,
     private authRouter: AuthRouter
   ) {
     this.startServer();
@@ -102,8 +106,9 @@ class Server {
     router.use("/products", this.productsRouter.getRouter());
     router.use("/brands", this.brandsRouter.getRouter());
     router.use("/categories", this.categoriesRouter.getRouter());
-    router.use("/currencies", this.currencyRouter.getRouter());
+    router.use("/currencies", this.currenciesRouter.getRouter());
     router.use("/cart", this.cartRouter.getRouter());
+    router.use("/orders", this.ordersRouter.getRouter());
     router.use("/auth", this.authRouter.getRouter());
 
     return router;
@@ -114,16 +119,18 @@ class Server {
 const productsService = new ProductsService();
 const brandsService = new BrandsService();
 const categoriesService = new CategoriesService();
-const currencyService = new CurrencyService();
+const currenciesService = new CurrenciesService();
 const cartService = new CartService();
+const ordersService = new OrdersService();
 const authService = new AuthService();
 
 // Instantiate controllers
 const productsController = new ProductsController(productsService);
 const brandsController = new BrandsController(brandsService);
 const categoriesController = new CategoriesController(categoriesService);
-const currencyController = new CurrencyController(currencyService);
+const currenciesController = new CurrenciesController(currenciesService);
 const cartController = new CartController(cartService);
+const ordersController = new OrdersController(ordersService);
 const authController = new AuthController(authService);
 
 // Instantiate routers
@@ -133,8 +140,12 @@ const categoriesRouter = new CategoriesRouter(
   express.Router(),
   categoriesController
 );
-const currencyRouter = new CurrencyRouter(express.Router(), currencyController);
+const currenciesRouter = new CurrenciesRouter(
+  express.Router(),
+  currenciesController
+);
 const cartRouter = new CartRouter(express.Router(), cartController);
+const ordersRouter = new OrdersRouter(express.Router(), ordersController);
 const authRouter = new AuthRouter(express.Router(), authController);
 
 // Start server
@@ -142,7 +153,8 @@ new Server(
   productsRouter,
   brandsRouter,
   categoriesRouter,
-  currencyRouter,
+  currenciesRouter,
   cartRouter,
+  ordersRouter,
   authRouter
 );

@@ -10,17 +10,24 @@ datasource db {
    ENUMS
 =========================== */
 
-enum ProductStatus {
+enum PRODUCT_STATUS {
   NOT_APPROVED
   WAITING_FOR_APPROVE
   APPROVED
   DELETED
 }
 
-enum UserRole {
+enum USER_ROLE {
   USER
   SELLER
   ADMIN
+}
+
+enum ORDER_STATUS {
+  PENDING
+  PAID
+  COMPLETED
+  CANCELED
 }
 
 /* ===========================
@@ -56,35 +63,39 @@ model Category {
 
 model Currency {
   id     Int    @id @default(autoincrement())
-  code   String @unique // TRY, USD, EUR
-  symbol String // ₺, $, €
+  code   String @unique
+  symbol String
 
-  products Product[]
+  products    Product[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  orders      Order[]
 
   @@map("Currencies")
 }
 
 model Product {
-  id          Int           @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   name        String
   description String
-  stockCount  Int           @default(0) @map("stock_count")
-  price       Decimal       @default(0.0)
+  stockCount  Int            @default(0) @map("stock_count")
+  price       Decimal        @default(0.0)
 
-  brandId     Int           @map("brand_id")
-  categoryId  Int           @map("category_id")
-  currencyId  Int           @map("currency_id")
-  sellerId    Int           @map("seller_id")
+  brandId     Int            @map("brand_id")
+  categoryId  Int            @map("category_id")
+  currencyId  Int            @map("currency_id")
+  sellerId    Int            @map("seller_id")
 
-  status      ProductStatus @default(WAITING_FOR_APPROVE)
+  status      PRODUCT_STATUS @default(WAITING_FOR_APPROVE)
 
-  brand       Brand         @relation(fields: [brandId], references: [id])
-  category    Category      @relation(fields: [categoryId], references: [id])
-  currency    Currency      @relation(fields: [currencyId], references: [id])
-  seller      User          @relation(fields: [sellerId], references: [id])
+  brand       Brand          @relation(fields: [brandId], references: [id])
+  category    Category       @relation(fields: [categoryId], references: [id])
+  currency    Currency       @relation(fields: [currencyId], references: [id])
+  seller      User           @relation(fields: [sellerId], references: [id])
 
-  cartItems   CartItem[]
   images      ProductImage[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
 
   @@index([sellerId])
   @@index([status])
@@ -113,16 +124,15 @@ model ProductImage {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
+  id       Int       @id @default(autoincrement())
   name     String
-  email    String   @unique
+  email    String    @unique
   password String
-  role     UserRole @default(USER)
+  role     USER_ROLE @default(USER)
 
-  cart     Cart?
-
-  // 🔴 SELLER PRODUCTS
   products Product[]
+  cart     Cart?
+  orders   Order[]
 
   @@map("Users")
 }
@@ -141,16 +151,52 @@ model CartItem {
   id            Int      @id @default(autoincrement())
   cartId        Int      @map("cart_id")
   productId     Int      @map("product_id")
+  currencyId    Int      @map("currency_id")
   quantity      Int      @default(1)
   priceSnapshot Decimal  @default(0.0) @map("price_snapshot")
 
-  // TODO (Phase 3):
-  // - currencyId snapshot eklenmeli
-  // - order / payment sırasında ürünün para birimi sabitlenmeli
-  // - product.currencyId değişse bile cart/order etkilenmemeli
-
   cart          Cart     @relation(fields: [cartId], references: [id])
   product       Product  @relation(fields: [productId], references: [id])
+  currency      Currency @relation(fields: [currencyId], references: [id])
 
   @@map("CartItems")
+}
+
+model Order {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @map("user_id")
+  currencyId  Int          @map("currency_id")
+  status      ORDER_STATUS @default(PENDING)
+  totalPrice  Decimal      @default(0.0)
+
+  user        User         @relation(fields: [userId], references: [id])
+  currency    Currency     @relation(fields: [currencyId], references: [id])
+  items       OrderItem[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("Orders")
+}
+
+model OrderItem {
+  id            Int      @id @default(autoincrement())
+  orderId       Int      @map("order_id")
+  productId     Int      @map("product_id")
+  currencyId    Int      @map("currency_id")
+
+  productName   String
+  priceSnapshot Decimal  @default(0.0) @map("price_snapshot")
+  quantity      Int      @default(1)
+
+  order         Order    @relation(fields: [orderId], references: [id])
+  product       Product  @relation(fields: [productId], references: [id])
+  currency      Currency @relation(fields: [currencyId], references: [id])
+
+  createdAt     DateTime @default(now())
+
+  @@index([orderId])
+  @@map("OrderItems")
 }
