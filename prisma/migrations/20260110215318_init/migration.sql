@@ -113,6 +113,15 @@ CREATE TABLE "OrderItems" (
     CONSTRAINT "OrderItems_currency_id_fkey" FOREIGN KEY ("currency_id") REFERENCES "Currencies" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
+-- CreateTable
+CREATE TABLE "Favorites" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "user_id" INTEGER NOT NULL,
+    "product_id" INTEGER NOT NULL,
+    CONSTRAINT "Favorites_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "Users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Favorites_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Products" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Brands_slug_key" ON "Brands"("slug");
 
@@ -138,6 +147,9 @@ CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 CREATE UNIQUE INDEX "Carts_user_id_key" ON "Carts"("user_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "CartItems_cart_id_product_id_key" ON "CartItems"("cart_id", "product_id");
+
+-- CreateIndex
 CREATE INDEX "Orders_user_id_idx" ON "Orders"("user_id");
 
 -- CreateIndex
@@ -145,3 +157,6 @@ CREATE INDEX "Orders_status_idx" ON "Orders"("status");
 
 -- CreateIndex
 CREATE INDEX "OrderItems_order_id_idx" ON "OrderItems"("order_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Favorites_user_id_product_id_key" ON "Favorites"("user_id", "product_id");
