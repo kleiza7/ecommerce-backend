@@ -66,10 +66,10 @@ model Currency {
   code   String @unique
   symbol String
 
-  products    Product[]
-  cartItems   CartItem[]
-  orderItems  OrderItem[]
-  orders      Order[]
+  products   Product[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+  orders     Order[]
 
   @@map("Currencies")
 }
@@ -96,6 +96,7 @@ model Product {
   images      ProductImage[]
   cartItems   CartItem[]
   orderItems  OrderItem[]
+  favorites   Favorite[]
 
   @@index([sellerId])
   @@index([status])
@@ -130,9 +131,10 @@ model User {
   password String
   role     USER_ROLE @default(USER)
 
-  products Product[]
-  cart     Cart?
-  orders   Order[]
+  products  Product[]
+  cart      Cart?
+  orders    Order[]
+  favorites Favorite[]
 
   @@map("Users")
 }
@@ -159,6 +161,7 @@ model CartItem {
   product       Product  @relation(fields: [productId], references: [id])
   currency      Currency @relation(fields: [currencyId], references: [id])
 
+  @@unique([cartId, productId])
   @@map("CartItems")
 }
 
@@ -199,4 +202,16 @@ model OrderItem {
 
   @@index([orderId])
   @@map("OrderItems")
+}
+
+model Favorite {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @map("user_id")
+  productId Int     @map("product_id")
+
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@map("Favorites")
 }

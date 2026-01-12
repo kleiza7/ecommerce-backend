@@ -3,13 +3,14 @@ import dotenv from "dotenv";
 import express, { Application } from "express";
 import path from "path";
 import { prisma } from "./config/prisma";
-import { CurrenciesRouter } from "./routers/Currencies.router";
 
 // Controllers
 import { AuthController } from "./controllers/Auth.controller";
 import { BrandsController } from "./controllers/Brands.controller";
 import { CartController } from "./controllers/Cart.controller";
 import { CategoriesController } from "./controllers/Categories.controller";
+import { CurrenciesController } from "./controllers/Currencies.controller";
+import { FavoritesController } from "./controllers/Favorites.controller";
 import { OrdersController } from "./controllers/Orders.controller";
 import { ProductsController } from "./controllers/Products.controller";
 
@@ -18,6 +19,8 @@ import { AuthRouter } from "./routers/Auth.router";
 import { BrandsRouter } from "./routers/Brands.router";
 import { CartRouter } from "./routers/Cart.router";
 import { CategoriesRouter } from "./routers/Categories.router";
+import { CurrenciesRouter } from "./routers/Currencies.router";
+import { FavoritesRouter } from "./routers/Favorites.router";
 import { OrdersRouter } from "./routers/Orders.router";
 import { ProductsRouter } from "./routers/Products.router";
 
@@ -26,6 +29,8 @@ import { AuthService } from "./services/Auth.service";
 import { BrandsService } from "./services/Brands.service";
 import { CartService } from "./services/Cart.service";
 import { CategoriesService } from "./services/Categories.service";
+import { CurrenciesService } from "./services/Currencies.service";
+import { FavoritesService } from "./services/Favorites.service";
 import { OrdersService } from "./services/Orders.service";
 import { ProductsService } from "./services/Products.service";
 
@@ -34,8 +39,6 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 
 // Swagger
 import { swaggerSpec, swaggerUi, swaggerUiSetup } from "./config/swagger";
-import { CurrenciesController } from "./controllers/Currencies.controller";
-import { CurrenciesService } from "./services/Currencies.service";
 
 dotenv.config();
 
@@ -47,6 +50,7 @@ class Server {
     private currenciesRouter: CurrenciesRouter,
     private cartRouter: CartRouter,
     private ordersRouter: OrdersRouter,
+    private favoritesRouter: FavoritesRouter,
     private authRouter: AuthRouter
   ) {
     this.startServer();
@@ -109,31 +113,40 @@ class Server {
     router.use("/currencies", this.currenciesRouter.getRouter());
     router.use("/cart", this.cartRouter.getRouter());
     router.use("/orders", this.ordersRouter.getRouter());
+    router.use("/favorites", this.favoritesRouter.getRouter());
     router.use("/auth", this.authRouter.getRouter());
 
     return router;
   }
 }
 
-// Instantiate services
+/* ===========================
+   SERVICES
+=========================== */
 const productsService = new ProductsService();
 const brandsService = new BrandsService();
 const categoriesService = new CategoriesService();
 const currenciesService = new CurrenciesService();
 const cartService = new CartService();
 const ordersService = new OrdersService();
+const favoritesService = new FavoritesService();
 const authService = new AuthService();
 
-// Instantiate controllers
+/* ===========================
+   CONTROLLERS
+=========================== */
 const productsController = new ProductsController(productsService);
 const brandsController = new BrandsController(brandsService);
 const categoriesController = new CategoriesController(categoriesService);
 const currenciesController = new CurrenciesController(currenciesService);
 const cartController = new CartController(cartService);
 const ordersController = new OrdersController(ordersService);
+const favoritesController = new FavoritesController(favoritesService);
 const authController = new AuthController(authService);
 
-// Instantiate routers
+/* ===========================
+   ROUTERS
+=========================== */
 const productsRouter = new ProductsRouter(express.Router(), productsController);
 const brandsRouter = new BrandsRouter(express.Router(), brandsController);
 const categoriesRouter = new CategoriesRouter(
@@ -146,9 +159,15 @@ const currenciesRouter = new CurrenciesRouter(
 );
 const cartRouter = new CartRouter(express.Router(), cartController);
 const ordersRouter = new OrdersRouter(express.Router(), ordersController);
+const favoritesRouter = new FavoritesRouter(
+  express.Router(),
+  favoritesController
+);
 const authRouter = new AuthRouter(express.Router(), authController);
 
-// Start server
+/* ===========================
+   START SERVER
+=========================== */
 new Server(
   productsRouter,
   brandsRouter,
@@ -156,5 +175,6 @@ new Server(
   currenciesRouter,
   cartRouter,
   ordersRouter,
+  favoritesRouter,
   authRouter
 );
