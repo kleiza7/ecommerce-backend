@@ -28,7 +28,7 @@ export class OrdersService {
         },
       });
 
-      if (!cart || !cart.items.length) {
+      if (!cart || cart.items.length === 0) {
         throw new AppError("Cart is empty", 400);
       }
 
@@ -38,19 +38,35 @@ export class OrdersService {
         if (item.currencyId !== currencyId) {
           throw new AppError("Mixed currency orders are not allowed", 400);
         }
-
-        if (item.product.stockCount < item.quantity) {
-          throw new AppError(
-            `Insufficient stock for product ${item.product.name}`,
-            400
-          );
-        }
       }
 
       let totalPrice = 0;
 
       for (const item of cart.items) {
         totalPrice += Number(item.priceSnapshot) * item.quantity;
+      }
+
+      for (const item of cart.items) {
+        const updated = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            stockCount: {
+              gte: item.quantity,
+            },
+          },
+          data: {
+            stockCount: {
+              decrement: item.quantity,
+            },
+          },
+        });
+
+        if (updated.count === 0) {
+          throw new AppError(
+            "Some products are out of stock. Please update your cart.",
+            409
+          );
+        }
       }
 
       const order = await tx.order.create({
@@ -72,17 +88,6 @@ export class OrdersService {
           currencyId: item.currencyId,
         })),
       });
-
-      for (const item of cart.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stockCount: {
-              decrement: item.quantity,
-            },
-          },
-        });
-      }
 
       await tx.cartItem.deleteMany({
         where: { cartId: cart.id },
