@@ -24,7 +24,19 @@ export class CartService {
       where: { cartId: cart.id },
       include: {
         product: {
-          include: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            stockCount: true,
+            price: true,
+            status: true,
+
+            brand: { select: { id: true, name: true } },
+            category: { select: { id: true, name: true } },
+            currency: { select: { id: true, code: true, symbol: true } },
+            seller: { select: { id: true, name: true } },
+
             images: {
               select: {
                 thumbUrl: true,
@@ -116,7 +128,19 @@ export class CartService {
         where: { id: itemId },
         include: {
           product: {
-            include: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              stockCount: true,
+              price: true,
+              status: true,
+
+              brand: { select: { id: true, name: true } },
+              category: { select: { id: true, name: true } },
+              currency: { select: { id: true, code: true, symbol: true } },
+              seller: { select: { id: true, name: true } },
+
               images: {
                 select: {
                   thumbUrl: true,
@@ -170,7 +194,19 @@ export class CartService {
         data: { quantity },
         include: {
           product: {
-            include: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              stockCount: true,
+              price: true,
+              status: true,
+
+              brand: { select: { id: true, name: true } },
+              category: { select: { id: true, name: true } },
+              currency: { select: { id: true, code: true, symbol: true } },
+              seller: { select: { id: true, name: true } },
+
               images: {
                 select: {
                   thumbUrl: true,

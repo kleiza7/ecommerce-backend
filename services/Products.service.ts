@@ -46,11 +46,11 @@ export class ProductsService {
           description: true,
           stockCount: true,
           price: true,
-          brandId: true,
-          categoryId: true,
-          currencyId: true,
-          sellerId: true,
           status: true,
+          brand: { select: { id: true, name: true } },
+          category: { select: { id: true, name: true } },
+          currency: { select: { id: true, code: true, symbol: true } },
+          seller: { select: { id: true, name: true } },
           images: {
             select: {
               id: true,
@@ -143,7 +143,19 @@ export class ProductsService {
   async getProductById(id: number) {
     const product = await prisma.product.findUnique({
       where: { id },
-      include: { images: { orderBy: { isPrimary: "desc" } } },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        stockCount: true,
+        price: true,
+        status: true,
+        brand: { select: { id: true, name: true } },
+        category: { select: { id: true, name: true } },
+        currency: { select: { id: true, code: true, symbol: true } },
+        seller: { select: { id: true, name: true } },
+        images: { orderBy: { isPrimary: "desc" } },
+      },
     });
 
     if (!product) throw new AppError("Product not found", 404);
