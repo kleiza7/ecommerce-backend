@@ -21,11 +21,13 @@ export class FavoritesService {
             description: true,
             stockCount: true,
             price: true,
-            brandId: true,
-            categoryId: true,
-            currencyId: true,
-            sellerId: true,
             status: true,
+
+            brand: { select: { id: true, name: true } },
+            category: { select: { id: true, name: true } },
+            currency: { select: { id: true, code: true, symbol: true } },
+            seller: { select: { id: true, name: true } },
+
             images: {
               select: {
                 id: true,
