@@ -20,6 +20,8 @@ export const productListSchema = z.object({
       .optional()
       .default([]),
 
+    query: z.string().trim().min(1).max(100).optional(),
+
     // 🔜 currency filter (Phase 3)
   }),
 });

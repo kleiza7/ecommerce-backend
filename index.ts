@@ -13,6 +13,7 @@ import { CurrenciesController } from "./controllers/Currencies.controller";
 import { FavoritesController } from "./controllers/Favorites.controller";
 import { OrdersController } from "./controllers/Orders.controller";
 import { ProductsController } from "./controllers/Products.controller";
+import { SearchController } from "./controllers/Search.controller";
 
 // Routers
 import { AuthRouter } from "./routers/Auth.router";
@@ -23,6 +24,7 @@ import { CurrenciesRouter } from "./routers/Currencies.router";
 import { FavoritesRouter } from "./routers/Favorites.router";
 import { OrdersRouter } from "./routers/Orders.router";
 import { ProductsRouter } from "./routers/Products.router";
+import { SearchRouter } from "./routers/Search.router";
 
 // Services
 import { AuthService } from "./services/Auth.service";
@@ -33,6 +35,7 @@ import { CurrenciesService } from "./services/Currencies.service";
 import { FavoritesService } from "./services/Favorites.service";
 import { OrdersService } from "./services/Orders.service";
 import { ProductsService } from "./services/Products.service";
+import { SearchService } from "./services/Search.service";
 
 // Middlewares
 import { errorHandler } from "./middlewares/errorHandler.middleware";
@@ -51,7 +54,8 @@ class Server {
     private cartRouter: CartRouter,
     private ordersRouter: OrdersRouter,
     private favoritesRouter: FavoritesRouter,
-    private authRouter: AuthRouter
+    private authRouter: AuthRouter,
+    private searchRouter: SearchRouter
   ) {
     this.startServer();
   }
@@ -115,6 +119,7 @@ class Server {
     router.use("/orders", this.ordersRouter.getRouter());
     router.use("/favorites", this.favoritesRouter.getRouter());
     router.use("/auth", this.authRouter.getRouter());
+    router.use("/search", this.searchRouter.getRouter());
 
     return router;
   }
@@ -131,6 +136,11 @@ const cartService = new CartService();
 const ordersService = new OrdersService();
 const favoritesService = new FavoritesService();
 const authService = new AuthService();
+const searchService = new SearchService(
+  productsService,
+  brandsService,
+  categoriesService
+);
 
 /* ===========================
    CONTROLLERS
@@ -143,6 +153,7 @@ const cartController = new CartController(cartService);
 const ordersController = new OrdersController(ordersService);
 const favoritesController = new FavoritesController(favoritesService);
 const authController = new AuthController(authService);
+const searchController = new SearchController(searchService);
 
 /* ===========================
    ROUTERS
@@ -164,6 +175,7 @@ const favoritesRouter = new FavoritesRouter(
   favoritesController
 );
 const authRouter = new AuthRouter(express.Router(), authController);
+const searchRouter = new SearchRouter(express.Router(), searchController);
 
 /* ===========================
    START SERVER
@@ -176,5 +188,6 @@ new Server(
   cartRouter,
   ordersRouter,
   favoritesRouter,
-  authRouter
+  authRouter,
+  searchRouter
 );

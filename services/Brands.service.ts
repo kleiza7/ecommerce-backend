@@ -67,4 +67,24 @@ export class BrandsService {
 
     return true;
   }
+
+  /* ===========================
+     SEARCH
+  =========================== */
+
+  async searchByName(query: string) {
+    return prisma.brand.findMany({
+      where: {
+        name: {
+          contains: query,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+      take: 5,
+    });
+  }
 }
