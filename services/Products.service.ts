@@ -17,22 +17,35 @@ export class ProductsService {
     categoryIds: number[];
     sellerIds: number[];
     statuses?: PRODUCT_STATUS[];
+    query?: string;
     skip?: number;
     take?: number;
   }) {
-    const { brandIds, categoryIds, sellerIds, statuses, skip, take } = params;
+    const { brandIds, categoryIds, sellerIds, statuses, query, skip, take } =
+      params;
 
     const where: {
       brandId?: { in: number[] };
       categoryId?: { in: number[] };
       sellerId?: { in: number[] };
       status?: { in: PRODUCT_STATUS[] };
+      OR?: {
+        name?: { contains: string };
+        description?: { contains: string };
+      }[];
     } = {};
 
     if (brandIds.length) where.brandId = { in: brandIds };
     if (categoryIds.length) where.categoryId = { in: categoryIds };
     if (sellerIds.length) where.sellerId = { in: sellerIds };
     if (statuses && statuses.length) where.status = { in: statuses };
+
+    if (query) {
+      where.OR = [
+        { name: { contains: query } },
+        { description: { contains: query } },
+      ];
+    }
 
     const [items, total] = await Promise.all([
       prisma.product.findMany({
@@ -88,8 +101,10 @@ export class ProductsService {
     categoryIds: number[];
     sellerIds: number[];
     statuses?: PRODUCT_STATUS[];
+    query?: string;
   }) {
-    const { pagination, brandIds, categoryIds, sellerIds, statuses } = params;
+    const { pagination, brandIds, categoryIds, sellerIds, statuses, query } =
+      params;
 
     const skip = (pagination.page - 1) * pagination.limit;
     const take = pagination.limit;
@@ -99,6 +114,7 @@ export class ProductsService {
       categoryIds,
       sellerIds,
       statuses,
+      query,
       skip,
       take,
     });
@@ -123,14 +139,16 @@ export class ProductsService {
     categoryIds: number[];
     sellerIds: number[];
     statuses?: PRODUCT_STATUS[];
+    query?: string;
   }) {
-    const { brandIds, categoryIds, sellerIds, statuses } = params;
+    const { brandIds, categoryIds, sellerIds, statuses, query } = params;
 
     const { items } = await this.getProductsBaseQuery({
       brandIds,
       categoryIds,
       sellerIds,
       statuses,
+      query,
     });
 
     return items;
@@ -186,9 +204,7 @@ export class ProductsService {
       where: { id: productId },
     });
 
-    if (!product) {
-      throw new AppError("Product not found", 404);
-    }
+    if (!product) throw new AppError("Product not found", 404);
 
     if (product.status === PRODUCT_STATUS.DELETED) {
       throw new AppError("Deleted product status cannot be changed", 400);
@@ -360,5 +376,25 @@ export class ProductsService {
     });
 
     return true;
+  }
+
+  /* ===========================
+     SEARCH (TEXT ONLY)
+  =========================== */
+
+  async searchNamesByText(query: string, limit = 10): Promise<string[]> {
+    const rows = await prisma.product.findMany({
+      where: {
+        status: PRODUCT_STATUS.APPROVED,
+        OR: [
+          { name: { contains: query } },
+          { description: { contains: query } },
+        ],
+      },
+      select: { name: true },
+      take: limit,
+    });
+
+    return rows.map((row) => row.name);
   }
 }

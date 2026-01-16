@@ -18,14 +18,23 @@ export const validate =
       }
 
       const data = parsed.data as {
-        body?: any;
-        params?: any;
-        query?: any;
+        body?: unknown;
+        params?: unknown;
+        query?: Record<string, unknown>;
       };
 
-      if (data.body) req.body = data.body;
-      if (data.params) req.params = data.params;
-      if (data.query) req.query = data.query;
+      // ✅ body overwrite OK
+      if (data.body) {
+        req.body = data.body;
+      }
+
+      // ❌ params overwrite ETMİYORUZ
+      // Zod sadece validate etmiş oluyor
+
+      // ✅ query SET edilmez, MERGE edilir
+      if (data.query) {
+        Object.assign(req.query, data.query);
+      }
 
       next();
     } catch (err) {

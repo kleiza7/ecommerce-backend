@@ -26,12 +26,15 @@ export class ProductsController {
         ? req.body.sellerIds.map(Number)
         : [];
 
+      const query = String(req.body.query ?? "").trim();
+
       const result = await this.productsService.getProductsListWithPagination({
         pagination: { page, limit },
         brandIds,
         categoryIds,
         sellerIds,
         statuses: [PRODUCT_STATUS.APPROVED],
+        query: query.length ? query : undefined,
       });
 
       return res.status(200).json(result);
