@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { CartController } from "../controllers/Cart.controller";
+import { USER_ROLE } from "../enums/UserRole.enum";
+import { checkRole } from "../middlewares/checkRole.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { verifyToken } from "../middlewares/verifyToken.middleware";
 import {
@@ -18,7 +20,12 @@ export class CartRouter {
     /**
      * GET CART
      */
-    this.router.get("/get-cart", verifyToken, this.controller.getCart);
+    this.router.get(
+      "/get-cart",
+      verifyToken,
+      checkRole(USER_ROLE.USER),
+      this.controller.getCart
+    );
 
     /**
      * ADD ITEM
@@ -26,6 +33,7 @@ export class CartRouter {
     this.router.post(
       "/add",
       verifyToken,
+      checkRole(USER_ROLE.USER),
       validate(addToCartSchema),
       this.controller.addItem
     );
@@ -36,6 +44,7 @@ export class CartRouter {
     this.router.put(
       "/update",
       verifyToken,
+      checkRole(USER_ROLE.USER),
       validate(updateCartQuantitySchema),
       this.controller.updateQuantity
     );
@@ -46,6 +55,7 @@ export class CartRouter {
     this.router.post(
       "/merge",
       verifyToken,
+      checkRole(USER_ROLE.USER),
       validate(mergeGuestCartSchema),
       this.controller.mergeGuestCart
     );
@@ -56,6 +66,7 @@ export class CartRouter {
     this.router.delete(
       "/remove/:itemId",
       verifyToken,
+      checkRole(USER_ROLE.USER),
       validate(removeItemSchema),
       this.controller.removeItem
     );
@@ -63,7 +74,12 @@ export class CartRouter {
     /**
      * CLEAR CART
      */
-    this.router.delete("/clear", verifyToken, this.controller.clearCart);
+    this.router.delete(
+      "/clear",
+      verifyToken,
+      checkRole(USER_ROLE.USER),
+      this.controller.clearCart
+    );
   }
 
   public getRouter() {
