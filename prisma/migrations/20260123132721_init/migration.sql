@@ -35,6 +35,8 @@ CREATE TABLE "Products" (
     "currency_id" INTEGER NOT NULL,
     "seller_id" INTEGER NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'WAITING_FOR_APPROVE',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Products_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "Brands" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "Products_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "Categories" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "Products_currency_id_fkey" FOREIGN KEY ("currency_id") REFERENCES "Currencies" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -139,6 +141,12 @@ CREATE INDEX "Products_seller_id_idx" ON "Products"("seller_id");
 
 -- CreateIndex
 CREATE INDEX "Products_status_idx" ON "Products"("status");
+
+-- CreateIndex
+CREATE INDEX "Products_createdAt_idx" ON "Products"("createdAt");
+
+-- CreateIndex
+CREATE INDEX "Products_status_price_idx" ON "Products"("status", "price");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");

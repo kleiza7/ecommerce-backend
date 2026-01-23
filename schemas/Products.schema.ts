@@ -5,24 +5,45 @@ export const productListSchema = z.object({
     page: z.coerce.number().int().min(1).optional(),
     limit: z.coerce.number().int().min(1).max(100).optional(),
 
-    brandIds: z
-      .array(z.coerce.number().int().positive())
+    filter: z
+      .object({
+        brandIds: z
+          .array(z.coerce.number().int().positive())
+          .optional()
+          .default([]),
+
+        categoryIds: z
+          .array(z.coerce.number().int().positive())
+          .optional()
+          .default([]),
+
+        sellerIds: z
+          .array(z.coerce.number().int().positive())
+          .optional()
+          .default([]),
+
+        query: z.string().trim().min(1).max(100).optional(),
+
+        // 🔜 currency filter (Phase 3)
+      })
       .optional()
-      .default([]),
+      .default({
+        brandIds: [],
+        categoryIds: [],
+        sellerIds: [],
+      }),
 
-    categoryIds: z
-      .array(z.coerce.number().int().positive())
+    sort: z
+      .object({
+        field: z.enum(["id", "createdAt", "price"]).optional().default("id"),
+
+        order: z.enum(["asc", "desc"]).optional().default("desc"),
+      })
       .optional()
-      .default([]),
-
-    sellerIds: z
-      .array(z.coerce.number().int().positive())
-      .optional()
-      .default([]),
-
-    query: z.string().trim().min(1).max(100).optional(),
-
-    // 🔜 currency filter (Phase 3)
+      .default({
+        field: "id",
+        order: "desc",
+      }),
   }),
 });
 

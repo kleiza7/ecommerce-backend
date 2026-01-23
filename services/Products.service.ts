@@ -8,21 +8,22 @@ import {
 } from "../utils/ProductImage.util";
 
 export class ProductsService {
-  /* ===========================
-     GET LIST (INTERNAL)
-  =========================== */
-
   private async getProductsBaseQuery(params: {
-    brandIds: number[];
-    categoryIds: number[];
-    sellerIds: number[];
-    statuses?: PRODUCT_STATUS[];
-    query?: string;
+    filter: {
+      brandIds: number[];
+      categoryIds: number[];
+      sellerIds: number[];
+      statuses?: PRODUCT_STATUS[];
+      query?: string;
+    };
+    sort?: {
+      field: "id" | "createdAt" | "price";
+      order: "asc" | "desc";
+    };
     skip?: number;
     take?: number;
   }) {
-    const { brandIds, categoryIds, sellerIds, statuses, query, skip, take } =
-      params;
+    const { filter, sort, skip, take } = params;
 
     const where: {
       brandId?: { in: number[] };
@@ -35,16 +36,33 @@ export class ProductsService {
       }[];
     } = {};
 
-    if (brandIds.length) where.brandId = { in: brandIds };
-    if (categoryIds.length) where.categoryId = { in: categoryIds };
-    if (sellerIds.length) where.sellerId = { in: sellerIds };
-    if (statuses && statuses.length) where.status = { in: statuses };
+    if (filter.brandIds.length) where.brandId = { in: filter.brandIds };
+    if (filter.categoryIds.length)
+      where.categoryId = { in: filter.categoryIds };
+    if (filter.sellerIds.length) where.sellerId = { in: filter.sellerIds };
+    if (filter.statuses?.length) where.status = { in: filter.statuses };
 
-    if (query) {
+    if (filter.query) {
       where.OR = [
-        { name: { contains: query } },
-        { description: { contains: query } },
+        { name: { contains: filter.query } },
+        { description: { contains: filter.query } },
       ];
+    }
+
+    let orderBy: {
+      id?: "asc" | "desc";
+      price?: "asc" | "desc";
+      createdAt?: "asc" | "desc";
+    };
+
+    if (!sort) {
+      orderBy = { id: "desc" };
+    } else if (sort.field === "price") {
+      orderBy = { price: sort.order };
+    } else if (sort.field === "createdAt") {
+      orderBy = { createdAt: sort.order };
+    } else {
+      orderBy = { id: sort.order };
     }
 
     const [items, total] = await Promise.all([
@@ -52,7 +70,7 @@ export class ProductsService {
         where,
         skip,
         take,
-        orderBy: { id: "desc" },
+        orderBy,
         select: {
           id: true,
           name: true,
@@ -88,33 +106,31 @@ export class ProductsService {
     return { items: mappedItems, total };
   }
 
-  /* ===========================
-     GET LIST WITH PAGINATION
-  =========================== */
-
   async getProductsListWithPagination(params: {
     pagination: {
       page: number;
       limit: number;
     };
-    brandIds: number[];
-    categoryIds: number[];
-    sellerIds: number[];
-    statuses?: PRODUCT_STATUS[];
-    query?: string;
+    filter: {
+      brandIds: number[];
+      categoryIds: number[];
+      sellerIds: number[];
+      statuses?: PRODUCT_STATUS[];
+      query?: string;
+    };
+    sort?: {
+      field: "id" | "createdAt" | "price";
+      order: "asc" | "desc";
+    };
   }) {
-    const { pagination, brandIds, categoryIds, sellerIds, statuses, query } =
-      params;
+    const { pagination, filter, sort } = params;
 
     const skip = (pagination.page - 1) * pagination.limit;
     const take = pagination.limit;
 
     const { items, total } = await this.getProductsBaseQuery({
-      brandIds,
-      categoryIds,
-      sellerIds,
-      statuses,
-      query,
+      filter,
+      sort,
       skip,
       take,
     });
@@ -130,33 +146,28 @@ export class ProductsService {
     };
   }
 
-  /* ===========================
-     GET LIST WITHOUT PAGINATION
-  =========================== */
-
   async getProductsListWithoutPagination(params: {
-    brandIds: number[];
-    categoryIds: number[];
-    sellerIds: number[];
-    statuses?: PRODUCT_STATUS[];
-    query?: string;
+    filter: {
+      brandIds: number[];
+      categoryIds: number[];
+      sellerIds: number[];
+      statuses?: PRODUCT_STATUS[];
+      query?: string;
+    };
+    sort?: {
+      field: "id" | "createdAt" | "price";
+      order: "asc" | "desc";
+    };
   }) {
-    const { brandIds, categoryIds, sellerIds, statuses, query } = params;
+    const { filter, sort } = params;
 
     const { items } = await this.getProductsBaseQuery({
-      brandIds,
-      categoryIds,
-      sellerIds,
-      statuses,
-      query,
+      filter,
+      sort,
     });
 
     return items;
   }
-
-  /* ===========================
-     GET BY ID
-  =========================== */
 
   async getProductById(id: number) {
     const product = await prisma.product.findUnique({
@@ -190,10 +201,6 @@ export class ProductsService {
     };
   }
 
-  /* ===========================
-     ADMIN - CHANGE PRODUCT STATUS
-  =========================== */
-
   async changeProductStatus(params: {
     productId: number;
     status: PRODUCT_STATUS;
@@ -218,10 +225,6 @@ export class ProductsService {
     return true;
   }
 
-  /* ===========================
-     CREATE
-  =========================== */
-
   async createProduct(
     data: {
       name: string;
@@ -233,7 +236,7 @@ export class ProductsService {
       currencyId: number;
       sellerId: number;
     },
-    files: Express.Multer.File[]
+    files: Express.Multer.File[],
   ) {
     if (!files?.length) {
       throw new AppError("At least 1 image is required", 400);
@@ -267,10 +270,6 @@ export class ProductsService {
     return this.getProductById(product.id);
   }
 
-  /* ===========================
-     UPDATE
-  =========================== */
-
   async updateProduct(
     payload: {
       id: number;
@@ -284,7 +283,7 @@ export class ProductsService {
       sellerId: number;
       deletedImageIds: number[];
     },
-    newAddedImages: Express.Multer.File[]
+    newAddedImages: Express.Multer.File[],
   ) {
     const {
       id,
@@ -325,7 +324,7 @@ export class ProductsService {
 
       if (deletedImageIds.length) {
         const imagesToDelete = product.images.filter((img) =>
-          deletedImageIds.includes(img.id)
+          deletedImageIds.includes(img.id),
         );
 
         await deleteProductImages(imagesToDelete);
@@ -360,10 +359,6 @@ export class ProductsService {
     });
   }
 
-  /* ===========================
-     DELETE (SOFT)
-  =========================== */
-
   async deleteProduct(id: number, sellerId: number) {
     const product = await prisma.product.findUnique({ where: { id } });
 
@@ -377,10 +372,6 @@ export class ProductsService {
 
     return true;
   }
-
-  /* ===========================
-     SEARCH (TEXT ONLY)
-  =========================== */
 
   async searchNamesByText(query: string, limit = 10): Promise<string[]> {
     const rows = await prisma.product.findMany({
