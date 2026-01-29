@@ -19,12 +19,10 @@ export class OrdersService {
                   stockCount: true,
                   price: true,
                   status: true,
-
                   brand: { select: { id: true, name: true } },
                   category: { select: { id: true, name: true } },
                   currency: { select: { id: true, code: true, symbol: true } },
                   seller: { select: { id: true, name: true } },
-
                   images: {
                     select: {
                       id: true,
@@ -53,9 +51,17 @@ export class OrdersService {
       }
 
       let totalPrice = 0;
-
       for (const item of cart.items) {
         totalPrice += Number(item.priceSnapshot) * item.quantity;
+      }
+
+      for (const item of cart.items) {
+        await tx.$queryRaw`
+          SELECT id
+          FROM "Products"
+          WHERE id = ${item.productId}
+          FOR UPDATE
+        `;
       }
 
       for (const item of cart.items) {
@@ -76,7 +82,7 @@ export class OrdersService {
         if (updated.count === 0) {
           throw new AppError(
             "Some products are out of stock. Please update your cart.",
-            409
+            409,
           );
         }
       }
@@ -118,12 +124,10 @@ export class OrdersService {
                   stockCount: true,
                   price: true,
                   status: true,
-
                   brand: { select: { id: true, name: true } },
                   category: { select: { id: true, name: true } },
                   currency: { select: { id: true, code: true, symbol: true } },
                   seller: { select: { id: true, name: true } },
-
                   images: {
                     select: {
                       id: true,
@@ -238,12 +242,10 @@ export class OrdersService {
                 stockCount: true,
                 price: true,
                 status: true,
-
                 brand: { select: { id: true, name: true } },
                 category: { select: { id: true, name: true } },
                 currency: { select: { id: true, code: true, symbol: true } },
                 seller: { select: { id: true, name: true } },
-
                 images: {
                   select: {
                     id: true,
@@ -288,12 +290,10 @@ export class OrdersService {
                 stockCount: true,
                 price: true,
                 status: true,
-
                 brand: { select: { id: true, name: true } },
                 category: { select: { id: true, name: true } },
                 currency: { select: { id: true, code: true, symbol: true } },
                 seller: { select: { id: true, name: true } },
-
                 images: {
                   select: {
                     id: true,
