@@ -55,7 +55,7 @@ class Server {
     private ordersRouter: OrdersRouter,
     private favoritesRouter: FavoritesRouter,
     private authRouter: AuthRouter,
-    private searchRouter: SearchRouter
+    private searchRouter: SearchRouter,
   ) {
     this.startServer();
   }
@@ -92,13 +92,13 @@ class Server {
     prisma
       .$connect()
       .then(() => {
-        console.log("🟢 Connected to SQLite via Prisma");
+        console.log("🟢 Connected to PostgreSQL via Prisma");
         app.listen(port, () => {
           console.log(`🔥 Server running at http://localhost:${port}`);
           console.log(`📡 API Base URL: http://localhost:${port}/api`);
           console.log(`📘 Swagger Docs: http://localhost:${port}/api-docs`);
           console.log(
-            `📄 Swagger JSON: http://localhost:${port}/api-docs/swagger.json`
+            `📄 Swagger JSON: http://localhost:${port}/api-docs/swagger.json`,
           );
           console.log(`🖼️ Static uploads: http://localhost:${port}/uploads`);
         });
@@ -139,7 +139,7 @@ const authService = new AuthService();
 const searchService = new SearchService(
   productsService,
   brandsService,
-  categoriesService
+  categoriesService,
 );
 
 /* ===========================
@@ -162,17 +162,17 @@ const productsRouter = new ProductsRouter(express.Router(), productsController);
 const brandsRouter = new BrandsRouter(express.Router(), brandsController);
 const categoriesRouter = new CategoriesRouter(
   express.Router(),
-  categoriesController
+  categoriesController,
 );
 const currenciesRouter = new CurrenciesRouter(
   express.Router(),
-  currenciesController
+  currenciesController,
 );
 const cartRouter = new CartRouter(express.Router(), cartController);
 const ordersRouter = new OrdersRouter(express.Router(), ordersController);
 const favoritesRouter = new FavoritesRouter(
   express.Router(),
-  favoritesController
+  favoritesController,
 );
 const authRouter = new AuthRouter(express.Router(), authController);
 const searchRouter = new SearchRouter(express.Router(), searchController);
@@ -189,5 +189,5 @@ new Server(
   ordersRouter,
   favoritesRouter,
   authRouter,
-  searchRouter
+  searchRouter,
 );
