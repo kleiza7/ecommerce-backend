@@ -4,7 +4,11 @@ import { generateSlug } from "../utils/Slug.util";
 
 export class BrandsService {
   async getAllBrands() {
-    return prisma.brand.findMany();
+    return prisma.brand.findMany({
+      orderBy: {
+        name: "asc",
+      },
+    });
   }
 
   async getBrandById(id: number) {
@@ -85,6 +89,9 @@ export class BrandsService {
         slug: true,
       },
       take: 5,
+      orderBy: {
+        name: "asc",
+      },
     });
   }
 }
