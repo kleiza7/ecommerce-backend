@@ -12,7 +12,10 @@ import {
 } from "../schemas/Brands.schema";
 
 export class BrandsRouter {
-  constructor(private router: Router, private controller: BrandsController) {
+  constructor(
+    private router: Router,
+    private controller: BrandsController,
+  ) {
     this.setupRoutes();
   }
 
@@ -22,31 +25,31 @@ export class BrandsRouter {
     this.router.get(
       "/get-by-id/:id",
       validate(brandIdParamSchema),
-      this.controller.getBrandById
+      this.controller.getBrandById,
     );
 
     this.router.post(
       "/create",
       verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      checkRole(USER_ROLE.ADMIN),
       validate(createBrandSchema),
-      this.controller.createBrand
+      this.controller.createBrand,
     );
 
     this.router.put(
       "/update",
       verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      checkRole(USER_ROLE.ADMIN),
       validate(updateBrandSchema),
-      this.controller.updateBrand
+      this.controller.updateBrand,
     );
 
     this.router.delete(
       "/delete/:id",
       verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      checkRole(USER_ROLE.ADMIN),
       validate(brandIdParamSchema),
-      this.controller.deleteBrand
+      this.controller.deleteBrand,
     );
   }
 
