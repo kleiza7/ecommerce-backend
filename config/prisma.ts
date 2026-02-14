@@ -8,44 +8,42 @@ const adapter = new PrismaPg({ connectionString });
 
 export const prisma = new PrismaClient({
   adapter,
-})
-  // TODO: search this after
-  .$extends({
-    result: {
-      product: {
-        price: {
-          needs: { price: true },
-          compute(product) {
-            return Number(product.price);
-          },
-        },
-      },
-
-      cartItem: {
-        priceSnapshot: {
-          needs: { priceSnapshot: true },
-          compute(cartItem) {
-            return Number(cartItem.priceSnapshot);
-          },
-        },
-      },
-
-      order: {
-        totalPrice: {
-          needs: { totalPrice: true },
-          compute(order) {
-            return Number(order.totalPrice);
-          },
-        },
-      },
-
-      orderItem: {
-        priceSnapshot: {
-          needs: { priceSnapshot: true },
-          compute(orderItem) {
-            return Number(orderItem.priceSnapshot);
-          },
+}).$extends({
+  result: {
+    product: {
+      price: {
+        needs: { price: true },
+        compute(product) {
+          return Number(product.price);
         },
       },
     },
-  });
+
+    cartItem: {
+      priceSnapshot: {
+        needs: { priceSnapshot: true },
+        compute(cartItem) {
+          return Number(cartItem.priceSnapshot);
+        },
+      },
+    },
+
+    order: {
+      totalPrice: {
+        needs: { totalPrice: true },
+        compute(order) {
+          return Number(order.totalPrice);
+        },
+      },
+    },
+
+    orderItem: {
+      priceSnapshot: {
+        needs: { priceSnapshot: true },
+        compute(orderItem) {
+          return Number(orderItem.priceSnapshot);
+        },
+      },
+    },
+  },
+});
