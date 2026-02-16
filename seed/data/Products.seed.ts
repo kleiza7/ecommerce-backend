@@ -27,54 +27,61 @@ const ensureUploadFolders = async () => {
   }
 };
 
-const ensureDummyImages = async () => {
-  for (const img of DUMMY_IMAGES) {
-    const source = path.join(SEED_IMAGES, img);
+/**
+ * 🔥 Her product için unique image üretir
+ * base dummy image’ı kopyalar ama dosya adını benzersiz yapar
+ */
+const createProductImages = async (
+  baseImg: string,
+  productId: number,
+  index: number,
+) => {
+  const imageNumber = index + 1;
+  const uniqueName = `product-${productId}-${imageNumber}.jpg`;
+  const source = path.join(SEED_IMAGES, baseImg);
 
-    const original = path.join(UPLOAD_ROOT, "original", img);
-    const thumb = path.join(UPLOAD_ROOT, "thumb", img);
-    const medium = path.join(UPLOAD_ROOT, "medium", img);
-    const large = path.join(UPLOAD_ROOT, "large", img);
+  const original = path.join(UPLOAD_ROOT, "original", uniqueName);
+  const thumb = path.join(UPLOAD_ROOT, "thumb", uniqueName);
+  const medium = path.join(UPLOAD_ROOT, "medium", uniqueName);
+  const large = path.join(UPLOAD_ROOT, "large", uniqueName);
 
-    try {
-      await fs.access(original);
-      continue;
-    } catch {}
+  await fs.copyFile(source, original);
+  await sharp(original).resize(200).toFile(thumb);
+  await sharp(original).resize(600).toFile(medium);
+  await sharp(original).resize(1200).toFile(large);
 
-    await fs.copyFile(source, original);
-    await sharp(original).resize(200).toFile(thumb);
-    await sharp(original).resize(600).toFile(medium);
-    await sharp(original).resize(1200).toFile(large);
-  }
+  return {
+    originalUrl: `/uploads/products/original/${uniqueName}`,
+    thumbUrl: `/uploads/products/thumb/${uniqueName}`,
+    mediumUrl: `/uploads/products/medium/${uniqueName}`,
+    largeUrl: `/uploads/products/large/${uniqueName}`,
+    publicId: null,
+  };
 };
 
 /* ===========================
-   IMAGE URL FACTORY
+   CLOUDINARY
 =========================== */
 
-const getLocalImageUrls = (img: string) => ({
-  originalUrl: `/uploads/products/original/${img}`,
-  thumbUrl: `/uploads/products/thumb/${img}`,
-  mediumUrl: `/uploads/products/medium/${img}`,
-  largeUrl: `/uploads/products/large/${img}`,
-  publicId: null,
-});
-
-/**
- * 🔥 CDN CACHE
- * Aynı dummy image CDN'e SADECE 1 KERE yüklenir
- */
 const cloudinaryCache = new Map<string, any>();
 
-const uploadToCloudinary = async (img: string) => {
-  if (cloudinaryCache.has(img)) {
-    return cloudinaryCache.get(img);
+const uploadToCloudinary = async (
+  img: string,
+  productId: number,
+  index: number,
+) => {
+  const imageNumber = index + 1;
+  const cacheKey = `${img}-${productId}-${imageNumber}`;
+
+  if (cloudinaryCache.has(cacheKey)) {
+    return cloudinaryCache.get(cacheKey);
   }
 
   const source = path.join(SEED_IMAGES, img);
 
   const result = await cloudinary.uploader.upload(source, {
     folder: "products",
+    public_id: `product-${productId}-${imageNumber}`,
   });
 
   const data = {
@@ -85,7 +92,7 @@ const uploadToCloudinary = async (img: string) => {
     publicId: result.public_id,
   };
 
-  cloudinaryCache.set(img, data);
+  cloudinaryCache.set(cacheKey, data);
   return data;
 };
 
@@ -93,12 +100,11 @@ const rand = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
 export const seedProducts = async () => {
   console.log(
-    `🌱 Seeding products (${isProd ? "PROD / CDN" : "LOCAL / DISK"})`
+    `🌱 Seeding products (${isProd ? "PROD / CDN" : "LOCAL / DISK"})`,
   );
 
   if (!isProd) {
     await ensureUploadFolders();
-    await ensureDummyImages();
   }
 
   const brands = await prisma.brand.findMany();
@@ -124,7 +130,7 @@ export const seedProducts = async () => {
   const sellerIds = sellers.map((s) => s.id);
 
   const leafCategories = categories.filter(
-    (c) => !categories.some((x) => x.parentId === c.id)
+    (c) => !categories.some((x) => x.parentId === c.id),
   );
 
   for (const category of leafCategories) {
@@ -145,10 +151,11 @@ export const seedProducts = async () => {
         },
       });
 
+      // 🔥 Her product için 4 farklı fiziksel image oluştur
       for (let j = 0; j < DUMMY_IMAGES.length; j++) {
         const imageData = isProd
-          ? await uploadToCloudinary(DUMMY_IMAGES[j])
-          : getLocalImageUrls(DUMMY_IMAGES[j]);
+          ? await uploadToCloudinary(DUMMY_IMAGES[j], product.id, j)
+          : await createProductImages(DUMMY_IMAGES[j], product.id, j);
 
         await prisma.productImage.create({
           data: {
