@@ -3,10 +3,6 @@ import { AppError } from "../errors/AppError";
 import { getUrlWithBaseUrl } from "../utils/Common.util";
 
 export class FavoritesService {
-  /* ===========================
-     GET FAVORITES (USER)
-     → PRODUCT LIST CARD FORMAT
-  =========================== */
   async getFavoritesListByUser(userId: number) {
     const favorites = await prisma.favorite.findMany({
       where: { userId },
@@ -55,9 +51,6 @@ export class FavoritesService {
     return mappedFavorites;
   }
 
-  /* ===========================
-     TOGGLE FAVORITE
-  =========================== */
   async toggleFavorite(params: { userId: number; productId: number }) {
     const { userId, productId } = params;
 
@@ -97,10 +90,6 @@ export class FavoritesService {
     return { isFavorited: true };
   }
 
-  /* ===========================
-     MERGE GUEST FAVORITES
-     (LOGIN SONRASI)
-  =========================== */
   async mergeGuestFavorites(userId: number, productIds: number[]) {
     if (!productIds.length) {
       return this.getFavoritesListByUser(userId);
@@ -118,7 +107,7 @@ export class FavoritesService {
       const existingSet = new Set(existing.map((f) => f.productId));
 
       const toCreate = productIds.filter(
-        (productId) => !existingSet.has(productId)
+        (productId) => !existingSet.has(productId),
       );
 
       if (toCreate.length > 0) {

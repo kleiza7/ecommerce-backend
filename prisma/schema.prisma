@@ -6,9 +6,7 @@ datasource db {
   provider = "postgresql"
 }
 
-/* ===========================
-   ENUMS
-=========================== */
+// Enums
 
 enum PRODUCT_STATUS {
   NOT_APPROVED
@@ -30,9 +28,7 @@ enum ORDER_STATUS {
   CANCELED
 }
 
-/* ===========================
-   MODELS
-=========================== */
+// Models
 
 model Brand {
   id       Int       @id @default(autoincrement())

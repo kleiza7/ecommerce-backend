@@ -8,13 +8,9 @@ import { prisma } from "../config/prisma";
 const UPLOAD_ROOT = path.join(__dirname, "..", "uploads", "products");
 const isProd = process.env.NODE_ENV === "production";
 
-/* ===========================
-   LOCAL IMPLEMENTATION
-=========================== */
-
 const localProcessImages = async (
   productId: number,
-  files: Express.Multer.File[]
+  files: Express.Multer.File[],
 ): Promise<void> => {
   const folders = ["original", "thumb", "medium", "large"] as const;
 
@@ -50,13 +46,9 @@ const localProcessImages = async (
   }
 };
 
-/* ===========================
-   PRODUCTION IMPLEMENTATION
-=========================== */
-
 const prodProcessImages = async (
   productId: number,
-  files: Express.Multer.File[]
+  files: Express.Multer.File[],
 ): Promise<void> => {
   for (const file of files) {
     const uploadResult = await new Promise<{
@@ -90,13 +82,9 @@ const prodProcessImages = async (
   }
 };
 
-/* ===========================
-   PUBLIC API — CREATE / UPDATE
-=========================== */
-
 export const processProductImages = async (
   productId: number,
-  files: Express.Multer.File[]
+  files: Express.Multer.File[],
 ): Promise<void> => {
   if (!files?.length) return;
 
@@ -118,10 +106,6 @@ export const processProductImages = async (
     });
   }
 };
-
-/* ===========================
-   DELETE (LOCAL + PROD)
-=========================== */
 
 const deleteLocalImages = async (image: ProductImage): Promise<void> => {
   const urls = [
@@ -149,7 +133,7 @@ const deleteProdImages = async (image: ProductImage): Promise<void> => {
 };
 
 export const deleteProductImages = async (
-  images: ProductImage[]
+  images: ProductImage[],
 ): Promise<void> => {
   if (!images.length) return;
 

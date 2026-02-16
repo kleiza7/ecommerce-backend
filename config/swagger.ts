@@ -47,7 +47,7 @@ export const swaggerSpec = swaggerJsdoc(swaggerOptions);
 export const swaggerUiSetup = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const spec = swaggerSpec as OpenAPIV3.Document;
 

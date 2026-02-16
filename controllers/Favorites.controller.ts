@@ -5,20 +5,16 @@ import { FavoritesService } from "../services/Favorites.service";
 export class FavoritesController {
   constructor(private favoritesService: FavoritesService) {}
 
-  /* ===========================
-     GET FAVORITES BY USER
-  =========================== */
   getFavoritesListByUser = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const userId = req.user!.id;
 
-      const favorites = await this.favoritesService.getFavoritesListByUser(
-        userId
-      );
+      const favorites =
+        await this.favoritesService.getFavoritesListByUser(userId);
 
       return res.status(200).json(favorites);
     } catch (err) {
@@ -26,13 +22,10 @@ export class FavoritesController {
     }
   };
 
-  /* ===========================
-     TOGGLE FAVORITE
-  =========================== */
   toggleFavorite = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const userId = req.user!.id;
@@ -49,13 +42,10 @@ export class FavoritesController {
     }
   };
 
-  /* ===========================
-     MERGE GUEST FAVORITES
-  =========================== */
   mergeGuestFavorites = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const userId = req.user!.id;
@@ -63,7 +53,7 @@ export class FavoritesController {
 
       const merged = await this.favoritesService.mergeGuestFavorites(
         userId,
-        productIds.map(Number)
+        productIds.map(Number),
       );
 
       return res.status(200).json(merged);

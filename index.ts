@@ -67,12 +67,12 @@ class Server {
     app.use(express.json());
     app.use(cors());
 
-    // 🟢 STATIC SERVE — uploads root'tan çalışsın
+    // INFO: STATIC SERVE — uploads root'tan çalışsın
     const uploadsPath = path.join(process.cwd(), "uploads");
     console.log("📂 Serving uploads from:", uploadsPath);
     app.use("/uploads", express.static(uploadsPath));
 
-    // 🟢 Swagger JSON
+    // Swagger JSON
     if (process.env.NODE_ENV !== "production") {
       app.get("/api-docs/swagger.json", (_req, res) => {
         res.setHeader("Content-Type", "application/json");
@@ -80,13 +80,13 @@ class Server {
       });
     }
 
-    // 🟠 Swagger UI
+    // Swagger UI
     app.use("/api-docs", swaggerUi.serve, swaggerUiSetup);
 
-    // 🌍 API prefix
+    // API prefix
     app.use("/api", this.mountRouters());
 
-    // 🔥 Global error handler
+    // Global error handler
     app.use(errorHandler);
 
     prisma
@@ -125,9 +125,7 @@ class Server {
   }
 }
 
-/* ===========================
-   SERVICES
-=========================== */
+// Services
 const productsService = new ProductsService();
 const brandsService = new BrandsService();
 const categoriesService = new CategoriesService();
@@ -142,9 +140,7 @@ const searchService = new SearchService(
   categoriesService,
 );
 
-/* ===========================
-   CONTROLLERS
-=========================== */
+// Controllers
 const productsController = new ProductsController(productsService);
 const brandsController = new BrandsController(brandsService);
 const categoriesController = new CategoriesController(categoriesService);
@@ -155,9 +151,7 @@ const favoritesController = new FavoritesController(favoritesService);
 const authController = new AuthController(authService);
 const searchController = new SearchController(searchService);
 
-/* ===========================
-   ROUTERS
-=========================== */
+// Routers
 const productsRouter = new ProductsRouter(express.Router(), productsController);
 const brandsRouter = new BrandsRouter(express.Router(), brandsController);
 const categoriesRouter = new CategoriesRouter(
@@ -177,9 +171,6 @@ const favoritesRouter = new FavoritesRouter(
 const authRouter = new AuthRouter(express.Router(), authController);
 const searchRouter = new SearchRouter(express.Router(), searchController);
 
-/* ===========================
-   START SERVER
-=========================== */
 new Server(
   productsRouter,
   brandsRouter,

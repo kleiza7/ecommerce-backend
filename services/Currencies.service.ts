@@ -48,7 +48,6 @@ export class CurrenciesService {
       throw new AppError("Currency not found", 404);
     }
 
-    // başka bir currency aynı code'u kullanıyor mu?
     const existingCurrency = await prisma.currency.findUnique({
       where: { code },
     });

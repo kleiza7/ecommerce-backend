@@ -17,20 +17,12 @@ const DUMMY_IMAGES = [
   "dummy-image-4.jpg",
 ];
 
-/* ===========================
-   LOCAL HELPERS
-=========================== */
-
 const ensureUploadFolders = async () => {
   for (const f of ["original", "thumb", "medium", "large"]) {
     await fs.mkdir(path.join(UPLOAD_ROOT, f), { recursive: true });
   }
 };
 
-/**
- * 🔥 Her product için unique image üretir
- * base dummy image’ı kopyalar ama dosya adını benzersiz yapar
- */
 const createProductImages = async (
   baseImg: string,
   productId: number,
@@ -58,10 +50,6 @@ const createProductImages = async (
     publicId: null,
   };
 };
-
-/* ===========================
-   CLOUDINARY
-=========================== */
 
 const cloudinaryCache = new Map<string, any>();
 
@@ -151,7 +139,7 @@ export const seedProducts = async () => {
         },
       });
 
-      // 🔥 Her product için 4 farklı fiziksel image oluştur
+      // INFO: Her product için 4 farklı fiziksel image oluştur
       for (let j = 0; j < DUMMY_IMAGES.length; j++) {
         const imageData = isProd
           ? await uploadToCloudinary(DUMMY_IMAGES[j], product.id, j)

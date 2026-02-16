@@ -3,10 +3,6 @@ import { AppError } from "../errors/AppError";
 import { generateSlug } from "../utils/Slug.util";
 
 export class CategoriesService {
-  /**
-   * Flat + ordered category list
-   * Frontend builds the tree
-   */
   async getAllCategories() {
     return prisma.category.findMany({
       orderBy: [{ parentId: "asc" }, { displayOrder: "asc" }],
@@ -72,7 +68,7 @@ export class CategoriesService {
       throw new AppError("Category not found", 404);
     }
 
-    // 🔒 Parent validation (full update olduğu için her zaman çalışır)
+    // INFO: Parent validation (full update olduğu için her zaman çalışır)
     if (parentId !== null) {
       if (parentId === id) {
         throw new AppError("A category cannot be its own parent", 400);
@@ -117,7 +113,7 @@ export class CategoriesService {
     if (hasChildren) {
       throw new AppError(
         "Category has child categories and cannot be deleted",
-        400
+        400,
       );
     }
 
@@ -127,10 +123,6 @@ export class CategoriesService {
 
     return true;
   }
-
-  /* ===========================
-     SEARCH
-  =========================== */
 
   async searchByName(query: string) {
     return prisma.category.findMany({

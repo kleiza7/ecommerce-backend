@@ -7,19 +7,12 @@ export const seedUsers = async () => {
 
   await prisma.user.createMany({
     data: [
-      /* =========================
-         ADMIN
-      ========================= */
       {
         name: "Admin",
         email: "admin@example.com",
         password: hashedPassword,
         role: USER_ROLE.ADMIN,
       },
-
-      /* =========================
-         REGULAR USERS
-      ========================= */
       {
         name: "User 1",
         email: "user1@example.com",
@@ -32,10 +25,6 @@ export const seedUsers = async () => {
         password: hashedPassword,
         role: USER_ROLE.USER,
       },
-
-      /* =========================
-         SELLERS
-      ========================= */
       {
         name: "Seller 1",
         email: "seller1@example.com",
