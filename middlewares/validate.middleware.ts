@@ -23,15 +23,15 @@ export const validate =
         query?: Record<string, unknown>;
       };
 
-      // ✅ body overwrite OK
+      // INFO: body overwrite OK
       if (data.body) {
         req.body = data.body;
       }
 
-      // ❌ params overwrite ETMİYORUZ
-      // Zod sadece validate etmiş oluyor
+      // INFO: params overwrite ETMİYORUZ
+      // INFO: Zod sadece validate etmiş oluyor
 
-      // ✅ query SET edilmez, MERGE edilir
+      // INFO: query SET edilmez, MERGE edilir
       if (data.query) {
         Object.assign(req.query, data.query);
       }

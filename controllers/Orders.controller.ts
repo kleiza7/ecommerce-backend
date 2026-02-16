@@ -5,13 +5,10 @@ import { OrdersService } from "../services/Orders.service";
 export class OrdersController {
   constructor(private ordersService: OrdersService) {}
 
-  /* ===========================
-     CREATE (CART -> ORDER)
-  =========================== */
   createOrder = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const userId = req.user!.id;
@@ -24,13 +21,10 @@ export class OrdersController {
     }
   };
 
-  /* ===========================
-     COMPLETE PAYMENT
-  =========================== */
   completePayment = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const orderId = Number(req.params.id);
@@ -46,13 +40,10 @@ export class OrdersController {
     }
   };
 
-  /* ===========================
-     CANCEL
-  =========================== */
   cancelOrder = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const orderId = Number(req.params.id);
@@ -68,13 +59,10 @@ export class OrdersController {
     }
   };
 
-  /* ===========================
-     GET LIST BY USER
-  =========================== */
   getOrdersListByUser = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const userId = req.user!.id;
@@ -87,13 +75,10 @@ export class OrdersController {
     }
   };
 
-  /* ===========================
-     GET BY ID
-  =========================== */
   getOrderById = async (
     req: AuthenticatedRequest,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const orderId = Number(req.params.id);

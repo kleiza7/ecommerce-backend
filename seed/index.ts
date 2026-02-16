@@ -10,7 +10,7 @@ const main = async () => {
   try {
     console.log("🌱 Running Prisma Seed...");
 
-    // ORDER MATTERS
+    // WARNING: Order matters
     console.log("➡ Seeding categories...");
     await seedCategories();
 

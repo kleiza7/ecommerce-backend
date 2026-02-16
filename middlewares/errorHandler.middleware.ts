@@ -7,9 +7,9 @@ export const errorHandler = (
   err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  // 🔑 Eğer response zaten gönderildiyse zinciri kırma
+  // INFO: Eğer response zaten gönderildiyse zinciri kırma
   if (res.headersSent) {
     return next(err);
   }
@@ -91,7 +91,7 @@ export const errorHandler = (
     });
   }
 
-  // 🔑 En sonda mutlaka generic error
+  // INFO: En sonda mutlaka generic error
   return res.status(500).json({
     message: "Something went wrong",
   });

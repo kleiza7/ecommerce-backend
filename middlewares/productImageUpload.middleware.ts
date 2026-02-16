@@ -9,10 +9,8 @@ const makeUploader = (folder: string, fieldName: string, maxCount: number) => {
   let storage: multer.StorageEngine;
 
   if (isProd) {
-    // 🔥 PROD → MEMORY (Cloudinary için)
     storage = multer.memoryStorage();
   } else {
-    // 🟢 LOCAL → DISK
     const uploadDir = path.join(__dirname, "..", "uploads", folder, "original");
 
     if (!fs.existsSync(uploadDir)) {
@@ -54,5 +52,5 @@ export const uploadProductImages = makeUploader("products", "images", 10);
 export const uploadNewProductImages = makeUploader(
   "products",
   "newAddedImages",
-  10
+  10,
 );

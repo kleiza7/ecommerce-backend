@@ -23,8 +23,6 @@ export const productListSchema = z.object({
           .default([]),
 
         query: z.string().trim().min(1).max(100).optional(),
-
-        // 🔜 currency filter (Phase 3)
       })
       .optional()
       .default({
@@ -60,7 +58,7 @@ export const createProductSchema = z.object({
     categoryId: z.coerce.number().int().positive("Invalid category ID"),
     currencyId: z.coerce.number().int().positive("Invalid currency ID"),
 
-    // ⚠️ Images are NOT validated here — handled by Multer
+    // WARNING: Images are NOT validated here — handled by Multer
   }),
 });
 
@@ -77,7 +75,7 @@ export const updateProductSchema = z.object({
     brandId: z.coerce.number().int().positive("Invalid brand ID"),
     categoryId: z.coerce.number().int().positive("Invalid category ID"),
     currencyId: z.coerce.number().int().positive("Invalid currency ID"),
-    // ⚠️ Images optional & handled by Multer
+    // WARNING: Images optional & handled by Multer
     deletedImageIds: z.string(),
   }),
 });
