@@ -2,11 +2,11 @@
  * @swagger
  * tags:
  *   name: Cart
- *   description: User cart management endpoints
+ *   description: Cart endpoints (USER only)
  */
 
 ///////////////////////////////////////////////////////////////
-// GET CART (USER ONLY)
+// GET CART
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
@@ -18,40 +18,115 @@
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Cart items retrieved successfully
+ *         description: Cart retrieved successfully
  *         content:
  *           application/json:
- *             example:
- *               items:
- *                 - id: 1
- *                   cartId: 2
- *                   productId: 5
- *                   currencyId: 1
- *                   quantity: 2
- *                   priceSnapshot: 1999
- *                   product:
- *                     id: 5
- *                     name: "iPhone 16"
- *                     description: "Flagship phone"
- *                     stockCount: 25
- *                     price: 1999
- *                     status: "APPROVED"
- *                     brand:
- *                       id: 1
- *                       name: "Apple"
- *                     category:
- *                       id: 4
- *                       name: "Smartphones"
- *                     currency:
- *                       id: 1
- *                       code: "USD"
- *                       symbol: "$"
- *                     seller:
- *                       id: 3
- *                       name: "Sapphire Store"
- *                     images:
- *                       - thumbUrl: "http://localhost:5000/uploads/products/thumb/iphone.jpg"
- *                         isPrimary: true
+ *             schema:
+ *               type: object
+ *               required: [items]
+ *               properties:
+ *                 items:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     required: [id, cartId, productId, currencyId, quantity, priceSnapshot, product]
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 12
+ *                       cartId:
+ *                         type: integer
+ *                         example: 3
+ *                       productId:
+ *                         type: integer
+ *                         example: 5
+ *                       currencyId:
+ *                         type: integer
+ *                         example: 1
+ *                       quantity:
+ *                         type: integer
+ *                         example: 2
+ *                       priceSnapshot:
+ *                         type: number
+ *                         example: 1999
+ *                       product:
+ *                         type: object
+ *                         required: [id, name, description, stockCount, price, status, brand, category, currency, seller, images]
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 5
+ *                           name:
+ *                             type: string
+ *                             example: "iPhone 16"
+ *                           description:
+ *                             type: string
+ *                             example: "Flagship phone"
+ *                           stockCount:
+ *                             type: integer
+ *                             example: 25
+ *                           price:
+ *                             type: number
+ *                             example: 1999
+ *                           status:
+ *                             type: string
+ *                             enum: [NOT_APPROVED, WAITING_FOR_APPROVE, APPROVED, DELETED]
+ *                             example: "APPROVED"
+ *                           brand:
+ *                             type: object
+ *                             required: [id, name]
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 example: 1
+ *                               name:
+ *                                 type: string
+ *                                 example: "Apple"
+ *                           category:
+ *                             type: object
+ *                             required: [id, name]
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 example: 4
+ *                               name:
+ *                                 type: string
+ *                                 example: "Smartphones"
+ *                           currency:
+ *                             type: object
+ *                             required: [id, code, symbol]
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 example: 1
+ *                               code:
+ *                                 type: string
+ *                                 example: "USD"
+ *                               symbol:
+ *                                 type: string
+ *                                 example: "$"
+ *                           seller:
+ *                             type: object
+ *                             required: [id, name]
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 example: 3
+ *                               name:
+ *                                 type: string
+ *                                 example: "Sapphire Store"
+ *                           images:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               required: [thumbUrl, isPrimary]
+ *                               properties:
+ *                                 thumbUrl:
+ *                                   type: string
+ *                                   example: "http://localhost:5000/uploads/products/thumb/iphone.jpg"
+ *                                 isPrimary:
+ *                                   type: boolean
+ *                                   example: true
  *       401:
  *         description: Unauthorized
  *       403:
@@ -59,13 +134,13 @@
  */
 
 ///////////////////////////////////////////////////////////////
-// ADD ITEM TO CART (USER ONLY)
+// ADD ITEM
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/cart/add:
  *   post:
- *     summary: Add item to cart
+ *     summary: Add item to cart (returns updated cart items array)
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
@@ -75,9 +150,7 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - productId
- *               - quantity
+ *             required: [productId, quantity]
  *             properties:
  *               productId:
  *                 type: integer
@@ -87,41 +160,31 @@
  *                 example: 2
  *     responses:
  *       201:
- *         description: Item added to cart successfully
+ *         description: Cart updated successfully
  *         content:
  *           application/json:
- *             example:
- *               - id: 1
- *                 cartId: 2
- *                 productId: 5
- *                 currencyId: 1
- *                 quantity: 2
- *                 priceSnapshot: 1999
- *                 product:
- *                   id: 5
- *                   name: "iPhone 16"
- *                   description: "Flagship phone"
- *                   stockCount: 25
- *                   price: 1999
- *                   status: "APPROVED"
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
  *       400:
- *         description: Validation error
+ *         description: Validation error or mixed currency carts are not allowed
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires USER role)
  *       409:
- *         description: Stock conflict or mixed currency cart
+ *         description: Only X items left in stock
  */
 
 ///////////////////////////////////////////////////////////////
-// UPDATE CART ITEM QUANTITY (USER ONLY)
+// UPDATE QUANTITY
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/cart/update:
  *   put:
- *     summary: Update cart item quantity
+ *     summary: Update cart item quantity (returns updated cart items array)
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
@@ -131,48 +194,43 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - itemId
- *               - quantity
+ *             required: [itemId, quantity]
  *             properties:
  *               itemId:
  *                 type: integer
- *                 example: 1
+ *                 example: 12
  *               quantity:
  *                 type: integer
- *                 example: 3
+ *                 example: 1
  *     responses:
  *       200:
- *         description: Cart item quantity updated successfully
+ *         description: Cart updated successfully
  *         content:
  *           application/json:
- *             example:
- *               - id: 1
- *                 cartId: 2
- *                 productId: 5
- *                 currencyId: 1
- *                 quantity: 3
- *                 priceSnapshot: 1999
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
  *       400:
- *         description: Validation error
+ *         description: Quantity must be at least 1
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires USER role)
  *       404:
- *         description: Cart or cart item not found
+ *         description: Cart not found or cart item not found
  *       409:
- *         description: Stock conflict
+ *         description: Only X items left in stock
  */
 
 ///////////////////////////////////////////////////////////////
-// MERGE GUEST CART (USER ONLY)
+// MERGE GUEST CART
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/cart/merge:
  *   post:
- *     summary: Merge guest cart items into user's cart
+ *     summary: Merge guest cart into user's cart
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
@@ -182,16 +240,14 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - items
+ *             required: [items]
  *             properties:
  *               items:
  *                 type: array
+ *                 minItems: 1
  *                 items:
  *                   type: object
- *                   required:
- *                     - productId
- *                     - quantity
+ *                   required: [productId, quantity]
  *                   properties:
  *                     productId:
  *                       type: integer
@@ -201,29 +257,29 @@
  *                       example: 2
  *     responses:
  *       200:
- *         description: Guest cart merged successfully
+ *         description: Cart merged successfully
  *         content:
  *           application/json:
- *             example:
- *               items:
- *                 - id: 1
- *                   cartId: 2
- *                   productId: 5
- *                   currencyId: 1
- *                   quantity: 2
- *                   priceSnapshot: 1999
+ *             schema:
+ *               type: object
+ *               required: [items]
+ *               properties:
+ *                 items:
+ *                   type: array
+ *                   items:
+ *                     type: object
  *       400:
- *         description: Validation error
+ *         description: Mixed currency carts are not allowed or quantity validation error
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires USER role)
  *       409:
- *         description: Stock conflict or mixed currency cart
+ *         description: Only X items left in stock
  */
 
 ///////////////////////////////////////////////////////////////
-// REMOVE ITEM FROM CART (USER ONLY)
+// REMOVE ITEM
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
@@ -239,12 +295,19 @@
  *         required: true
  *         schema:
  *           type: integer
- *         example: 1
+ *         example: 12
  *     responses:
  *       200:
- *         description: Item removed from cart successfully
+ *         description: Item removed successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [message]
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Item removed from cart"
  *             example:
  *               message: "Item removed from cart"
  *       401:
@@ -252,17 +315,17 @@
  *       403:
  *         description: Forbidden (Requires USER role)
  *       404:
- *         description: Cart or cart item not found
+ *         description: Cart not found or cart item not found
  */
 
 ///////////////////////////////////////////////////////////////
-// CLEAR CART (USER ONLY)
+// CLEAR CART
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/cart/clear:
  *   delete:
- *     summary: Clear all items from cart
+ *     summary: Clear cart
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
@@ -271,6 +334,13 @@
  *         description: Cart cleared successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [message]
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Cart cleared"
  *             example:
  *               message: "Cart cleared"
  *       401:

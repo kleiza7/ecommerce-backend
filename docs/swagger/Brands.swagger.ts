@@ -16,16 +16,24 @@
  *     tags: [Brands]
  *     responses:
  *       200:
- *         description: List of all brands
+ *         description: Brands retrieved successfully
  *         content:
  *           application/json:
- *             example:
- *               - id: 1
- *                 name: "Apple"
- *                 slug: "apple"
- *               - id: 2
- *                 name: "Samsung"
- *                 slug: "samsung"
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 required: [id, name, slug]
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: "Apple"
+ *                   slug:
+ *                     type: string
+ *                     example: "apple"
  */
 
 ///////////////////////////////////////////////////////////////
@@ -35,7 +43,7 @@
  * @swagger
  * /api/brands/get-by-id/{id}:
  *   get:
- *     summary: Get a brand by ID
+ *     summary: Get brand by ID (public)
  *     tags: [Brands]
  *     parameters:
  *       - in: path
@@ -43,18 +51,36 @@
  *         required: true
  *         schema:
  *           type: integer
- *         example: 3
+ *         example: 1
  *     responses:
  *       200:
- *         description: Brand found
+ *         description: Brand retrieved successfully
  *         content:
  *           application/json:
- *             example:
- *               id: 3
- *               name: "Apple"
- *               slug: "apple"
+ *             schema:
+ *               type: object
+ *               required: [id, name, slug]
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 1
+ *                 name:
+ *                   type: string
+ *                   example: "Apple"
+ *                 slug:
+ *                   type: string
+ *                   example: "apple"
  *       404:
  *         description: Brand not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [error]
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Brand not found"
  */
 
 ///////////////////////////////////////////////////////////////
@@ -74,8 +100,7 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
+ *             required: [name]
  *             properties:
  *               name:
  *                 type: string
@@ -85,14 +110,25 @@
  *         description: Brand created successfully
  *         content:
  *           application/json:
- *             example:
- *               id: 5
- *               name: "Samsung"
- *               slug: "samsung"
+ *             schema:
+ *               type: object
+ *               required: [id, name, slug]
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 5
+ *                 name:
+ *                   type: string
+ *                   example: "Samsung"
+ *                 slug:
+ *                   type: string
+ *                   example: "samsung"
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires ADMIN role)
+ *       400:
+ *         description: Validation error
  */
 
 ///////////////////////////////////////////////////////////////
@@ -112,9 +148,7 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - id
- *               - name
+ *             required: [id, name]
  *             properties:
  *               id:
  *                 type: integer
@@ -127,10 +161,19 @@
  *         description: Brand updated successfully
  *         content:
  *           application/json:
- *             example:
- *               id: 5
- *               name: "Xiaomi Updated"
- *               slug: "xiaomi-updated"
+ *             schema:
+ *               type: object
+ *               required: [id, name, slug]
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 5
+ *                 name:
+ *                   type: string
+ *                   example: "Xiaomi Updated"
+ *                 slug:
+ *                   type: string
+ *                   example: "xiaomi-updated"
  *       401:
  *         description: Unauthorized
  *       403:
@@ -162,6 +205,13 @@
  *         description: Brand deleted successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [message]
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Brand deleted successfully"
  *             example:
  *               message: "Brand deleted successfully"
  *       401:

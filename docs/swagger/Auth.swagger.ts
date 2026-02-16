@@ -2,7 +2,7 @@
  * @swagger
  * tags:
  *   name: Auth
- *   description: Authentication endpoints (User & Seller)
+ *   description: Authentication endpoints
  */
 
 ///////////////////////////////////////////////////////////////
@@ -12,18 +12,30 @@
  * @swagger
  * /api/auth/get-all-sellers:
  *   get:
- *     summary: Get all seller accounts (public)
+ *     summary: Get all sellers (public)
  *     tags: [Auth]
  *     responses:
  *       200:
- *         description: List of all sellers
+ *         description: Sellers retrieved successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 required: [id, name]
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 3
+ *                   name:
+ *                     type: string
+ *                     example: "Sapphire Store"
  *             example:
- *               - id: 1
+ *               - id: 3
  *                 name: "Sapphire Store"
- *               - id: 2
- *                 name: "Tech World"
+ *               - id: 7
+ *                 name: "Oceanic Shop"
  */
 
 ///////////////////////////////////////////////////////////////
@@ -33,7 +45,7 @@
  * @swagger
  * /api/auth/register-user:
  *   post:
- *     summary: Register a new REGULAR user
+ *     summary: Register a new user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -41,29 +53,44 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - email
- *               - password
+ *             required: [name, email, password]
  *             properties:
  *               name:
  *                 type: string
- *                 example: John Doe
+ *                 example: "John Doe"
  *               email:
  *                 type: string
- *                 example: john@example.com
+ *                 example: "john@example.com"
  *               password:
  *                 type: string
  *                 example: "123456"
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: Registered successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [message]
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Registered successfully"
  *             example:
  *               message: "Registered successfully"
  *       400:
- *         description: Validation error or email already exists
+ *         description: Validation failed or email already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [error]
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Email already exists"
+ *             example:
+ *               error: "Email already exists"
  */
 
 ///////////////////////////////////////////////////////////////
@@ -73,7 +100,7 @@
  * @swagger
  * /api/auth/register-seller:
  *   post:
- *     summary: Register a new SELLER account
+ *     summary: Register a new seller
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -81,29 +108,44 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - email
- *               - password
+ *             required: [name, email, password]
  *             properties:
  *               name:
  *                 type: string
- *                 example: Sapphire Store
+ *                 example: "Sapphire Store"
  *               email:
  *                 type: string
- *                 example: seller@example.com
+ *                 example: "seller@example.com"
  *               password:
  *                 type: string
  *                 example: "123456"
  *     responses:
  *       201:
- *         description: Seller registered successfully
+ *         description: Registered successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [message]
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Registered successfully"
  *             example:
  *               message: "Registered successfully"
  *       400:
- *         description: Validation error or duplicate email
+ *         description: Validation failed or email already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [error]
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Email already exists"
+ *             example:
+ *               error: "Email already exists"
  */
 
 ///////////////////////////////////////////////////////////////
@@ -113,7 +155,7 @@
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Login user or seller and receive JWT access token
+ *     summary: Login and receive access token
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -121,21 +163,43 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - email
- *               - password
+ *             required: [email, password]
  *             properties:
  *               email:
  *                 type: string
- *                 example: john@example.com
+ *                 example: "john@example.com"
  *               password:
  *                 type: string
  *                 example: "123456"
  *     responses:
  *       200:
- *         description: Login successful, access token and user returned
+ *         description: Login successful
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [accessToken, user]
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 user:
+ *                   type: object
+ *                   required: [id, name, email, role]
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     name:
+ *                       type: string
+ *                       example: "John Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "john@example.com"
+ *                     role:
+ *                       type: string
+ *                       enum: [USER, SELLER, ADMIN]
+ *                       example: "USER"
  *             example:
  *               accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *               user:
@@ -144,5 +208,16 @@
  *                 email: "john@example.com"
  *                 role: "USER"
  *       400:
- *         description: Invalid email or password
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [error]
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid credentials"
+ *             example:
+ *               error: "Invalid credentials"
  */
