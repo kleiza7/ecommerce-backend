@@ -6,52 +6,62 @@
  */
 
 ///////////////////////////////////////////////////////////////
-// GET FAVORITES LIST BY USER
+// GET FAVORITES LIST BY USER (USER ONLY)
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/favorites/get-favorites-list-by-user:
  *   get:
- *     summary: Get favorite products of the logged-in user
+ *     summary: Get current user's favorite products
  *     tags: [Favorites]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Favorite products list
+ *         description: Favorites list retrieved successfully
  *         content:
  *           application/json:
  *             example:
  *               - id: 1
- *                 productId: 12
- *                 createdAt: "2026-01-10T12:30:00.000Z"
+ *                 productId: 5
  *                 product:
- *                   id: 12
+ *                   id: 5
  *                   name: "iPhone 16"
  *                   description: "Flagship phone"
- *                   price: 1999
  *                   stockCount: 25
- *                   brandId: 1
- *                   categoryId: 4
- *                   currencyId: 1
+ *                   price: 1999
+ *                   status: "APPROVED"
+ *                   brand:
+ *                     id: 1
+ *                     name: "Apple"
+ *                   category:
+ *                     id: 4
+ *                     name: "Smartphones"
+ *                   currency:
+ *                     id: 1
+ *                     code: "USD"
+ *                     symbol: "$"
+ *                   seller:
+ *                     id: 3
+ *                     name: "Sapphire Store"
  *                   images:
- *                     - id: 5
- *                       mediumUrl: "/uploads/products/iphone16.jpg"
+ *                     - id: 10
+ *                       mediumUrl: "http://localhost:5000/uploads/products/medium/iphone.jpg"
  *                       isPrimary: true
  *       401:
  *         description: Unauthorized
  *       403:
- *         description: User role required
+ *         description: Forbidden (Requires USER role)
  */
 
 ///////////////////////////////////////////////////////////////
-// TOGGLE FAVORITE
+// TOGGLE FAVORITE (USER ONLY)
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/favorites/toggle-favorite:
  *   post:
- *     summary: Add or remove a product from favorites
+ *     summary: Toggle favorite status for a product
  *     tags: [Favorites]
  *     security:
  *       - bearerAuth: []
@@ -65,31 +75,33 @@
  *               - productId
  *             properties:
  *               productId:
- *                 type: number
- *                 example: 12
+ *                 type: integer
+ *                 example: 5
  *     responses:
  *       200:
- *         description: Toggle result
+ *         description: Favorite status toggled successfully
  *         content:
  *           application/json:
  *             example:
  *               isFavorited: true
+ *       400:
+ *         description: Validation error
  *       401:
  *         description: Unauthorized
  *       403:
- *         description: User role required
+ *         description: Forbidden (Requires USER role)
  *       404:
  *         description: Product not found
  */
 
 ///////////////////////////////////////////////////////////////
-// MERGE GUEST FAVORITES (LOGIN SONRASI)
+// MERGE GUEST FAVORITES (USER ONLY)
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/favorites/merge:
  *   post:
- *     summary: Merge guest favorites into user favorites after login
+ *     summary: Merge guest favorites into user's favorites
  *     tags: [Favorites]
  *     security:
  *       - bearerAuth: []
@@ -105,28 +117,27 @@
  *               productIds:
  *                 type: array
  *                 items:
- *                   type: number
- *                 example: [3, 7, 12]
+ *                   type: integer
+ *                 example: [3, 5, 8]
  *     responses:
  *       200:
- *         description: Merged favorites list
+ *         description: Guest favorites merged successfully
  *         content:
  *           application/json:
  *             example:
- *               - id: 4
- *                 productId: 12
- *                 createdAt: "2026-01-10T12:45:00.000Z"
+ *               - id: 1
+ *                 productId: 5
  *                 product:
- *                   id: 12
+ *                   id: 5
  *                   name: "iPhone 16"
  *                   description: "Flagship phone"
- *                   price: 1999
  *                   stockCount: 25
- *                   brandId: 1
- *                   categoryId: 4
- *                   currencyId: 1
+ *                   price: 1999
+ *                   status: "APPROVED"
+ *       400:
+ *         description: Validation error
  *       401:
  *         description: Unauthorized
  *       403:
- *         description: User role required
+ *         description: Forbidden (Requires USER role)
  */

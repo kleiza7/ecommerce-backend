@@ -5,49 +5,9 @@
  *   description: Currency management endpoints
  */
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Currency:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           example: 1
- *         code:
- *           type: string
- *           example: "TRY"
- *         symbol:
- *           type: string
- *           example: "₺"
- *
- *     CreateCurrencyInput:
- *       type: object
- *       required: [code, symbol]
- *       properties:
- *         code:
- *           type: string
- *           example: "USD"
- *         symbol:
- *           type: string
- *           example: "$"
- *
- *     UpdateCurrencyInput:
- *       type: object
- *       required: [id, code, symbol]
- *       properties:
- *         id:
- *           type: integer
- *           example: 2
- *         code:
- *           type: string
- *           example: "EUR"
- *         symbol:
- *           type: string
- *           example: "€"
- */
-
+///////////////////////////////////////////////////////////////
+// GET ALL CURRENCIES
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/currencies/get-all:
@@ -59,12 +19,18 @@
  *         description: List of all currencies
  *         content:
  *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Currency'
+ *             example:
+ *               - id: 1
+ *                 code: "USD"
+ *                 symbol: "$"
+ *               - id: 2
+ *                 code: "EUR"
+ *                 symbol: "€"
  */
 
+///////////////////////////////////////////////////////////////
+// GET CURRENCY BY ID
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/currencies/get-by-id/{id}:
@@ -77,22 +43,28 @@
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 1
  *     responses:
  *       200:
  *         description: Currency found
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Currency'
+ *             example:
+ *               id: 1
+ *               code: "USD"
+ *               symbol: "$"
  *       404:
  *         description: Currency not found
  */
 
+///////////////////////////////////////////////////////////////
+// CREATE CURRENCY (ADMIN ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/currencies/create:
  *   post:
- *     summary: Create a new currency (SELLER only)
+ *     summary: Create a new currency (ADMIN only)
  *     tags: [Currencies]
  *     security:
  *       - bearerAuth: []
@@ -101,23 +73,42 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateCurrencyInput'
+ *             type: object
+ *             required:
+ *               - code
+ *               - symbol
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 example: "USD"
+ *               symbol:
+ *                 type: string
+ *                 example: "$"
  *     responses:
  *       201:
  *         description: Currency created successfully
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Currency'
+ *             example:
+ *               id: 3
+ *               code: "GBP"
+ *               symbol: "£"
  *       400:
- *         description: Validation error or duplicate currency
+ *         description: Validation error or currency already exists
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires ADMIN role)
  */
 
+///////////////////////////////////////////////////////////////
+// UPDATE CURRENCY (ADMIN ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/currencies/update:
  *   put:
- *     summary: Update a currency (SELLER only)
+ *     summary: Update a currency (ADMIN only)
  *     tags: [Currencies]
  *     security:
  *       - bearerAuth: []
@@ -126,23 +117,48 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateCurrencyInput'
+ *             type: object
+ *             required:
+ *               - id
+ *               - code
+ *               - symbol
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 3
+ *               code:
+ *                 type: string
+ *                 example: "GBP"
+ *               symbol:
+ *                 type: string
+ *                 example: "£"
  *     responses:
  *       200:
  *         description: Currency updated successfully
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Currency'
+ *             example:
+ *               id: 3
+ *               code: "GBP"
+ *               symbol: "£"
+ *       400:
+ *         description: Validation error or currency code already exists
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires ADMIN role)
  *       404:
  *         description: Currency not found
  */
 
+///////////////////////////////////////////////////////////////
+// DELETE CURRENCY (ADMIN ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/currencies/delete/{id}:
  *   delete:
- *     summary: Delete a currency (SELLER only)
+ *     summary: Delete a currency (ADMIN only)
  *     tags: [Currencies]
  *     security:
  *       - bearerAuth: []
@@ -152,9 +168,18 @@
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 3
  *     responses:
  *       200:
  *         description: Currency deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Currency deleted successfully"
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires ADMIN role)
  *       404:
  *         description: Currency not found
  */

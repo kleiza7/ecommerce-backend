@@ -6,6 +6,27 @@
  */
 
 ///////////////////////////////////////////////////////////////
+// GET ALL SELLERS
+///////////////////////////////////////////////////////////////
+/**
+ * @swagger
+ * /api/auth/get-all-sellers:
+ *   get:
+ *     summary: Get all seller accounts (public)
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: List of all sellers
+ *         content:
+ *           application/json:
+ *             example:
+ *               - id: 1
+ *                 name: "Sapphire Store"
+ *               - id: 2
+ *                 name: "Tech World"
+ */
+
+///////////////////////////////////////////////////////////////
 // REGISTER USER
 ///////////////////////////////////////////////////////////////
 /**
@@ -42,11 +63,7 @@
  *             example:
  *               message: "Registered successfully"
  *       400:
- *         description: Validation failed or email already exists
- *         content:
- *           application/json:
- *             example:
- *               error: "Email already exists"
+ *         description: Validation error or email already exists
  */
 
 ///////////////////////////////////////////////////////////////
@@ -86,11 +103,7 @@
  *             example:
  *               message: "Registered successfully"
  *       400:
- *         description: Validation failed or duplicate email
- *         content:
- *           application/json:
- *             example:
- *               error: "Email already exists"
+ *         description: Validation error or duplicate email
  */
 
 ///////////////////////////////////////////////////////////////
@@ -100,7 +113,7 @@
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Login user or seller and receive a JWT token
+ *     summary: Login user or seller and receive JWT access token
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -120,15 +133,16 @@
  *                 example: "123456"
  *     responses:
  *       200:
- *         description: Login successful, JWT token returned
+ *         description: Login successful, access token and user returned
  *         content:
  *           application/json:
  *             example:
- *               token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *               accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *               user:
+ *                 id: 1
+ *                 name: "John Doe"
+ *                 email: "john@example.com"
+ *                 role: "USER"
  *       400:
  *         description: Invalid email or password
- *         content:
- *           application/json:
- *             example:
- *               error: "Invalid credentials"
  */

@@ -5,72 +5,9 @@
  *   description: Category management endpoints
  */
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     Category:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           example: 12
- *         name:
- *           type: string
- *           example: "Laptops"
- *         slug:
- *           type: string
- *           example: "laptops"
- *         parentId:
- *           type: integer
- *           nullable: true
- *           example: 5
- *         description:
- *           type: string
- *           nullable: true
- *           example: "All modern laptop models"
- *         displayOrder:
- *           type: integer
- *           example: 1
- *
- *     CreateCategoryInput:
- *       type: object
- *       required: [name, displayOrder]
- *       properties:
- *         name:
- *           type: string
- *           example: "Smartphones"
- *         parentId:
- *           type: integer
- *           nullable: true
- *           example: 3
- *         description:
- *           type: string
- *           nullable: true
- *           example: "Mobile phones and accessories"
- *         displayOrder:
- *           type: integer
- *           example: 2
- *
- *     UpdateCategoryInput:
- *       type: object
- *       properties:
- *         name:
- *           type: string
- *           example: "Updated Category"
- *         parentId:
- *           type: integer
- *           nullable: true
- *           example: 1
- *         description:
- *           type: string
- *           nullable: true
- *           example: "Updated description"
- *         displayOrder:
- *           type: integer
- *           example: 5
- */
-
+///////////////////////////////////////////////////////////////
+// GET ALL CATEGORIES
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/categories/get-all:
@@ -82,17 +19,29 @@
  *         description: List of all categories
  *         content:
  *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Category'
+ *             example:
+ *               - id: 1
+ *                 name: "Electronics"
+ *                 slug: "electronics"
+ *                 description: "All electronic products"
+ *                 displayOrder: 0
+ *                 parentId: null
+ *               - id: 2
+ *                 name: "Smartphones"
+ *                 slug: "smartphones"
+ *                 description: null
+ *                 displayOrder: 1
+ *                 parentId: 1
  */
 
+///////////////////////////////////////////////////////////////
+// GET CATEGORY BY ID
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/categories/get-by-id/{id}:
  *   get:
- *     summary: Get category by ID
+ *     summary: Get a category by ID
  *     tags: [Categories]
  *     parameters:
  *       - in: path
@@ -100,47 +49,31 @@
  *         required: true
  *         schema:
  *           type: integer
- *         description: Category ID
+ *         example: 2
  *     responses:
  *       200:
  *         description: Category found
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Category'
+ *             example:
+ *               id: 2
+ *               name: "Smartphones"
+ *               slug: "smartphones"
+ *               description: null
+ *               displayOrder: 1
+ *               parentId: 1
  *       404:
  *         description: Category not found
  */
 
-/**
- * @swagger
- * /api/categories/get-children/{id}:
- *   get:
- *     summary: Get children of a category
- *     tags: [Categories]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: Parent category ID
- *     responses:
- *       200:
- *         description: Child categories
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Category'
- */
-
+///////////////////////////////////////////////////////////////
+// CREATE CATEGORY (ADMIN ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/categories/create:
  *   post:
- *     summary: Create a new category (SELLER only)
+ *     summary: Create a new category (ADMIN only)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
@@ -149,56 +82,116 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateCategoryInput'
+ *             type: object
+ *             required:
+ *               - name
+ *               - displayOrder
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Laptops"
+ *               parentId:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 1
+ *               description:
+ *                 type: string
+ *                 nullable: true
+ *                 example: "Portable computers"
+ *               displayOrder:
+ *                 type: integer
+ *                 example: 2
  *     responses:
  *       201:
  *         description: Category created successfully
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Category'
+ *             example:
+ *               id: 5
+ *               name: "Laptops"
+ *               slug: "laptops"
+ *               parentId: 1
+ *               description: "Portable computers"
+ *               displayOrder: 2
  *       400:
- *         description: Invalid parent ID or validation error
+ *         description: Validation error or parent category invalid
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires ADMIN role)
  */
 
+///////////////////////////////////////////////////////////////
+// UPDATE CATEGORY (ADMIN ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
- * /api/categories/update/{id}:
+ * /api/categories/update:
  *   put:
- *     summary: Update an existing category (SELLER only)
+ *     summary: Update a category (ADMIN only)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateCategoryInput'
+ *             type: object
+ *             required:
+ *               - id
+ *               - name
+ *               - parentId
+ *               - description
+ *               - displayOrder
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 5
+ *               name:
+ *                 type: string
+ *                 example: "Gaming Laptops"
+ *               parentId:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 1
+ *               description:
+ *                 type: string
+ *                 nullable: true
+ *                 example: "High performance laptops"
+ *               displayOrder:
+ *                 type: integer
+ *                 example: 3
  *     responses:
  *       200:
  *         description: Category updated successfully
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Category'
+ *             example:
+ *               id: 5
+ *               name: "Gaming Laptops"
+ *               slug: "gaming-laptops"
+ *               parentId: 1
+ *               description: "High performance laptops"
+ *               displayOrder: 3
  *       400:
- *         description: Parent category invalid or cannot set itself as parent
+ *         description: Validation error or invalid parent category
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires ADMIN role)
  *       404:
  *         description: Category not found
  */
 
+///////////////////////////////////////////////////////////////
+// DELETE CATEGORY (ADMIN ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/categories/delete/{id}:
  *   delete:
- *     summary: Delete a category (SELLER only)
+ *     summary: Delete a category (ADMIN only)
  *     tags: [Categories]
  *     security:
  *       - bearerAuth: []
@@ -208,11 +201,20 @@
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 5
  *     responses:
  *       200:
  *         description: Category deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Category deleted successfully"
  *       400:
- *         description: Category has children and cannot be deleted
+ *         description: Category has child categories or validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires ADMIN role)
  *       404:
  *         description: Category not found
  */
