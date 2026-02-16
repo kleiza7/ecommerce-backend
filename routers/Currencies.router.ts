@@ -13,7 +13,7 @@ import {
 export class CurrenciesRouter {
   constructor(
     private router: Router,
-    private controller: CurrenciesController
+    private controller: CurrenciesController,
   ) {
     this.setupRoutes();
   }
@@ -24,31 +24,31 @@ export class CurrenciesRouter {
     this.router.get(
       "/get-by-id/:id",
       validate(currencyIdParamSchema),
-      this.controller.getCurrencyById
+      this.controller.getCurrencyById,
     );
 
     this.router.post(
       "/create",
       verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      checkRole(USER_ROLE.ADMIN),
       validate(createCurrencySchema),
-      this.controller.createCurrency
+      this.controller.createCurrency,
     );
 
     this.router.put(
       "/update",
       verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      checkRole(USER_ROLE.ADMIN),
       validate(updateCurrencySchema),
-      this.controller.updateCurrency
+      this.controller.updateCurrency,
     );
 
     this.router.delete(
       "/delete/:id",
       verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      checkRole(USER_ROLE.ADMIN),
       validate(currencyIdParamSchema),
-      this.controller.deleteCurrency
+      this.controller.deleteCurrency,
     );
   }
 

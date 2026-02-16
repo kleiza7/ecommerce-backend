@@ -33,7 +33,7 @@ export class FavoritesController {
 
       const result = await this.favoritesService.toggleFavorite({
         userId,
-        productId: Number(productId),
+        productId,
       });
 
       return res.status(200).json(result);
@@ -53,7 +53,7 @@ export class FavoritesController {
 
       const merged = await this.favoritesService.mergeGuestFavorites(
         userId,
-        productIds.map(Number),
+        productIds,
       );
 
       return res.status(200).json(merged);

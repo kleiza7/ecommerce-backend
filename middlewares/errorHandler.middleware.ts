@@ -26,7 +26,7 @@ export const errorHandler = (
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       message: err.message,
-      details: err.details,
+      details: err.details ?? null,
     });
   }
 
@@ -34,7 +34,7 @@ export const errorHandler = (
     typeof err === "object" &&
     err !== null &&
     "name" in err &&
-    (err as any).name === "JsonWebTokenError"
+    (err as { name?: string }).name === "JsonWebTokenError"
   ) {
     return res.status(401).json({
       message: "Invalid token",
@@ -45,7 +45,7 @@ export const errorHandler = (
     typeof err === "object" &&
     err !== null &&
     "name" in err &&
-    (err as any).name === "TokenExpiredError"
+    (err as { name?: string }).name === "TokenExpiredError"
   ) {
     return res.status(401).json({
       message: "Token expired",
@@ -69,7 +69,7 @@ export const errorHandler = (
 
     return res.status(400).json({
       message,
-      meta: err.meta,
+      meta: err.meta ?? null,
     });
   }
 

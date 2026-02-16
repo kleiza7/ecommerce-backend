@@ -1,6 +1,6 @@
 import { Request } from "express";
 import fs from "fs";
-import multer from "multer";
+import multer, { FileFilterCallback } from "multer";
 import path from "path";
 
 const isProd = process.env.NODE_ENV === "production";
@@ -13,9 +13,7 @@ const makeUploader = (folder: string, fieldName: string, maxCount: number) => {
   } else {
     const uploadDir = path.join(__dirname, "..", "uploads", folder, "original");
 
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    fs.mkdirSync(uploadDir, { recursive: true });
 
     storage = multer.diskStorage({
       destination: (req, file, cb) => {
@@ -29,10 +27,14 @@ const makeUploader = (folder: string, fieldName: string, maxCount: number) => {
     });
   }
 
-  const fileFilter = (req: Request, file: Express.Multer.File, cb: any) => {
+  const fileFilter = (
+    req: Request,
+    file: Express.Multer.File,
+    cb: FileFilterCallback,
+  ) => {
     const allowed = ["image/jpeg", "image/png", "image/webp"];
     if (!allowed.includes(file.mimetype)) {
-      return cb(new Error("Only JPEG, PNG, or WEBP images allowed!"), false);
+      return cb(new Error("Only JPEG, PNG, or WEBP images allowed!"));
     }
     cb(null, true);
   };

@@ -6,7 +6,7 @@ export class SearchController {
 
   search = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const q = req.query.q as string;
+      const { q } = req.query as { q: string };
 
       const result = await this.searchService.search(q);
 

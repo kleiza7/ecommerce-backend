@@ -2,7 +2,7 @@ import cloudinary from "../config/cloudinary";
 
 export const uploadBufferToCloudinary = (
   buffer: Buffer,
-  filename: string
+  filename: string,
 ): Promise<{ secureUrl: string; publicId: string }> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
@@ -12,12 +12,19 @@ export const uploadBufferToCloudinary = (
           public_id: filename,
         },
         (error, result) => {
-          if (error || !result) return reject(error);
+          if (error) {
+            return reject(error);
+          }
+
+          if (!result) {
+            return reject(new Error("Cloudinary upload failed"));
+          }
+
           resolve({
             secureUrl: result.secure_url,
             publicId: result.public_id,
           });
-        }
+        },
       )
       .end(buffer);
   });

@@ -1,5 +1,4 @@
 import { prisma } from "../config/prisma";
-
 import { seedBrands } from "./data/Brands.seed";
 import { seedCategories } from "./data/Categories.seed";
 import { seedCurrencies } from "./data/Currencies.seed";

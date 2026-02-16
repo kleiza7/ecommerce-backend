@@ -37,18 +37,16 @@ export class FavoritesService {
       },
     });
 
-    const mappedFavorites = favorites.map((fav) => ({
-      ...fav,
+    return favorites.map((favorite) => ({
+      ...favorite,
       product: {
-        ...fav.product,
-        images: fav.product.images.map((img) => ({
-          ...img,
-          mediumUrl: getUrlWithBaseUrl(img.mediumUrl),
+        ...favorite.product,
+        images: favorite.product.images.map((image) => ({
+          ...image,
+          mediumUrl: getUrlWithBaseUrl(image.mediumUrl),
         })),
       },
     }));
-
-    return mappedFavorites;
   }
 
   async toggleFavorite(params: { userId: number; productId: number }) {
@@ -63,7 +61,7 @@ export class FavoritesService {
       throw new AppError("Product not found", 404);
     }
 
-    const existing = await prisma.favorite.findUnique({
+    const existingFavorite = await prisma.favorite.findUnique({
       where: {
         userId_productId: {
           userId,
@@ -72,9 +70,9 @@ export class FavoritesService {
       },
     });
 
-    if (existing) {
+    if (existingFavorite) {
       await prisma.favorite.delete({
-        where: { id: existing.id },
+        where: { id: existingFavorite.id },
       });
 
       return { isFavorited: false };
@@ -96,7 +94,7 @@ export class FavoritesService {
     }
 
     await prisma.$transaction(async (tx) => {
-      const existing = await tx.favorite.findMany({
+      const existingFavorites = await tx.favorite.findMany({
         where: {
           userId,
           productId: { in: productIds },
@@ -104,10 +102,12 @@ export class FavoritesService {
         select: { productId: true },
       });
 
-      const existingSet = new Set(existing.map((f) => f.productId));
+      const existingFavoritesSet = new Set(
+        existingFavorites.map((favorite) => favorite.productId),
+      );
 
       const toCreate = productIds.filter(
-        (productId) => !existingSet.has(productId),
+        (productId) => !existingFavoritesSet.has(productId),
       );
 
       if (toCreate.length > 0) {

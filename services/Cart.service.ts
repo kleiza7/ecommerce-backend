@@ -46,13 +46,16 @@ export class CartService {
       },
     });
 
-    for (const item of items) {
-      for (const img of item.product.images) {
-        img.thumbUrl = getUrlWithBaseUrl(img.thumbUrl);
-      }
-    }
-
-    return items;
+    return items.map((item) => ({
+      ...item,
+      product: {
+        ...item.product,
+        images: item.product.images.map((image) => ({
+          ...image,
+          thumbUrl: getUrlWithBaseUrl(image.thumbUrl),
+        })),
+      },
+    }));
   }
 
   async addItem(userId: number, productId: number, quantity: number) {
@@ -70,11 +73,11 @@ export class CartService {
         where: { id: productId },
       });
 
-      const existing = await tx.cartItem.findFirst({
+      const existingCartItem = await tx.cartItem.findFirst({
         where: { cartId: cart.id, productId },
       });
 
-      const currentQuantity = existing ? existing.quantity : 0;
+      const currentQuantity = existingCartItem ? existingCartItem.quantity : 0;
       const requestedQuantity = currentQuantity + quantity;
 
       if (requestedQuantity > product.stockCount) {
@@ -93,9 +96,9 @@ export class CartService {
         throw new AppError("Mixed currency carts are not allowed", 400);
       }
 
-      if (existing) {
+      if (existingCartItem) {
         await tx.cartItem.update({
-          where: { id: existing.id },
+          where: { id: existingCartItem.id },
           data: { quantity: requestedQuantity },
         });
       } else {
@@ -172,11 +175,13 @@ export class CartService {
           where: { id: item.productId },
         });
 
-        const existing = await tx.cartItem.findFirst({
+        const existingCartItem = await tx.cartItem.findFirst({
           where: { cartId: cart.id, productId: item.productId },
         });
 
-        const currentQuantity = existing ? existing.quantity : 0;
+        const currentQuantity = existingCartItem
+          ? existingCartItem.quantity
+          : 0;
         const requestedQuantity = currentQuantity + item.quantity;
 
         if (requestedQuantity > product.stockCount) {
@@ -195,9 +200,9 @@ export class CartService {
           throw new AppError("Mixed currency carts are not allowed", 400);
         }
 
-        if (existing) {
+        if (existingCartItem) {
           await tx.cartItem.update({
-            where: { id: existing.id },
+            where: { id: existingCartItem.id },
             data: { quantity: requestedQuantity },
           });
         } else {

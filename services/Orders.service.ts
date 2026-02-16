@@ -50,10 +50,9 @@ export class OrdersService {
         }
       }
 
-      let totalPrice = 0;
-      for (const item of cart.items) {
-        totalPrice += Number(item.priceSnapshot) * item.quantity;
-      }
+      const totalPrice = cart.items.reduce((sum, item) => {
+        return sum + Number(item.priceSnapshot) * item.quantity;
+      }, 0);
 
       for (const item of cart.items) {
         await tx.$queryRaw`
@@ -153,9 +152,9 @@ export class OrdersService {
           ...item,
           product: {
             ...item.product,
-            images: item.product.images.map((img) => ({
-              ...img,
-              thumbUrl: getUrlWithBaseUrl(img.thumbUrl),
+            images: item.product.images.map((image) => ({
+              ...image,
+              thumbUrl: getUrlWithBaseUrl(image.thumbUrl),
             })),
           },
         })),
@@ -267,9 +266,9 @@ export class OrdersService {
         ...item,
         product: {
           ...item.product,
-          images: item.product.images.map((img) => ({
-            ...img,
-            thumbUrl: getUrlWithBaseUrl(img.thumbUrl),
+          images: item.product.images.map((image) => ({
+            ...image,
+            thumbUrl: getUrlWithBaseUrl(image.thumbUrl),
           })),
         },
       })),
@@ -323,9 +322,9 @@ export class OrdersService {
         ...item,
         product: {
           ...item.product,
-          images: item.product.images.map((img) => ({
-            ...img,
-            thumbUrl: getUrlWithBaseUrl(img.thumbUrl),
+          images: item.product.images.map((image) => ({
+            ...image,
+            thumbUrl: getUrlWithBaseUrl(image.thumbUrl),
           })),
         },
       })),

@@ -32,11 +32,7 @@ export class CartController {
       const userId = req.user!.id;
       const { productId, quantity } = req.body;
 
-      const item = await this.cartService.addItem(
-        userId,
-        Number(productId),
-        Number(quantity),
-      );
+      const item = await this.cartService.addItem(userId, productId, quantity);
 
       return res.status(201).json(item);
     } catch (error) {

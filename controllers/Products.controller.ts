@@ -11,17 +11,17 @@ export class ProductsController {
       const page = Number(req.body.page ?? 1);
       const limit = Number(req.body.limit ?? 20);
 
+      const bodyFilter = req.body.filter ?? {};
+
       const rawQuery =
-        typeof req.body.filter.query === "string"
-          ? req.body.filter.query.trim()
-          : "";
+        typeof bodyFilter.query === "string" ? bodyFilter.query.trim() : "";
 
       const query = rawQuery.length ? rawQuery : undefined;
 
       const filter = {
-        brandIds: req.body.filter.brandIds,
-        categoryIds: req.body.filter.categoryIds,
-        sellerIds: req.body.filter.sellerIds,
+        brandIds: bodyFilter.brandIds ?? [],
+        categoryIds: bodyFilter.categoryIds ?? [],
+        sellerIds: bodyFilter.sellerIds ?? [],
         statuses: [PRODUCT_STATUS.APPROVED],
         query,
       };

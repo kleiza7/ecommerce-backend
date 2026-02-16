@@ -28,7 +28,6 @@ export class CategoriesService {
     displayOrder: number;
   }) {
     const { name, parentId, description, displayOrder } = data;
-    const slug = generateSlug(name);
 
     if (parentId !== null) {
       const parent = await prisma.category.findUnique({
@@ -39,6 +38,8 @@ export class CategoriesService {
         throw new AppError("Parent category not found", 400);
       }
     }
+
+    const slug = generateSlug(name);
 
     return prisma.category.create({
       data: {
