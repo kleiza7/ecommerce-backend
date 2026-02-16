@@ -47,8 +47,8 @@ export class CategoriesController {
       const updated = await this.categoriesService.updateCategory({
         id,
         name,
-        parentId,
-        description,
+        parentId: parentId ?? null,
+        description: description ?? null,
         displayOrder,
       });
 

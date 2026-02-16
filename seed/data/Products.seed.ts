@@ -15,7 +15,7 @@ const DUMMY_IMAGES = [
   "dummy-image-2.jpg",
   "dummy-image-3.jpg",
   "dummy-image-4.jpg",
-];
+] as const;
 
 const ensureUploadFolders = async () => {
   for (const f of ["original", "thumb", "medium", "large"]) {
@@ -51,28 +51,36 @@ const createProductImages = async (
   };
 };
 
-const cloudinaryCache = new Map<string, any>();
+type CloudinaryImageData = {
+  originalUrl: string;
+  thumbUrl: string;
+  mediumUrl: string;
+  largeUrl: string;
+  publicId: string;
+};
+
+const cloudinaryCache = new Map<string, CloudinaryImageData>();
 
 const uploadToCloudinary = async (
-  img: string,
+  image: string,
   productId: number,
   index: number,
 ) => {
   const imageNumber = index + 1;
-  const cacheKey = `${img}-${productId}-${imageNumber}`;
+  const cacheKey = `${image}-${productId}-${imageNumber}`;
 
   if (cloudinaryCache.has(cacheKey)) {
-    return cloudinaryCache.get(cacheKey);
+    return cloudinaryCache.get(cacheKey)!;
   }
 
-  const source = path.join(SEED_IMAGES, img);
+  const source = path.join(SEED_IMAGES, image);
 
   const result = await cloudinary.uploader.upload(source, {
     folder: "products",
     public_id: `product-${productId}-${imageNumber}`,
   });
 
-  const data = {
+  const data: CloudinaryImageData = {
     originalUrl: result.secure_url,
     thumbUrl: cloudinary.url(result.public_id, { width: 200, crop: "scale" }),
     mediumUrl: cloudinary.url(result.public_id, { width: 600, crop: "scale" }),
@@ -84,7 +92,9 @@ const uploadToCloudinary = async (
   return data;
 };
 
-const rand = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
+const rand = <T>(arr: T[]): T => {
+  return arr[Math.floor(Math.random() * arr.length)];
+};
 
 export const seedProducts = async () => {
   console.log(

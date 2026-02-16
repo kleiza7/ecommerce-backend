@@ -13,7 +13,7 @@ import {
 export class CategoriesRouter {
   constructor(
     private router: Router,
-    private controller: CategoriesController
+    private controller: CategoriesController,
   ) {
     this.setupRoutes();
   }
@@ -24,31 +24,31 @@ export class CategoriesRouter {
     this.router.get(
       "/get-by-id/:id",
       validate(categoryIdParamSchema),
-      this.controller.getCategoryById
+      this.controller.getCategoryById,
     );
 
     this.router.post(
       "/create",
       verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      checkRole(USER_ROLE.ADMIN),
       validate(createCategorySchema),
-      this.controller.createCategory
+      this.controller.createCategory,
     );
 
     this.router.put(
       "/update",
       verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      checkRole(USER_ROLE.ADMIN),
       validate(updateCategorySchema),
-      this.controller.updateCategory
+      this.controller.updateCategory,
     );
 
     this.router.delete(
       "/delete/:id",
       verifyToken,
-      checkRole(USER_ROLE.SELLER),
+      checkRole(USER_ROLE.ADMIN),
       validate(categoryIdParamSchema),
-      this.controller.deleteCategory
+      this.controller.deleteCategory,
     );
   }
 

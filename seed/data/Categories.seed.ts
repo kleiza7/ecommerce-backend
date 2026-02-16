@@ -129,26 +129,26 @@ export const seedCategories = async () => {
   let displayOrder = 1;
 
   const createCategoryRecursive = async (
-    category: CategorySeed,
+    categorySeed: CategorySeed,
     parentId: number | null,
-    parentSlug: string | null
+    parentSlug: string | null,
   ) => {
     const slug = parentSlug
-      ? generateSlug(`${parentSlug}-${category.name}`)
-      : generateSlug(category.name);
+      ? generateSlug(`${parentSlug}-${categorySeed.name}`)
+      : generateSlug(categorySeed.name);
 
     const created = await prisma.category.create({
       data: {
-        name: category.name,
+        name: categorySeed.name,
         slug,
-        description: category.description ?? null,
+        description: categorySeed.description ?? null,
         parentId,
         displayOrder: displayOrder++,
       },
     });
 
-    if (category.children?.length) {
-      for (const child of category.children) {
+    if (categorySeed.children?.length) {
+      for (const child of categorySeed.children) {
         await createCategoryRecursive(child, created.id, slug);
       }
     }

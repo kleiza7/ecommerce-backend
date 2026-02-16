@@ -36,11 +36,18 @@ export class ProductsService {
       }[];
     } = {};
 
-    if (filter.brandIds.length) where.brandId = { in: filter.brandIds };
-    if (filter.categoryIds.length)
+    if (filter.brandIds.length) {
+      where.brandId = { in: filter.brandIds };
+    }
+    if (filter.categoryIds.length) {
       where.categoryId = { in: filter.categoryIds };
-    if (filter.sellerIds.length) where.sellerId = { in: filter.sellerIds };
-    if (filter.statuses?.length) where.status = { in: filter.statuses };
+    }
+    if (filter.sellerIds.length) {
+      where.sellerId = { in: filter.sellerIds };
+    }
+    if (filter.statuses?.length) {
+      where.status = { in: filter.statuses };
+    }
 
     if (filter.query) {
       where.OR = [
@@ -95,15 +102,16 @@ export class ProductsService {
       prisma.product.count({ where }),
     ]);
 
-    const mappedItems = items.map((product) => ({
-      ...product,
-      images: product.images.map((img) => ({
-        ...img,
-        mediumUrl: getUrlWithBaseUrl(img.mediumUrl),
+    return {
+      items: items.map((product) => ({
+        ...product,
+        images: product.images.map((image) => ({
+          ...image,
+          mediumUrl: getUrlWithBaseUrl(image.mediumUrl),
+        })),
       })),
-    }));
-
-    return { items: mappedItems, total };
+      total,
+    };
   }
 
   async getProductsListWithPagination(params: {
@@ -187,16 +195,18 @@ export class ProductsService {
       },
     });
 
-    if (!product) throw new AppError("Product not found", 404);
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
 
     return {
       ...product,
-      images: product.images.map((img) => ({
-        ...img,
-        originalUrl: getUrlWithBaseUrl(img.originalUrl),
-        thumbUrl: getUrlWithBaseUrl(img.thumbUrl),
-        mediumUrl: getUrlWithBaseUrl(img.mediumUrl),
-        largeUrl: getUrlWithBaseUrl(img.largeUrl),
+      images: product.images.map((image) => ({
+        ...image,
+        originalUrl: getUrlWithBaseUrl(image.originalUrl),
+        thumbUrl: getUrlWithBaseUrl(image.thumbUrl),
+        mediumUrl: getUrlWithBaseUrl(image.mediumUrl),
+        largeUrl: getUrlWithBaseUrl(image.largeUrl),
       })),
     };
   }
@@ -211,7 +221,9 @@ export class ProductsService {
       where: { id: productId },
     });
 
-    if (!product) throw new AppError("Product not found", 404);
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
 
     if (product.status === PRODUCT_STATUS.DELETED) {
       throw new AppError("Deleted product status cannot be changed", 400);
@@ -304,8 +316,14 @@ export class ProductsService {
         include: { images: true },
       });
 
-      if (!product) throw new AppError("Product not found", 404);
-      if (product.sellerId !== sellerId) throw new AppError("Forbidden", 403);
+      if (!product) {
+        throw new AppError("Product not found", 404);
+      }
+
+      if (product.sellerId !== sellerId) {
+        throw new AppError("Forbidden", 403);
+      }
+
       if (product.status === PRODUCT_STATUS.DELETED) {
         throw new AppError("Deleted product cannot be updated", 400);
       }
@@ -323,8 +341,8 @@ export class ProductsService {
       }
 
       if (deletedImageIds.length) {
-        const imagesToDelete = product.images.filter((img) =>
-          deletedImageIds.includes(img.id),
+        const imagesToDelete = product.images.filter((image) =>
+          deletedImageIds.includes(image.id),
         );
 
         await deleteProductImages(imagesToDelete);
@@ -362,8 +380,13 @@ export class ProductsService {
   async deleteProduct(id: number, sellerId: number) {
     const product = await prisma.product.findUnique({ where: { id } });
 
-    if (!product) throw new AppError("Product not found", 404);
-    if (product.sellerId !== sellerId) throw new AppError("Forbidden", 403);
+    if (!product) {
+      throw new AppError("Product not found", 404);
+    }
+
+    if (product.sellerId !== sellerId) {
+      throw new AppError("Forbidden", 403);
+    }
 
     await prisma.product.update({
       where: { id },

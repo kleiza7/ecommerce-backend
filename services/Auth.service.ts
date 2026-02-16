@@ -6,22 +6,20 @@ import { AppError } from "../errors/AppError";
 
 export class AuthService {
   async getAllSellers() {
-    const sellers = await prisma.user.findMany({
+    return prisma.user.findMany({
       where: { role: USER_ROLE.SELLER },
       select: {
         id: true,
         name: true,
       },
     });
-
-    return sellers;
   }
 
   async register(
     name: string,
     email: string,
     password: string,
-    role: USER_ROLE
+    role: USER_ROLE,
   ) {
     const existing = await prisma.user.findUnique({
       where: { email },
@@ -31,13 +29,13 @@ export class AuthService {
       throw new AppError("Email already exists", 400);
     }
 
-    const hashed = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await prisma.user.create({
       data: {
         name,
         email,
-        password: hashed,
+        password: hashedPassword,
         role,
       },
     });
@@ -55,6 +53,7 @@ export class AuthService {
     }
 
     const match = await bcrypt.compare(password, user.password);
+
     if (!match) {
       throw new AppError("Invalid credentials", 400);
     }
@@ -62,7 +61,7 @@ export class AuthService {
     const accessToken = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET as string,
-      { expiresIn: "1d" }
+      { expiresIn: "1d" },
     );
 
     const publicUser = {

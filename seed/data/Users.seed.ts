@@ -5,68 +5,38 @@ import { prisma } from "../../config/prisma";
 export const seedUsers = async () => {
   const hashedPassword = await bcrypt.hash("Test1234", 10);
 
+  const admins = [
+    {
+      name: "Admin",
+      email: "admin@example.com",
+      role: USER_ROLE.ADMIN,
+    },
+  ];
+
+  const users = Array.from({ length: 2 }, (_, index) => {
+    const userNumber = index + 1;
+    return {
+      name: `User ${userNumber}`,
+      email: `user${userNumber}@example.com`,
+      role: USER_ROLE.USER,
+    };
+  });
+
+  const sellers = Array.from({ length: 7 }, (_, index) => {
+    const sellerNumber = index + 1;
+    return {
+      name: `Seller ${sellerNumber}`,
+      email: `seller${sellerNumber}@example.com`,
+      role: USER_ROLE.SELLER,
+    };
+  });
+
+  const usersData = [...admins, ...users, ...sellers].map((user) => ({
+    ...user,
+    password: hashedPassword,
+  }));
+
   await prisma.user.createMany({
-    data: [
-      {
-        name: "Admin",
-        email: "admin@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.ADMIN,
-      },
-      {
-        name: "User 1",
-        email: "user1@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.USER,
-      },
-      {
-        name: "User 2",
-        email: "user2@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.USER,
-      },
-      {
-        name: "Seller 1",
-        email: "seller1@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.SELLER,
-      },
-      {
-        name: "Seller 2",
-        email: "seller2@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.SELLER,
-      },
-      {
-        name: "Seller 3",
-        email: "seller3@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.SELLER,
-      },
-      {
-        name: "Seller 4",
-        email: "seller4@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.SELLER,
-      },
-      {
-        name: "Seller 5",
-        email: "seller5@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.SELLER,
-      },
-      {
-        name: "Seller 6",
-        email: "seller6@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.SELLER,
-      },
-      {
-        name: "Seller 7",
-        email: "seller7@example.com",
-        password: hashedPassword,
-        role: USER_ROLE.SELLER,
-      },
-    ],
+    data: usersData,
   });
 };

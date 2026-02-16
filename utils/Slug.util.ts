@@ -1,6 +1,5 @@
 export const generateSlug = (text: string): string => {
   return text
-    .toString()
     .toLowerCase()
     .trim()
     .replace(/[çÇ]/g, "c")

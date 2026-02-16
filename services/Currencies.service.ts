@@ -48,12 +48,14 @@ export class CurrenciesService {
       throw new AppError("Currency not found", 404);
     }
 
-    const existingCurrency = await prisma.currency.findUnique({
-      where: { code },
-    });
+    if (code !== currency.code) {
+      const existingCurrency = await prisma.currency.findUnique({
+        where: { code },
+      });
 
-    if (existingCurrency && existingCurrency.id !== id) {
-      throw new AppError("Currency code already exists", 400);
+      if (existingCurrency) {
+        throw new AppError("Currency code already exists", 400);
+      }
     }
 
     return prisma.currency.update({

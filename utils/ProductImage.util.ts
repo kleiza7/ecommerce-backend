@@ -57,7 +57,14 @@ const prodProcessImages = async (
     }>((resolve, reject) => {
       cloudinary.uploader
         .upload_stream({ folder: "products" }, (error, result) => {
-          if (error || !result) return reject(error);
+          if (error) {
+            return reject(error);
+          }
+
+          if (!result) {
+            return reject(new Error("Cloudinary upload failed"));
+          }
+
           resolve({
             secure_url: result.secure_url,
             public_id: result.public_id,
@@ -86,7 +93,9 @@ export const processProductImages = async (
   productId: number,
   files: Express.Multer.File[],
 ): Promise<void> => {
-  if (!files?.length) return;
+  if (!files?.length) {
+    return;
+  }
 
   if (isProd) {
     await prodProcessImages(productId, files);
@@ -118,12 +127,16 @@ const deleteLocalImages = async (image: ProductImage): Promise<void> => {
   for (const url of urls) {
     try {
       await fs.unlink(path.join(__dirname, "..", url));
-    } catch {}
+    } catch {
+      // ignore missing files
+    }
   }
 };
 
 const deleteProdImages = async (image: ProductImage): Promise<void> => {
-  if (!image.publicId) return;
+  if (!image.publicId) {
+    return;
+  }
 
   try {
     await cloudinary.uploader.destroy(image.publicId);
@@ -135,13 +148,15 @@ const deleteProdImages = async (image: ProductImage): Promise<void> => {
 export const deleteProductImages = async (
   images: ProductImage[],
 ): Promise<void> => {
-  if (!images.length) return;
+  if (!images.length) {
+    return;
+  }
 
-  for (const img of images) {
+  for (const image of images) {
     if (isProd) {
-      await deleteProdImages(img);
+      await deleteProdImages(image);
     } else {
-      await deleteLocalImages(img);
+      await deleteLocalImages(image);
     }
   }
 };
