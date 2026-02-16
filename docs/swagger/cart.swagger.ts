@@ -2,101 +2,70 @@
  * @swagger
  * tags:
  *   name: Cart
- *   description: Shopping cart operations for authenticated users
+ *   description: User cart management endpoints
  */
 
-/**
- * @swagger
- * components:
- *   schemas:
- *
- *     CartItemProduct:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           example: 10
- *         name:
- *           type: string
- *           example: "iPhone 14"
- *         description:
- *           type: string
- *           example: "Apple smartphone 2023"
- *         price:
- *           type: number
- *           example: 24999.90
- *         brandId:
- *           type: integer
- *           example: 2
- *         categoryId:
- *           type: integer
- *           example: 5
- *
- *     CartItem:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           example: 4
- *         productId:
- *           type: integer
- *           example: 10
- *         quantity:
- *           type: integer
- *           example: 2
- *         priceSnapshot:
- *           type: number
- *           example: 24999.90
- *         product:
- *           $ref: "#/components/schemas/CartItemProduct"
- *
- *     AddToCartInput:
- *       type: object
- *       required: [productId, quantity]
- *       properties:
- *         productId:
- *           type: integer
- *           example: 10
- *         quantity:
- *           type: integer
- *           example: 1
- *
- *     UpdateCartQuantityInput:
- *       type: object
- *       required: [quantity]
- *       properties:
- *         quantity:
- *           type: integer
- *           example: 3
- */
-
+///////////////////////////////////////////////////////////////
+// GET CART (USER ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/cart/get-cart:
  *   get:
- *     summary: Get user's cart
+ *     summary: Get current user's cart
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Cart items returned
+ *         description: Cart items retrieved successfully
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 items:
- *                   type: array
- *                   items:
- *                     $ref: "#/components/schemas/CartItem"
+ *             example:
+ *               items:
+ *                 - id: 1
+ *                   cartId: 2
+ *                   productId: 5
+ *                   currencyId: 1
+ *                   quantity: 2
+ *                   priceSnapshot: 1999
+ *                   product:
+ *                     id: 5
+ *                     name: "iPhone 16"
+ *                     description: "Flagship phone"
+ *                     stockCount: 25
+ *                     price: 1999
+ *                     status: "APPROVED"
+ *                     brand:
+ *                       id: 1
+ *                       name: "Apple"
+ *                     category:
+ *                       id: 4
+ *                       name: "Smartphones"
+ *                     currency:
+ *                       id: 1
+ *                       code: "USD"
+ *                       symbol: "$"
+ *                     seller:
+ *                       id: 3
+ *                       name: "Sapphire Store"
+ *                     images:
+ *                       - thumbUrl: "http://localhost:5000/uploads/products/thumb/iphone.jpg"
+ *                         isPrimary: true
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires USER role)
  */
 
+///////////////////////////////////////////////////////////////
+// ADD ITEM TO CART (USER ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/cart/add:
  *   post:
- *     summary: Add a product to cart
+ *     summary: Add item to cart
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
@@ -105,56 +74,157 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: "#/components/schemas/AddToCartInput"
+ *             type: object
+ *             required:
+ *               - productId
+ *               - quantity
+ *             properties:
+ *               productId:
+ *                 type: integer
+ *                 example: 5
+ *               quantity:
+ *                 type: integer
+ *                 example: 2
  *     responses:
  *       201:
- *         description: Item added or updated
+ *         description: Item added to cart successfully
  *         content:
  *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/CartItem"
- *       404:
- *         description: Product not found
+ *             example:
+ *               - id: 1
+ *                 cartId: 2
+ *                 productId: 5
+ *                 currencyId: 1
+ *                 quantity: 2
+ *                 priceSnapshot: 1999
+ *                 product:
+ *                   id: 5
+ *                   name: "iPhone 16"
+ *                   description: "Flagship phone"
+ *                   stockCount: 25
+ *                   price: 1999
+ *                   status: "APPROVED"
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires USER role)
+ *       409:
+ *         description: Stock conflict or mixed currency cart
  */
 
+///////////////////////////////////////////////////////////////
+// UPDATE CART ITEM QUANTITY (USER ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
- * /api/cart/update/{itemId}:
+ * /api/cart/update:
  *   put:
  *     summary: Update cart item quantity
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: itemId
- *         required: true
- *         schema:
- *           type: integer
- *         description: Cart item ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: "#/components/schemas/UpdateCartQuantityInput"
+ *             type: object
+ *             required:
+ *               - itemId
+ *               - quantity
+ *             properties:
+ *               itemId:
+ *                 type: integer
+ *                 example: 1
+ *               quantity:
+ *                 type: integer
+ *                 example: 3
  *     responses:
  *       200:
- *         description: Item updated or removed
+ *         description: Cart item quantity updated successfully
  *         content:
  *           application/json:
- *             schema:
- *               oneOf:
- *                 - $ref: "#/components/schemas/CartItem"
- *                 - type: object
- *                   properties:
- *                     message:
- *                       type: string
- *                       example: "Item removed"
+ *             example:
+ *               - id: 1
+ *                 cartId: 2
+ *                 productId: 5
+ *                 currencyId: 1
+ *                 quantity: 3
+ *                 priceSnapshot: 1999
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires USER role)
  *       404:
- *         description: Item not found
+ *         description: Cart or cart item not found
+ *       409:
+ *         description: Stock conflict
  */
 
+///////////////////////////////////////////////////////////////
+// MERGE GUEST CART (USER ONLY)
+///////////////////////////////////////////////////////////////
+/**
+ * @swagger
+ * /api/cart/merge:
+ *   post:
+ *     summary: Merge guest cart items into user's cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - items
+ *             properties:
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - productId
+ *                     - quantity
+ *                   properties:
+ *                     productId:
+ *                       type: integer
+ *                       example: 5
+ *                     quantity:
+ *                       type: integer
+ *                       example: 2
+ *     responses:
+ *       200:
+ *         description: Guest cart merged successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               items:
+ *                 - id: 1
+ *                   cartId: 2
+ *                   productId: 5
+ *                   currencyId: 1
+ *                   quantity: 2
+ *                   priceSnapshot: 1999
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires USER role)
+ *       409:
+ *         description: Stock conflict or mixed currency cart
+ */
+
+///////////////////////////////////////////////////////////////
+// REMOVE ITEM FROM CART (USER ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/cart/remove/{itemId}:
@@ -169,38 +239,42 @@
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 1
  *     responses:
  *       200:
- *         description: Item removed from cart
+ *         description: Item removed from cart successfully
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Item removed from cart"
+ *             example:
+ *               message: "Item removed from cart"
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires USER role)
  *       404:
- *         description: Cart item not found
+ *         description: Cart or cart item not found
  */
 
+///////////////////////////////////////////////////////////////
+// CLEAR CART (USER ONLY)
+///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/cart/clear:
  *   delete:
- *     summary: Clear user's entire cart
+ *     summary: Clear all items from cart
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Cart cleared
+ *         description: Cart cleared successfully
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Cart cleared"
+ *             example:
+ *               message: "Cart cleared"
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires USER role)
  */

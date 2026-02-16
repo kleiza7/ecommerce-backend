@@ -2,97 +2,197 @@
  * @swagger
  * tags:
  *   name: Products
- *   description: Product management endpoints
+ *   description: Product management and moderation endpoints
  */
 
 ///////////////////////////////////////////////////////////////
-// LIST PRODUCTS (pagination + filtering)
+// LIST PRODUCTS (PUBLIC + FILTER + PAGINATION)
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/products/list:
  *   post:
- *     summary: List products with pagination and optional brand/category filters
+ *     summary: List approved products with pagination, filtering and sorting
  *     tags: [Products]
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
  *               page:
- *                 type: number
+ *                 type: integer
  *                 example: 1
  *               limit:
- *                 type: number
- *                 example: 10
- *               brandId:
- *                 type: number
- *                 example: 2
- *               categoryId:
- *                 type: number
- *                 example: 5
+ *                 type: integer
+ *                 example: 20
+ *               filter:
+ *                 type: object
+ *                 properties:
+ *                   brandIds:
+ *                     type: array
+ *                     items:
+ *                       type: integer
+ *                     example: [1, 2]
+ *                   categoryIds:
+ *                     type: array
+ *                     items:
+ *                       type: integer
+ *                     example: [4]
+ *                   sellerIds:
+ *                     type: array
+ *                     items:
+ *                       type: integer
+ *                     example: [3]
+ *                   query:
+ *                     type: string
+ *                     example: "iphone"
+ *               sort:
+ *                 type: object
+ *                 properties:
+ *                   field:
+ *                     type: string
+ *                     enum: [id, createdAt, price]
+ *                     example: "price"
+ *                   order:
+ *                     type: string
+ *                     enum: [asc, desc]
+ *                     example: "desc"
  *     responses:
  *       200:
- *         description: Product list
- *         content:
- *           application/json:
- *             example:
- *               items:
- *                 - id: 12
- *                   name: "IPhone 16"
- *                   description: "Flagship phone"
- *                   price: 1999
- *                   stockCount: 25
- *                   brandId: 1
- *                   categoryId: 4
- *                   currencyId: 1
- *                 - id: 11
- *                   name: "Samsung S25"
- *                   description: "Premium Android phone"
- *                   price: 1499
- *                   stockCount: 0
- *                   brandId: 2
- *                   categoryId: 4
- *                   currencyId: 1
- *               pagination:
- *                 total: 27
- *                 page: 1
- *                 limit: 10
- *                 totalPages: 3
+ *         description: Product list with pagination
  */
 
 ///////////////////////////////////////////////////////////////
-// GET PRODUCT BY ID
+// GET PRODUCTS BY SELLER (SELLER ONLY)
+///////////////////////////////////////////////////////////////
+/**
+ * @swagger
+ * /api/products/get-products-by-seller:
+ *   get:
+ *     summary: Get all products belonging to the authenticated seller
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Seller products retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires SELLER role)
+ */
+
+///////////////////////////////////////////////////////////////
+// GET WAITING APPROVAL PRODUCTS (ADMIN ONLY)
+///////////////////////////////////////////////////////////////
+/**
+ * @swagger
+ * /api/products/get-waiting-approval-products:
+ *   get:
+ *     summary: Get products waiting for admin approval
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Waiting approval products retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires ADMIN role)
+ */
+
+///////////////////////////////////////////////////////////////
+// APPROVE PRODUCT (ADMIN ONLY)
+///////////////////////////////////////////////////////////////
+/**
+ * @swagger
+ * /api/products/approve/{id}:
+ *   put:
+ *     summary: Approve a product (ADMIN only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         example: 12
+ *     responses:
+ *       200:
+ *         description: Product approved successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Product approved successfully"
+ *       400:
+ *         description: Deleted product status cannot be changed
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires ADMIN role)
+ *       404:
+ *         description: Product not found
+ */
+
+///////////////////////////////////////////////////////////////
+// REJECT PRODUCT (ADMIN ONLY)
+///////////////////////////////////////////////////////////////
+/**
+ * @swagger
+ * /api/products/reject/{id}:
+ *   put:
+ *     summary: Reject a product (ADMIN only)
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         example: 12
+ *     responses:
+ *       200:
+ *         description: Product rejected successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Product rejected successfully"
+ *       400:
+ *         description: Deleted product status cannot be changed
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires ADMIN role)
+ *       404:
+ *         description: Product not found
+ */
+
+///////////////////////////////////////////////////////////////
+// GET PRODUCT BY ID (PUBLIC)
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/products/get-by-id/{id}:
  *   get:
- *     summary: Get a product by its ID
+ *     summary: Get product detail by ID
  *     tags: [Products]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
- *           type: number
- *         example: 3
+ *           type: integer
+ *         example: 5
  *     responses:
  *       200:
- *         description: Product found
- *         content:
- *           application/json:
- *             example:
- *               id: 3
- *               name: "MacBook Pro 14"
- *               description: "M4 Pro model"
- *               price: 2999
- *               stockCount: 12
- *               brandId: 1
- *               categoryId: 2
- *               currencyId: 1
+ *         description: Product retrieved successfully
  *       404:
  *         description: Product not found
  */
@@ -104,7 +204,7 @@
  * @swagger
  * /api/products/create:
  *   post:
- *     summary: Create a new product (SELLER role required)
+ *     summary: Create a new product with images (SELLER only)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -117,8 +217,8 @@
  *             required:
  *               - name
  *               - description
- *               - price
  *               - stockCount
+ *               - price
  *               - brandId
  *               - categoryId
  *               - currencyId
@@ -130,20 +230,20 @@
  *               description:
  *                 type: string
  *                 example: "Next-gen gaming console"
+ *               stockCount:
+ *                 type: integer
+ *                 example: 50
  *               price:
  *                 type: number
  *                 example: 899
- *               stockCount:
- *                 type: number
- *                 example: 50
  *               brandId:
- *                 type: number
+ *                 type: integer
  *                 example: 3
  *               categoryId:
- *                 type: number
+ *                 type: integer
  *                 example: 8
  *               currencyId:
- *                 type: number
+ *                 type: integer
  *                 example: 1
  *               images:
  *                 type: array
@@ -154,21 +254,21 @@
  *       201:
  *         description: Product created successfully
  *       400:
- *         description: Brand, Category or Currency not found
+ *         description: Invalid brandId, categoryId, currencyId or missing images
  *       401:
  *         description: Unauthorized
  *       403:
- *         description: Seller role required
+ *         description: Forbidden (Requires SELLER role)
  */
 
 ///////////////////////////////////////////////////////////////
-// UPDATE PRODUCT (SELLER ONLY + IMAGE ADD/DELETE SUPPORT)
+// UPDATE PRODUCT (SELLER ONLY + IMAGE MANAGEMENT)
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/products/update:
  *   put:
- *     summary: Update an existing product (SELLER role required)
+ *     summary: Update an existing product and manage images (SELLER only)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -182,29 +282,29 @@
  *               - id
  *               - name
  *               - description
- *               - price
  *               - stockCount
+ *               - price
  *               - brandId
  *               - categoryId
  *               - currencyId
  *             properties:
  *               id:
- *                 type: number
+ *                 type: integer
  *                 example: 10
  *               name:
  *                 type: string
  *               description:
  *                 type: string
+ *               stockCount:
+ *                 type: integer
  *               price:
  *                 type: number
- *               stockCount:
- *                 type: number
  *               brandId:
- *                 type: number
+ *                 type: integer
  *               categoryId:
- *                 type: number
+ *                 type: integer
  *               currencyId:
- *                 type: number
+ *                 type: integer
  *               deletedImageIds:
  *                 type: string
  *                 example: "[3,5]"
@@ -216,16 +316,24 @@
  *     responses:
  *       200:
  *         description: Product updated successfully
+ *       400:
+ *         description: Invalid brandId, categoryId, currencyId or deleted product cannot be updated
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires SELLER role or ownership)
+ *       404:
+ *         description: Product not found
  */
 
 ///////////////////////////////////////////////////////////////
-// DELETE PRODUCT (SELLER ONLY)
+// DELETE PRODUCT (SELLER ONLY - SOFT DELETE)
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
  * /api/products/delete/{id}:
  *   delete:
- *     summary: Delete a product (SELLER role required)
+ *     summary: Soft delete a product (SELLER only)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -234,11 +342,19 @@
  *         name: id
  *         required: true
  *         schema:
- *           type: number
+ *           type: integer
  *         example: 7
  *     responses:
  *       200:
  *         description: Product deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Product deleted successfully"
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (Requires SELLER role or ownership)
  *       404:
  *         description: Product not found
  */
