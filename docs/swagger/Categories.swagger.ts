@@ -16,22 +16,35 @@
  *     tags: [Categories]
  *     responses:
  *       200:
- *         description: List of all categories
+ *         description: Categories retrieved successfully
  *         content:
  *           application/json:
- *             example:
- *               - id: 1
- *                 name: "Electronics"
- *                 slug: "electronics"
- *                 description: "All electronic products"
- *                 displayOrder: 0
- *                 parentId: null
- *               - id: 2
- *                 name: "Smartphones"
- *                 slug: "smartphones"
- *                 description: null
- *                 displayOrder: 1
- *                 parentId: 1
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 required: [id, name, slug, displayOrder]
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: "Electronics"
+ *                   slug:
+ *                     type: string
+ *                     example: "electronics"
+ *                   description:
+ *                     type: string
+ *                     nullable: true
+ *                     example: "All electronic products"
+ *                   displayOrder:
+ *                     type: integer
+ *                     example: 0
+ *                   parentId:
+ *                     type: integer
+ *                     nullable: true
+ *                     example: null
  */
 
 ///////////////////////////////////////////////////////////////
@@ -41,7 +54,7 @@
  * @swagger
  * /api/categories/get-by-id/{id}:
  *   get:
- *     summary: Get a category by ID
+ *     summary: Get category by ID (public)
  *     tags: [Categories]
  *     parameters:
  *       - in: path
@@ -52,16 +65,7 @@
  *         example: 2
  *     responses:
  *       200:
- *         description: Category found
- *         content:
- *           application/json:
- *             example:
- *               id: 2
- *               name: "Smartphones"
- *               slug: "smartphones"
- *               description: null
- *               displayOrder: 1
- *               parentId: 1
+ *         description: Category retrieved successfully
  *       404:
  *         description: Category not found
  */
@@ -83,13 +87,11 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - displayOrder
+ *             required: [name, displayOrder]
  *             properties:
  *               name:
  *                 type: string
- *                 example: "Laptops"
+ *                 example: "Smartphones"
  *               parentId:
  *                 type: integer
  *                 nullable: true
@@ -97,24 +99,15 @@
  *               description:
  *                 type: string
  *                 nullable: true
- *                 example: "Portable computers"
+ *                 example: "Phone category"
  *               displayOrder:
  *                 type: integer
- *                 example: 2
+ *                 example: 10
  *     responses:
  *       201:
  *         description: Category created successfully
- *         content:
- *           application/json:
- *             example:
- *               id: 5
- *               name: "Laptops"
- *               slug: "laptops"
- *               parentId: 1
- *               description: "Portable computers"
- *               displayOrder: 2
  *       400:
- *         description: Validation error or parent category invalid
+ *         description: Parent category not found
  *       401:
  *         description: Unauthorized
  *       403:
@@ -138,19 +131,14 @@
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - id
- *               - name
- *               - parentId
- *               - description
- *               - displayOrder
+ *             required: [id, name, parentId, description, displayOrder]
  *             properties:
  *               id:
  *                 type: integer
- *                 example: 5
+ *                 example: 2
  *               name:
  *                 type: string
- *                 example: "Gaming Laptops"
+ *                 example: "Smartphones Updated"
  *               parentId:
  *                 type: integer
  *                 nullable: true
@@ -158,24 +146,15 @@
  *               description:
  *                 type: string
  *                 nullable: true
- *                 example: "High performance laptops"
+ *                 example: "Updated description"
  *               displayOrder:
  *                 type: integer
- *                 example: 3
+ *                 example: 10
  *     responses:
  *       200:
  *         description: Category updated successfully
- *         content:
- *           application/json:
- *             example:
- *               id: 5
- *               name: "Gaming Laptops"
- *               slug: "gaming-laptops"
- *               parentId: 1
- *               description: "High performance laptops"
- *               displayOrder: 3
  *       400:
- *         description: Validation error or invalid parent category
+ *         description: Parent category validation error
  *       401:
  *         description: Unauthorized
  *       403:
@@ -201,16 +180,23 @@
  *         required: true
  *         schema:
  *           type: integer
- *         example: 5
+ *         example: 2
  *     responses:
  *       200:
  *         description: Category deleted successfully
  *         content:
  *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [message]
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Category deleted successfully"
  *             example:
  *               message: "Category deleted successfully"
  *       400:
- *         description: Category has child categories or validation error
+ *         description: Category has child categories and cannot be deleted
  *       401:
  *         description: Unauthorized
  *       403:
