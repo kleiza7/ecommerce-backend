@@ -93,6 +93,7 @@ model Product {
   cartItems   CartItem[]
   orderItems  OrderItem[]
   favorites   Favorite[]
+  reviews     ProductReview[]
 
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -126,6 +127,26 @@ model ProductImage {
   @@map("ProductImages")
 }
 
+model ProductReview {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+
+  productId Int      @map("product_id")
+  userId    Int      @map("user_id")
+
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+  @@index([productId])
+  @@index([userId])
+  @@map("ProductReviews")
+}
+
 model User {
   id       Int       @id @default(autoincrement())
   name     String
@@ -137,6 +158,7 @@ model User {
   cart      Cart?
   orders    Order[]
   favorites Favorite[]
+  reviews   ProductReview[]
 
   @@map("Users")
 }

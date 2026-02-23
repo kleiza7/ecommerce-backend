@@ -6,8 +6,11 @@ import {
   deleteProductImages,
   processProductImages,
 } from "../utils/ProductImage.util";
+import { ProductReviewsService } from "./ProductReviews.service";
 
 export class ProductsService {
+  constructor(private readonly productReviewsService: ProductReviewsService) {}
+
   private async getProductsBaseQuery(params: {
     filter: {
       brandIds: number[];
@@ -143,8 +146,17 @@ export class ProductsService {
       take,
     });
 
+    const productIds = items.map((product) => product.id);
+
+    const statsMap =
+      await this.productReviewsService.getReviewStatsByProductIds(productIds);
+
     return {
-      items,
+      items: items.map((product) => ({
+        ...product,
+        avgRating: statsMap[product.id]?.avgRating ?? 0,
+        reviewCount: statsMap[product.id]?.reviewCount ?? 0,
+      })),
       pagination: {
         total,
         page: pagination.page,
@@ -199,8 +211,13 @@ export class ProductsService {
       throw new AppError("Product not found", 404);
     }
 
+    const statsMap =
+      await this.productReviewsService.getReviewStatsByProductIds([id]);
+
     return {
       ...product,
+      avgRating: statsMap[id]?.avgRating ?? 0,
+      reviewCount: statsMap[id]?.reviewCount ?? 0,
       images: product.images.map((image) => ({
         ...image,
         originalUrl: getUrlWithBaseUrl(image.originalUrl),
