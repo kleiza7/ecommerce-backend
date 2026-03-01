@@ -3,13 +3,13 @@ version: "3.9"
 services:
   postgres:
     image: postgres:16
-    container_name: ecommerce-postgres
+    container_name: shopland-postgres
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ecommerce_db
+      POSTGRES_DB: shopland_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
