@@ -1,4 +1,4 @@
-# 🔐 E-Commerce Backend (Phase-1)
+# 🔐 ShopLand Backend (Phase-1)
 
 **Production API:**  
 https://shopland-backend-z39w.onrender.com/
