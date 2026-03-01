@@ -28,6 +28,14 @@ if [ "$NODE_ENV" = "production" ]; then
 fi
 
 # =========================
+# AUTO GENERATE MIGRATION (DEV ONLY)
+# =========================
+if [ "$NODE_ENV" != "production" ]; then
+  echo "🧱 Checking schema changes & creating migration if needed"
+  npx prisma migrate dev --name auto-reset --create-only || true
+fi
+
+# =========================
 # UPLOADS (DEV ONLY)
 # =========================
 if [ "$NODE_ENV" != "production" ]; then
@@ -50,11 +58,13 @@ else
 fi
 
 # =========================
-# PRISMA RESET (POSTGRES)
+# PRISMA RESET
 # =========================
 echo "🗄️ Resetting PostgreSQL database via Prisma"
-
 npx prisma migrate reset --force
+
+echo "🔄 Regenerating Prisma Client"
+npx prisma generate
 
 # =========================
 # SEED

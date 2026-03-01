@@ -12,6 +12,7 @@ import { CategoriesController } from "./controllers/Categories.controller";
 import { CurrenciesController } from "./controllers/Currencies.controller";
 import { FavoritesController } from "./controllers/Favorites.controller";
 import { OrdersController } from "./controllers/Orders.controller";
+import { ProductReviewsController } from "./controllers/ProductReviews.controller";
 import { ProductsController } from "./controllers/Products.controller";
 import { SearchController } from "./controllers/Search.controller";
 
@@ -23,6 +24,7 @@ import { CategoriesRouter } from "./routers/Categories.router";
 import { CurrenciesRouter } from "./routers/Currencies.router";
 import { FavoritesRouter } from "./routers/Favorites.router";
 import { OrdersRouter } from "./routers/Orders.router";
+import { ProductReviewsRouter } from "./routers/ProductReviews.router";
 import { ProductsRouter } from "./routers/Products.router";
 import { SearchRouter } from "./routers/Search.router";
 
@@ -34,6 +36,7 @@ import { CategoriesService } from "./services/Categories.service";
 import { CurrenciesService } from "./services/Currencies.service";
 import { FavoritesService } from "./services/Favorites.service";
 import { OrdersService } from "./services/Orders.service";
+import { ProductReviewsService } from "./services/ProductReviews.service";
 import { ProductsService } from "./services/Products.service";
 import { SearchService } from "./services/Search.service";
 
@@ -47,6 +50,7 @@ dotenv.config();
 
 class Server {
   constructor(
+    private productReviewsRouter: ProductReviewsRouter,
     private productsRouter: ProductsRouter,
     private brandsRouter: BrandsRouter,
     private categoriesRouter: CategoriesRouter,
@@ -111,6 +115,7 @@ class Server {
   private mountRouters() {
     const router = express.Router();
 
+    router.use("/product-reviews", this.productReviewsRouter.getRouter());
     router.use("/products", this.productsRouter.getRouter());
     router.use("/brands", this.brandsRouter.getRouter());
     router.use("/categories", this.categoriesRouter.getRouter());
@@ -126,7 +131,8 @@ class Server {
 }
 
 // Services
-const productsService = new ProductsService();
+const productReviewsService = new ProductReviewsService();
+const productsService = new ProductsService(productReviewsService);
 const brandsService = new BrandsService();
 const categoriesService = new CategoriesService();
 const currenciesService = new CurrenciesService();
@@ -141,6 +147,9 @@ const searchService = new SearchService(
 );
 
 // Controllers
+const productReviewsController = new ProductReviewsController(
+  productReviewsService,
+);
 const productsController = new ProductsController(productsService);
 const brandsController = new BrandsController(brandsService);
 const categoriesController = new CategoriesController(categoriesService);
@@ -152,6 +161,10 @@ const authController = new AuthController(authService);
 const searchController = new SearchController(searchService);
 
 // Routers
+const productReviewsRouter = new ProductReviewsRouter(
+  express.Router(),
+  productReviewsController,
+);
 const productsRouter = new ProductsRouter(express.Router(), productsController);
 const brandsRouter = new BrandsRouter(express.Router(), brandsController);
 const categoriesRouter = new CategoriesRouter(
@@ -172,6 +185,7 @@ const authRouter = new AuthRouter(express.Router(), authController);
 const searchRouter = new SearchRouter(express.Router(), searchController);
 
 new Server(
+  productReviewsRouter,
   productsRouter,
   brandsRouter,
   categoriesRouter,

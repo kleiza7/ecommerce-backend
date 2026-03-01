@@ -3,7 +3,7 @@ import { prisma } from "../../config/prisma";
 export const seedCurrencies = async () => {
   const currencies = [
     {
-      code: "TRY",
+      code: "TL",
       symbol: "₺",
     },
     {
