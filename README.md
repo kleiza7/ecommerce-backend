@@ -1,12 +1,12 @@
-# 🔐 E-Commerce Backend (Phase-1)
+# 🔐 ShopLand Backend (Phase-1)
 
 **Production API:**  
-https://ecommerce-backend-z39w.onrender.com/
+https://shopland-backend-z39w.onrender.com/
 
 Modern, scalable, and production-ready backend application built with **Node.js**, **Express**, **TypeScript**, and **Prisma ORM** for a full-featured E-Commerce platform.
 
 This backend works together with the frontend application:  
-➡️ https://github.com/kleiza7/ecommerce-frontend
+➡️ https://github.com/kleiza7/shopland-frontend
 
 ---
 

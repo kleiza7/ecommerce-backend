@@ -8,9 +8,9 @@ const swaggerOptions: swaggerJsdoc.Options = {
     openapi: "3.0.0",
 
     info: {
-      title: "E-Commerce API",
+      title: "ShopLand API",
       version: "1.0.0",
-      description: "Maglo E-Commerce Backend API Documentation",
+      description: "ShopLand Backend API Documentation",
     },
 
     components: {
