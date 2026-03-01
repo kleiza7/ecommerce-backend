@@ -7,29 +7,73 @@ export const seedUsers = async () => {
 
   const admins = [
     {
-      name: "Admin",
-      email: "admin@example.com",
+      name: "System Administrator",
+      email: "admin@shopland.dev",
       role: USER_ROLE.ADMIN,
     },
   ];
 
-  const users = Array.from({ length: 2 }, (_, index) => {
-    const userNumber = index + 1;
-    return {
-      name: `User ${userNumber}`,
-      email: `user${userNumber}@example.com`,
+  const users = [
+    { name: "John Doe", email: "john.doe@example.com", role: USER_ROLE.USER },
+    {
+      name: "Emily Carter",
+      email: "emily.carter@example.com",
       role: USER_ROLE.USER,
-    };
-  });
+    },
+    {
+      name: "Michael Brown",
+      email: "michael.brown@example.com",
+      role: USER_ROLE.USER,
+    },
+    {
+      name: "Olivia Wilson",
+      email: "olivia.wilson@example.com",
+      role: USER_ROLE.USER,
+    },
+    {
+      name: "Daniel Martinez",
+      email: "daniel.martinez@example.com",
+      role: USER_ROLE.USER,
+    },
+  ];
 
-  const sellers = Array.from({ length: 7 }, (_, index) => {
-    const sellerNumber = index + 1;
-    return {
-      name: `Seller ${sellerNumber}`,
-      email: `seller${sellerNumber}@example.com`,
+  const sellers = [
+    {
+      name: "NovaTech Store",
+      email: "contact@novatech-store.com",
       role: USER_ROLE.SELLER,
-    };
-  });
+    },
+    {
+      name: "UrbanWear Co.",
+      email: "support@urbanwear-co.com",
+      role: USER_ROLE.SELLER,
+    },
+    {
+      name: "HomeCraft Market",
+      email: "info@homecraft-market.com",
+      role: USER_ROLE.SELLER,
+    },
+    {
+      name: "BrightElectro",
+      email: "hello@brightelectro.com",
+      role: USER_ROLE.SELLER,
+    },
+    {
+      name: "PureStyle Boutique",
+      email: "contact@purestyle-boutique.com",
+      role: USER_ROLE.SELLER,
+    },
+    {
+      name: "NextGen Gadgets",
+      email: "sales@nextgen-gadgets.com",
+      role: USER_ROLE.SELLER,
+    },
+    {
+      name: "ComfortLiving Store",
+      email: "support@comfortliving-store.com",
+      role: USER_ROLE.SELLER,
+    },
+  ];
 
   const usersData = [...admins, ...users, ...sellers].map((user) => ({
     ...user,
