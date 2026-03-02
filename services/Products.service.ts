@@ -154,7 +154,7 @@ export class ProductsService {
     return {
       items: items.map((product) => ({
         ...product,
-        avgRating: statsMap[product.id]?.avgRating ?? 0,
+        avgRating: Number((statsMap[product.id]?.avgRating ?? 0).toFixed(1)),
         reviewCount: statsMap[product.id]?.reviewCount ?? 0,
       })),
       pagination: {
@@ -211,13 +211,55 @@ export class ProductsService {
       throw new AppError("Product not found", 404);
     }
 
-    const statsMap =
+    const productStatsMap =
       await this.productReviewsService.getReviewStatsByProductIds([id]);
+
+    // Seller products
+    const sellerProducts = await prisma.product.findMany({
+      where: {
+        sellerId: product.seller.id,
+        status: PRODUCT_STATUS.APPROVED,
+      },
+      select: { id: true },
+    });
+
+    const sellerProductIds = sellerProducts.map((p) => p.id);
+
+    const sellerStatsMap =
+      await this.productReviewsService.getReviewStatsByProductIds(
+        sellerProductIds,
+      );
+
+    const totalProductCount = sellerProductIds.length;
+
+    let totalReviewCount = 0;
+    let sumOfProductAvgRatings = 0;
+    let reviewedProductCount = 0;
+
+    sellerProductIds.forEach((productId) => {
+      const stat = sellerStatsMap[productId];
+      if (stat && stat.reviewCount > 0) {
+        totalReviewCount += stat.reviewCount;
+        sumOfProductAvgRatings += stat.avgRating;
+        reviewedProductCount += 1;
+      }
+    });
+
+    const sellerAvgRating =
+      reviewedProductCount > 0
+        ? Number((sumOfProductAvgRatings / reviewedProductCount).toFixed(1))
+        : 0;
 
     return {
       ...product,
-      avgRating: statsMap[id]?.avgRating ?? 0,
-      reviewCount: statsMap[id]?.reviewCount ?? 0,
+      avgRating: Number((productStatsMap[id]?.avgRating ?? 0).toFixed(1)),
+      reviewCount: productStatsMap[id]?.reviewCount ?? 0,
+      seller: {
+        ...product.seller,
+        totalProductCount,
+        totalReviewCount,
+        avgRating: sellerAvgRating,
+      },
       images: product.images.map((image) => ({
         ...image,
         originalUrl: getUrlWithBaseUrl(image.originalUrl),
