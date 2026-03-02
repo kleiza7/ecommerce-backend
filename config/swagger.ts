@@ -22,10 +22,8 @@ const swaggerOptions: swaggerJsdoc.Options = {
         },
       },
 
-      // TODO — Phase 2: Global error schema buraya eklenecek.
-      // Global Error Response Schema buraya eklenecek.
-      //
-      // Örnek:
+      // TODO: Add global error response schema here
+      // Example:
       // schemas: {
       //   ErrorResponse: {
       //     type: "object",

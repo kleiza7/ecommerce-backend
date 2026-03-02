@@ -214,7 +214,6 @@ export class ProductsService {
     const productStatsMap =
       await this.productReviewsService.getReviewStatsByProductIds([id]);
 
-    // Seller products
     const sellerProducts = await prisma.product.findMany({
       where: {
         sellerId: product.seller.id,

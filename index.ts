@@ -71,7 +71,7 @@ class Server {
     app.use(express.json());
     app.use(cors());
 
-    // INFO: Static Serve — uploads root'tan çalışsın
+    // INFO: Serve static files from the uploads directory via /uploads route
     const uploadsPath = path.join(process.cwd(), "uploads");
     console.log("📂 Serving uploads from:", uploadsPath);
     app.use("/uploads", express.static(uploadsPath));

@@ -9,7 +9,7 @@ export const errorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  // INFO: Eğer response zaten gönderildiyse zinciri kırma
+  // INFO: Do not continue the middleware chain if the response has already been sent
   if (res.headersSent) {
     return next(err);
   }
@@ -91,7 +91,7 @@ export const errorHandler = (
     });
   }
 
-  // INFO: En sonda mutlaka generic error
+  // INFO: Ensure a generic error is returned as the final fallback
   return res.status(500).json({
     message: "Something went wrong",
   });

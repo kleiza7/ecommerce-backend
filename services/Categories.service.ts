@@ -69,7 +69,7 @@ export class CategoriesService {
       throw new AppError("Category not found", 404);
     }
 
-    // INFO: Parent validation (full update olduğu için her zaman çalışır)
+    // INFO: Parent validation (always executed since this is a full update)
     if (parentId !== null) {
       if (parentId === id) {
         throw new AppError("A category cannot be its own parent", 400);
