@@ -22,18 +22,7 @@
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 required: [id, code, symbol]
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   code:
- *                     type: string
- *                     example: "USD"
- *                   symbol:
- *                     type: string
- *                     example: "$"
+ *                 $ref: '#/components/schemas/Currency'
  */
 
 ///////////////////////////////////////////////////////////////
@@ -51,12 +40,26 @@
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
  *         example: 1
  *     responses:
  *       200:
  *         description: Currency retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Currency'
  *       404:
  *         description: Currency not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [error]
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Currency not found"
  */
 
 ///////////////////////////////////////////////////////////////
@@ -80,13 +83,20 @@
  *             properties:
  *               code:
  *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 3
  *                 example: "EUR"
  *               symbol:
  *                 type: string
+ *                 minLength: 1
  *                 example: "€"
  *     responses:
  *       201:
  *         description: Currency created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Currency'
  *       400:
  *         description: Currency already exists
  *       401:
@@ -116,16 +126,24 @@
  *             properties:
  *               id:
  *                 type: integer
+ *                 minimum: 1
  *                 example: 2
  *               code:
  *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 3
  *                 example: "GBP"
  *               symbol:
  *                 type: string
+ *                 minLength: 1
  *                 example: "£"
  *     responses:
  *       200:
  *         description: Currency updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Currency'
  *       400:
  *         description: Currency code already exists
  *       401:
@@ -153,6 +171,7 @@
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
  *         example: 2
  *     responses:
  *       200:
@@ -166,12 +185,30 @@
  *                 message:
  *                   type: string
  *                   example: "Currency deleted successfully"
- *             example:
- *               message: "Currency deleted successfully"
+ *       404:
+ *         description: Currency not found
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires ADMIN role)
- *       404:
- *         description: Currency not found
+ */
+
+///////////////////////////////////////////////////////////////
+// COMPONENT SCHEMA
+///////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Currency:
+ *       type: object
+ *       required: [id, code, symbol]
+ *       properties:
+ *         id:
+ *           type: integer
+ *         code:
+ *           type: string
+ *         symbol:
+ *           type: string
  */

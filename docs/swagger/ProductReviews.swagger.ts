@@ -20,6 +20,7 @@
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
  *         example: 12
  *     responses:
  *       200:
@@ -29,35 +30,7 @@
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 required: [id, rating, createdAt, user]
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 5
- *                   rating:
- *                     type: integer
- *                     example: 4
- *                   comment:
- *                     type: string
- *                     nullable: true
- *                     example: "Great product!"
- *                   createdAt:
- *                     type: string
- *                     format: date-time
- *                     example: "2026-02-22T10:15:30.000Z"
- *                   user:
- *                     type: object
- *                     required: [id, name]
- *                     properties:
- *                       id:
- *                         type: integer
- *                         example: 3
- *                       name:
- *                         type: string
- *                         example: "John Doe"
- *       404:
- *         description: Product not found
+ *                 $ref: '#/components/schemas/ProductReviewPublic'
  */
 
 ///////////////////////////////////////////////////////////////
@@ -81,28 +54,21 @@
  *             properties:
  *               productId:
  *                 type: integer
- *                 example: 12
+ *                 minimum: 1
  *               rating:
  *                 type: integer
  *                 minimum: 1
  *                 maximum: 5
- *                 example: 5
  *               comment:
  *                 type: string
  *                 nullable: true
- *                 example: "Amazing quality!"
  *     responses:
  *       201:
  *         description: Review created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               required: [message]
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Review created successfully"
+ *               $ref: '#/components/schemas/ProductReview'
  *       400:
  *         description: Invalid rating, duplicate review, or deleted product
  *       401:
@@ -134,28 +100,20 @@
  *             properties:
  *               productId:
  *                 type: integer
- *                 example: 12
  *               rating:
  *                 type: integer
  *                 minimum: 1
  *                 maximum: 5
- *                 example: 4
  *               comment:
  *                 type: string
  *                 nullable: true
- *                 example: "Updated review text"
  *     responses:
  *       200:
  *         description: Review updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               required: [message]
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Review updated successfully"
+ *               $ref: '#/components/schemas/ProductReview'
  *       400:
  *         description: Invalid rating or deleted product
  *       401:
@@ -171,19 +129,20 @@
 ///////////////////////////////////////////////////////////////
 /**
  * @swagger
- * /api/product-reviews/delete/{productId}:
+ * /api/product-reviews/delete/{id}:
  *   delete:
- *     summary: Delete user's review for a product (USER only)
+ *     summary: Delete user's review (USER only)
  *     tags: [ProductReviews]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: productId
+ *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         example: 12
+ *           minimum: 1
+ *         example: 5
  *     responses:
  *       200:
  *         description: Review deleted successfully
@@ -196,12 +155,70 @@
  *                 message:
  *                   type: string
  *                   example: "Review deleted successfully"
- *             example:
- *               message: "Review deleted successfully"
  *       401:
  *         description: Unauthorized
  *       403:
- *         description: Forbidden (Requires USER role)
+ *         description: You can only delete your own review
  *       404:
  *         description: Review not found
+ */
+
+///////////////////////////////////////////////////////////////
+// COMPONENT SCHEMAS
+///////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ProductReviewPublic:
+ *       type: object
+ *       required: [id, rating, createdAt, user]
+ *       properties:
+ *         id:
+ *           type: integer
+ *         rating:
+ *           type: integer
+ *         comment:
+ *           type: string
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         user:
+ *           type: object
+ *           required: [id, name]
+ *           properties:
+ *             id:
+ *               type: integer
+ *             name:
+ *               type: string
+ *
+ *     ProductReview:
+ *       type: object
+ *       required:
+ *         - id
+ *         - productId
+ *         - userId
+ *         - rating
+ *         - createdAt
+ *         - updatedAt
+ *       properties:
+ *         id:
+ *           type: integer
+ *         productId:
+ *           type: integer
+ *         userId:
+ *           type: integer
+ *         rating:
+ *           type: integer
+ *         comment:
+ *           type: string
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
  */

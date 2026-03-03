@@ -51,6 +51,7 @@
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
  *         example: 1
  *     responses:
  *       200:
@@ -104,6 +105,7 @@
  *             properties:
  *               name:
  *                 type: string
+ *                 minLength: 1
  *                 example: "Samsung"
  *     responses:
  *       201:
@@ -123,12 +125,21 @@
  *                 slug:
  *                   type: string
  *                   example: "samsung"
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [error]
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Brand name is required"
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires ADMIN role)
- *       400:
- *         description: Validation error
  */
 
 ///////////////////////////////////////////////////////////////
@@ -152,9 +163,11 @@
  *             properties:
  *               id:
  *                 type: integer
+ *                 minimum: 1
  *                 example: 5
  *               name:
  *                 type: string
+ *                 minLength: 1
  *                 example: "Xiaomi Updated"
  *     responses:
  *       200:
@@ -174,12 +187,21 @@
  *                 slug:
  *                   type: string
  *                   example: "xiaomi-updated"
+ *       404:
+ *         description: Brand not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [error]
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Brand not found"
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires ADMIN role)
- *       404:
- *         description: Brand not found
  */
 
 ///////////////////////////////////////////////////////////////
@@ -199,6 +221,7 @@
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
  *         example: 5
  *     responses:
  *       200:
@@ -214,10 +237,19 @@
  *                   example: "Brand deleted successfully"
  *             example:
  *               message: "Brand deleted successfully"
+ *       404:
+ *         description: Brand not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [error]
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Brand not found"
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires ADMIN role)
- *       404:
- *         description: Brand not found
  */
