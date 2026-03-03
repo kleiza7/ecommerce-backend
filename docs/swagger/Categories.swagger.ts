@@ -22,29 +22,7 @@
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 required: [id, name, slug, displayOrder]
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   name:
- *                     type: string
- *                     example: "Electronics"
- *                   slug:
- *                     type: string
- *                     example: "electronics"
- *                   description:
- *                     type: string
- *                     nullable: true
- *                     example: "All electronic products"
- *                   displayOrder:
- *                     type: integer
- *                     example: 0
- *                   parentId:
- *                     type: integer
- *                     nullable: true
- *                     example: null
+ *                 $ref: '#/components/schemas/Category'
  */
 
 ///////////////////////////////////////////////////////////////
@@ -62,12 +40,26 @@
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
  *         example: 2
  *     responses:
  *       200:
  *         description: Category retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Category'
  *       404:
  *         description: Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required: [error]
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Category not found"
  */
 
 ///////////////////////////////////////////////////////////////
@@ -91,6 +83,7 @@
  *             properties:
  *               name:
  *                 type: string
+ *                 minLength: 1
  *                 example: "Smartphones"
  *               parentId:
  *                 type: integer
@@ -106,6 +99,10 @@
  *     responses:
  *       201:
  *         description: Category created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Category'
  *       400:
  *         description: Parent category not found
  *       401:
@@ -135,9 +132,11 @@
  *             properties:
  *               id:
  *                 type: integer
+ *                 minimum: 1
  *                 example: 2
  *               name:
  *                 type: string
+ *                 minLength: 1
  *                 example: "Smartphones Updated"
  *               parentId:
  *                 type: integer
@@ -153,6 +152,10 @@
  *     responses:
  *       200:
  *         description: Category updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Category'
  *       400:
  *         description: Parent category validation error
  *       401:
@@ -180,6 +183,7 @@
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
  *         example: 2
  *     responses:
  *       200:
@@ -193,8 +197,6 @@
  *                 message:
  *                   type: string
  *                   example: "Category deleted successfully"
- *             example:
- *               message: "Category deleted successfully"
  *       400:
  *         description: Category has child categories and cannot be deleted
  *       401:
@@ -203,4 +205,32 @@
  *         description: Forbidden (Requires ADMIN role)
  *       404:
  *         description: Category not found
+ */
+
+///////////////////////////////////////////////////////////////
+// COMPONENT SCHEMA
+///////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Category:
+ *       type: object
+ *       required: [id, name, slug, displayOrder]
+ *       properties:
+ *         id:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         slug:
+ *           type: string
+ *         description:
+ *           type: string
+ *           nullable: true
+ *         displayOrder:
+ *           type: integer
+ *         parentId:
+ *           type: integer
+ *           nullable: true
  */

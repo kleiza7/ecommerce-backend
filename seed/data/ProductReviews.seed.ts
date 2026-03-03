@@ -56,12 +56,12 @@ const randInt = (min: number, max: number): number => {
 };
 
 /**
- * Rating dağılımı:
- * %55 -> 5⭐
- * %30 -> 4⭐
- * %15 -> 3⭐
- * (1 ve 2 yok)
- * Ortalama ~4.4 => 4.2 - 4.7 bandı
+ * Rating distribution:
+ * 55% -> 5 stars
+ * 30% -> 4 stars
+ * 15% -> 3 stars
+ * (No 1- or 2-star ratings)
+ * Average ≈ 4.4 (range: 4.2 – 4.7)
  */
 const weightedRating = (): number => {
   const roll = Math.random();
@@ -89,7 +89,7 @@ const shuffleArray = (array: number[]): number[] => {
 };
 
 const generateReviewsForProduct = (productId: number, userIds: number[]) => {
-  // 0-5 arası review (her user en fazla 1 review yazabilir -> çakışma yok)
+  // Rating range: 0–5 (each user can write only one review per product — no conflicts)
   const reviewCount = randInt(0, Math.min(5, userIds.length));
 
   if (reviewCount === 0) {

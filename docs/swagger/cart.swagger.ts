@@ -28,105 +28,7 @@
  *                 items:
  *                   type: array
  *                   items:
- *                     type: object
- *                     required: [id, cartId, productId, currencyId, quantity, priceSnapshot, product]
- *                     properties:
- *                       id:
- *                         type: integer
- *                         example: 12
- *                       cartId:
- *                         type: integer
- *                         example: 3
- *                       productId:
- *                         type: integer
- *                         example: 5
- *                       currencyId:
- *                         type: integer
- *                         example: 1
- *                       quantity:
- *                         type: integer
- *                         example: 2
- *                       priceSnapshot:
- *                         type: number
- *                         example: 1999
- *                       product:
- *                         type: object
- *                         required: [id, name, description, stockCount, price, status, brand, category, currency, seller, images]
- *                         properties:
- *                           id:
- *                             type: integer
- *                             example: 5
- *                           name:
- *                             type: string
- *                             example: "iPhone 16"
- *                           description:
- *                             type: string
- *                             example: "Flagship phone"
- *                           stockCount:
- *                             type: integer
- *                             example: 25
- *                           price:
- *                             type: number
- *                             example: 1999
- *                           status:
- *                             type: string
- *                             enum: [NOT_APPROVED, WAITING_FOR_APPROVE, APPROVED, DELETED]
- *                             example: "APPROVED"
- *                           brand:
- *                             type: object
- *                             required: [id, name]
- *                             properties:
- *                               id:
- *                                 type: integer
- *                                 example: 1
- *                               name:
- *                                 type: string
- *                                 example: "Apple"
- *                           category:
- *                             type: object
- *                             required: [id, name]
- *                             properties:
- *                               id:
- *                                 type: integer
- *                                 example: 4
- *                               name:
- *                                 type: string
- *                                 example: "Smartphones"
- *                           currency:
- *                             type: object
- *                             required: [id, code, symbol]
- *                             properties:
- *                               id:
- *                                 type: integer
- *                                 example: 1
- *                               code:
- *                                 type: string
- *                                 example: "USD"
- *                               symbol:
- *                                 type: string
- *                                 example: "$"
- *                           seller:
- *                             type: object
- *                             required: [id, name]
- *                             properties:
- *                               id:
- *                                 type: integer
- *                                 example: 3
- *                               name:
- *                                 type: string
- *                                 example: "Sapphire Store"
- *                           images:
- *                             type: array
- *                             items:
- *                               type: object
- *                               required: [thumbUrl, isPrimary]
- *                               properties:
- *                                 thumbUrl:
- *                                   type: string
- *                                   example: "http://localhost:5000/uploads/products/thumb/iphone.jpg"
- *                                 isPrimary:
- *                                   type: boolean
- *                                   example: true
+ *                     $ref: '#/components/schemas/CartItemDetailed'
  *       401:
  *         description: Unauthorized
  *       403:
@@ -154,9 +56,11 @@
  *             properties:
  *               productId:
  *                 type: integer
+ *                 minimum: 1
  *                 example: 5
  *               quantity:
  *                 type: integer
+ *                 minimum: 1
  *                 example: 2
  *     responses:
  *       201:
@@ -166,13 +70,15 @@
  *             schema:
  *               type: array
  *               items:
- *                 type: object
+ *                 $ref: '#/components/schemas/CartItemDetailed'
  *       400:
  *         description: Validation error or mixed currency carts are not allowed
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires USER role)
+ *       404:
+ *         description: Product not found
  *       409:
  *         description: Only X items left in stock
  */
@@ -198,9 +104,11 @@
  *             properties:
  *               itemId:
  *                 type: integer
+ *                 minimum: 1
  *                 example: 12
  *               quantity:
  *                 type: integer
+ *                 minimum: 1
  *                 example: 1
  *     responses:
  *       200:
@@ -210,7 +118,7 @@
  *             schema:
  *               type: array
  *               items:
- *                 type: object
+ *                 $ref: '#/components/schemas/CartItemDetailed'
  *       400:
  *         description: Quantity must be at least 1
  *       401:
@@ -251,9 +159,11 @@
  *                   properties:
  *                     productId:
  *                       type: integer
+ *                       minimum: 1
  *                       example: 5
  *                     quantity:
  *                       type: integer
+ *                       minimum: 1
  *                       example: 2
  *     responses:
  *       200:
@@ -267,13 +177,15 @@
  *                 items:
  *                   type: array
  *                   items:
- *                     type: object
+ *                     $ref: '#/components/schemas/CartItemDetailed'
  *       400:
  *         description: Mixed currency carts are not allowed or quantity validation error
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires USER role)
+ *       404:
+ *         description: Product not found
  *       409:
  *         description: Only X items left in stock
  */
@@ -295,6 +207,7 @@
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
  *         example: 12
  *     responses:
  *       200:
@@ -308,8 +221,6 @@
  *                 message:
  *                   type: string
  *                   example: "Item removed from cart"
- *             example:
- *               message: "Item removed from cart"
  *       401:
  *         description: Unauthorized
  *       403:
@@ -341,10 +252,95 @@
  *                 message:
  *                   type: string
  *                   example: "Cart cleared"
- *             example:
- *               message: "Cart cleared"
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden (Requires USER role)
+ */
+
+///////////////////////////////////////////////////////////////
+// COMPONENT SCHEMAS
+///////////////////////////////////////////////////////////////
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     CartItemDetailed:
+ *       type: object
+ *       required: [id, cartId, productId, currencyId, quantity, priceSnapshot, product]
+ *       properties:
+ *         id:
+ *           type: integer
+ *         cartId:
+ *           type: integer
+ *         productId:
+ *           type: integer
+ *         currencyId:
+ *           type: integer
+ *         quantity:
+ *           type: integer
+ *         priceSnapshot:
+ *           type: number
+ *         product:
+ *           type: object
+ *           required: [id, name, description, stockCount, price, status, brand, category, currency, seller, images]
+ *           properties:
+ *             id:
+ *               type: integer
+ *             name:
+ *               type: string
+ *             description:
+ *               type: string
+ *             stockCount:
+ *               type: integer
+ *             price:
+ *               type: number
+ *             status:
+ *               type: string
+ *               enum: [NOT_APPROVED, WAITING_FOR_APPROVE, APPROVED, DELETED]
+ *             brand:
+ *               type: object
+ *               required: [id, name]
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *             category:
+ *               type: object
+ *               required: [id, name]
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *             currency:
+ *               type: object
+ *               required: [id, code, symbol]
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 code:
+ *                   type: string
+ *                 symbol:
+ *                   type: string
+ *             seller:
+ *               type: object
+ *               required: [id, name]
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *             images:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 required: [thumbUrl, isPrimary]
+ *                 properties:
+ *                   thumbUrl:
+ *                     type: string
+ *                   isPrimary:
+ *                     type: boolean
  */

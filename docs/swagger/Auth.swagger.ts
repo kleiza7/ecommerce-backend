@@ -57,12 +57,15 @@
  *             properties:
  *               name:
  *                 type: string
+ *                 minLength: 1
  *                 example: "John Doe"
  *               email:
  *                 type: string
+ *                 format: email
  *                 example: "john@example.com"
  *               password:
  *                 type: string
+ *                 minLength: 1
  *                 example: "123456"
  *     responses:
  *       201:
@@ -112,12 +115,15 @@
  *             properties:
  *               name:
  *                 type: string
+ *                 minLength: 1
  *                 example: "Sapphire Store"
  *               email:
  *                 type: string
+ *                 format: email
  *                 example: "seller@example.com"
  *               password:
  *                 type: string
+ *                 minLength: 1
  *                 example: "123456"
  *     responses:
  *       201:
@@ -167,9 +173,11 @@
  *             properties:
  *               email:
  *                 type: string
+ *                 format: email
  *                 example: "john@example.com"
  *               password:
  *                 type: string
+ *                 minLength: 1
  *                 example: "123456"
  *     responses:
  *       200:
@@ -195,6 +203,7 @@
  *                       example: "John Doe"
  *                     email:
  *                       type: string
+ *                       format: email
  *                       example: "john@example.com"
  *                     role:
  *                       type: string
