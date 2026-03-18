@@ -16,8 +16,8 @@ export const seedCategories = async () => {
         {
           name: "Phones",
           children: [
-            { name: "Android Phones" },
             { name: "iPhones" },
+            { name: "Android Phones" },
             { name: "Feature Phones" },
           ],
         },
